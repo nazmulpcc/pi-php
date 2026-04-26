@@ -1,0 +1,39 @@
+{
+  "name": "nazmulpcc/pi-php",
+  "description": "Pi agent implementation in PHP",
+  "type": "project",
+  "license": "MIT",
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=8.3"
+  },
+  "require-dev": {
+    "pestphp/pest": "^3.0",
+    "laravel/pint": "^1.29"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pi\\Agent\\": "packages/agent/src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pi\\Agent\\Tests\\": "packages/agent/tests/"
+    }
+  },
+  "scripts": {
+    "lint": "vendor/bin/pint packages/agent/src packages/agent/tests",
+    "lint:check": "vendor/bin/pint --test packages/agent/src packages/agent/tests",
+    "test": [
+      "Composer\\Config::disableProcessTimeout",
+      "@lint",
+      "vendor/bin/pest packages/agent/tests"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
+    "process-timeout": 0
+  }
+}

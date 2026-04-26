@@ -1,0 +1,7 @@
+{
+    "preset": "laravel",
+    "paths": [
+        "packages/agent/src",
+        "packages/agent/tests"
+    ]
+}
