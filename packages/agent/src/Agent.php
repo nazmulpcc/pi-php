@@ -14,6 +14,10 @@ use Pi\Agent\Event\ToolExecutionEndEvent;
 use Pi\Agent\Event\ToolExecutionStartEvent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\Message\UserMessage;
+use React\EventLoop\LoopInterface;
+use React\Promise\PromiseInterface;
+
+use function React\Promise\resolve;
 
 class Agent
 {
@@ -28,6 +32,8 @@ class Agent
     private bool $isRunning = false;
 
     private ?CancellationToken $cancellationToken = null;
+
+    private ?PromiseInterface $activeRunPromise = null;
 
     public mixed $convertToLlm = null;
 
@@ -57,6 +63,7 @@ class Agent
         string $followUpMode = 'one-at-a-time',
         ?string $sessionId = null,
         ToolExecutionMode $toolExecution = ToolExecutionMode::Parallel,
+        private readonly ?LoopInterface $loop = null,
     ) {
         $this->state = $initialState ?? new MutableAgentState;
         $this->convertToLlm = $convertToLlm ?? fn (array $messages): array => $this->defaultConvertToLlm($messages);
@@ -96,6 +103,9 @@ class Agent
         return $this->followUpQueue->getMode();
     }
 
+    /**
+     * @param  callable(AgentEvent, ?CancellationToken): (void|PromiseInterface<void>)  $listener
+     */
     public function subscribe(callable $listener): callable
     {
         $this->listeners[] = $listener;
@@ -161,17 +171,24 @@ class Agent
         $this->clearAllQueues();
     }
 
-    public function prompt(string|AgentMessage|array $input, ?array $images = null): void
+    /**
+     * @return PromiseInterface<void>
+     */
+    public function prompt(string|AgentMessage|array $input, ?array $images = null): PromiseInterface
     {
         if ($this->isRunning) {
             throw new \RuntimeException('Agent is already processing a prompt. Use steer() or followUp() to queue messages, or wait for completion.');
         }
 
         $messages = $this->normalizePromptInput($input, $images);
-        $this->runPromptMessages($messages);
+
+        return $this->runPromptMessages($messages);
     }
 
-    public function continue(): void
+    /**
+     * @return PromiseInterface<void>
+     */
+    public function continue(): PromiseInterface
     {
         if ($this->isRunning) {
             throw new \RuntimeException('Agent is already processing. Wait for completion before continuing.');
@@ -186,22 +203,30 @@ class Agent
         if ($lastMessage->getRole() === MessageRole::Assistant) {
             $queuedSteering = $this->steeringQueue->drain();
             if (count($queuedSteering) > 0) {
-                $this->runPromptMessages($queuedSteering, true);
-
-                return;
+                return $this->runPromptMessages($queuedSteering, true);
             }
 
             $queuedFollowUps = $this->followUpQueue->drain();
             if (count($queuedFollowUps) > 0) {
-                $this->runPromptMessages($queuedFollowUps);
-
-                return;
+                return $this->runPromptMessages($queuedFollowUps);
             }
 
             throw new \RuntimeException('Cannot continue from message role: assistant');
         }
 
-        $this->runContinuation();
+        return $this->runContinuation();
+    }
+
+    /**
+     * @return PromiseInterface<void>
+     */
+    public function waitForIdle(): PromiseInterface
+    {
+        if ($this->activeRunPromise === null) {
+            return resolve(null);
+        }
+
+        return $this->activeRunPromise;
     }
 
     private function normalizePromptInput(string|AgentMessage|array $input, ?array $images): array
@@ -222,42 +247,36 @@ class Agent
         return [new UserMessage($content, time() * 1000)];
     }
 
-    private function runPromptMessages(array $messages, bool $skipInitialSteeringPoll = false): void
+    private function runPromptMessages(array $messages, bool $skipInitialSteeringPoll = false): PromiseInterface
     {
-        $this->runWithLifecycle(function () use ($messages, $skipInitialSteeringPoll) {
+        return $this->runWithLifecycle(function () use ($messages, $skipInitialSteeringPoll) {
             $loop = new AgentLoop;
-            $generator = $loop->agentLoop(
+
+            return $loop->agentLoop(
                 $messages,
                 $this->createContextSnapshot(),
                 $this->createLoopConfig($skipInitialSteeringPoll),
                 $this->cancellationToken,
                 $this->streamFn,
             );
-
-            foreach ($generator as $event) {
-                $this->processEvent($event);
-            }
         });
     }
 
-    private function runContinuation(): void
+    private function runContinuation(): PromiseInterface
     {
-        $this->runWithLifecycle(function () {
+        return $this->runWithLifecycle(function () {
             $loop = new AgentLoop;
-            $generator = $loop->agentLoopContinue(
+
+            return $loop->agentLoopContinue(
                 $this->createContextSnapshot(),
                 $this->createLoopConfig(),
                 $this->cancellationToken,
                 $this->streamFn,
             );
-
-            foreach ($generator as $event) {
-                $this->processEvent($event);
-            }
         });
     }
 
-    private function runWithLifecycle(callable $executor): void
+    private function runWithLifecycle(callable $executor): PromiseInterface
     {
         if ($this->isRunning) {
             throw new \RuntimeException('Agent is already processing.');
@@ -269,16 +288,18 @@ class Agent
         $this->state->setStreamingMessage(null);
         $this->state->setErrorMessage(null);
 
-        try {
-            $executor();
-        } catch (\Throwable $error) {
-            $this->handleRunFailure($error, $this->cancellationToken->isCancelled());
-        } finally {
-            $this->finishRun();
-        }
+        $this->activeRunPromise = PromiseHelper::resolve($executor())
+            ->catch(function (\Throwable $error) {
+                return $this->handleRunFailure($error, $this->cancellationToken?->isCancelled() ?? false);
+            })
+            ->finally(function () {
+                $this->finishRun();
+            });
+
+        return $this->activeRunPromise;
     }
 
-    private function handleRunFailure(\Throwable $error, bool $aborted): void
+    private function handleRunFailure(\Throwable $error, bool $aborted): PromiseInterface
     {
         $failureMessage = new AssistantMessage(
             [new TextContent('')],
@@ -293,7 +314,8 @@ class Agent
         $messages[] = $failureMessage;
         $this->state->setMessages($messages);
         $this->state->setErrorMessage($failureMessage->errorMessage);
-        $this->processEvent(new AgentEndEvent([$failureMessage]));
+
+        return $this->processEvent(new AgentEndEvent([$failureMessage]));
     }
 
     private function finishRun(): void
@@ -303,6 +325,7 @@ class Agent
         $this->state->setPendingToolCalls([]);
         $this->isRunning = false;
         $this->cancellationToken = null;
+        $this->activeRunPromise = null;
     }
 
     private function createContextSnapshot(): AgentContext
@@ -336,6 +359,9 @@ class Agent
             toolExecution: $this->toolExecution,
             beforeToolCall: $this->beforeToolCall,
             afterToolCall: $this->afterToolCall,
+            emit: function (AgentEvent $event): PromiseInterface {
+                return $this->processEvent($event);
+            },
         );
     }
 
@@ -347,7 +373,7 @@ class Agent
         $this->state->setMessages($messages);
     }
 
-    private function processEvent(AgentEvent $event): void
+    private function processEvent(AgentEvent $event): PromiseInterface
     {
         match (true) {
             $event instanceof MessageStartEvent => $this->state->setStreamingMessage($event->message),
@@ -363,9 +389,14 @@ class Agent
             default => null,
         };
 
+        $promise = resolve(null);
         foreach ($this->listeners as $listener) {
-            $listener($event, $this->cancellationToken);
+            $promise = $promise->then(function () use ($listener, $event): PromiseInterface {
+                return PromiseHelper::resolve($listener($event, $this->cancellationToken));
+            });
         }
+
+        return $promise;
     }
 
     private function defaultConvertToLlm(array $messages): array

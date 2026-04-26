@@ -5,7 +5,9 @@
   "license": "MIT",
   "minimum-stability": "stable",
   "require": {
-    "php": ">=8.3"
+    "php": ">=8.3",
+    "react/promise": "^3.0",
+    "react/event-loop": "^1.5"
   },
   "require-dev": {
     "pestphp/pest": "^3.0",
@@ -19,7 +21,9 @@
   "autoload-dev": {
     "psr-4": {
       "Pi\\Agent\\Tests\\": "packages/agent/tests/"
-    }
+    },
+    "files": [
+    ]
   },
   "scripts": {
     "lint": "vendor/bin/pint packages/agent/src packages/agent/tests",

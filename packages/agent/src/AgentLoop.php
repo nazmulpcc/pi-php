@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pi\Agent;
 
-use Generator;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Content\ToolCall;
 use Pi\Agent\Event\AgentEndEvent;
@@ -15,16 +14,22 @@ use Pi\Agent\Event\MessageStartEvent;
 use Pi\Agent\Event\MessageUpdateEvent;
 use Pi\Agent\Event\ToolExecutionEndEvent;
 use Pi\Agent\Event\ToolExecutionStartEvent;
+use Pi\Agent\Event\ToolExecutionUpdateEvent;
 use Pi\Agent\Event\TurnEndEvent;
 use Pi\Agent\Event\TurnStartEvent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\Message\ToolResultMessage;
 use Pi\Agent\Tool\AgentToolResult;
+use React\Promise\PromiseInterface;
+
+use function React\Promise\reject;
+use function React\Promise\resolve;
 
 class AgentLoop
 {
     /**
-     * @return Generator<AgentEvent, void, void, array<AgentMessage>>
+     * @param  array<AgentMessage>  $prompts
+     * @return PromiseInterface<array<AgentMessage>>
      */
     public function agentLoop(
         array $prompts,
@@ -32,7 +37,7 @@ class AgentLoop
         AgentLoopConfig $config,
         ?CancellationToken $signal = null,
         ?callable $streamFn = null,
-    ): Generator {
+    ): PromiseInterface {
         $newMessages = [...$prompts];
         $currentContext = new AgentContext(
             $context->systemPrompt,
@@ -40,27 +45,35 @@ class AgentLoop
             $context->tools,
         );
 
-        yield new AgentStartEvent;
-        yield new TurnStartEvent;
-        foreach ($prompts as $prompt) {
-            yield new MessageStartEvent($prompt);
-            yield new MessageEndEvent($prompt);
-        }
+        return $this->emit(new AgentStartEvent, $config)
+            ->then(fn () => $this->emit(new TurnStartEvent, $config))
+            ->then(function () use ($prompts, $config) {
+                $promise = resolve(null);
+                foreach ($prompts as $prompt) {
+                    $promise = $promise
+                        ->then(fn () => $this->emit(new MessageStartEvent($prompt), $config))
+                        ->then(fn () => $this->emit(new MessageEndEvent($prompt), $config));
+                }
 
-        yield from $this->runLoop($currentContext, $newMessages, $config, $signal, $streamFn);
-
-        return $newMessages;
+                return $promise;
+            })
+            ->then(function () use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                return $this->runOuterLoop($currentContext, $newMessages, $config, $signal, $streamFn);
+            })
+            ->then(function () use (&$newMessages) {
+                return $newMessages;
+            });
     }
 
     /**
-     * @return Generator<AgentEvent, void, void, array<AgentMessage>>
+     * @return PromiseInterface<array<AgentMessage>>
      */
     public function agentLoopContinue(
         AgentContext $context,
         AgentLoopConfig $config,
         ?CancellationToken $signal = null,
         ?callable $streamFn = null,
-    ): Generator {
+    ): PromiseInterface {
         if (count($context->messages) === 0) {
             throw new \RuntimeException('Cannot continue: no messages in context');
         }
@@ -77,58 +90,101 @@ class AgentLoop
             $context->tools,
         );
 
-        yield new AgentStartEvent;
-        yield new TurnStartEvent;
-
-        yield from $this->runLoop($currentContext, $newMessages, $config, $signal, $streamFn);
-
-        return $newMessages;
+        return $this->emit(new AgentStartEvent, $config)
+            ->then(fn () => $this->emit(new TurnStartEvent, $config))
+            ->then(function () use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                return $this->runOuterLoop($currentContext, $newMessages, $config, $signal, $streamFn);
+            })
+            ->then(function () use (&$newMessages) {
+                return $newMessages;
+            });
     }
 
     /**
      * @param  array<AgentMessage>  $newMessages
-     * @return Generator<AgentEvent, void, void, void>
+     * @param  array<AgentMessage>  $pendingMessages
+     * @return PromiseInterface<void>
      */
-    private function runLoop(
+    private function runOuterLoop(
         AgentContext $currentContext,
         array &$newMessages,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
         ?callable $streamFn,
-    ): Generator {
-        $firstTurn = true;
-        $pendingMessages = $config->getSteeringMessages !== null
-            ? ($config->getSteeringMessages)()
-            : [];
+        array $pendingMessages = [],
+    ): PromiseInterface {
+        $promise = count($pendingMessages) > 0
+            ? resolve($pendingMessages)
+            : PromiseHelper::resolve($config->getSteeringMessages !== null ? ($config->getSteeringMessages)() : []);
 
-        while (true) {
-            $hasMoreToolCalls = true;
-
-            while ($hasMoreToolCalls || count($pendingMessages) > 0) {
-                if (! $firstTurn) {
-                    yield new TurnStartEvent;
-                } else {
-                    $firstTurn = false;
+        return $promise
+            ->then(function (array $msgs) use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                return $this->runToolCallLoop($currentContext, $newMessages, $config, $signal, $streamFn, true, $msgs);
+            })
+            ->then(function (bool $terminatedEarly) use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                if ($terminatedEarly) {
+                    return resolve(null);
                 }
 
-                if (count($pendingMessages) > 0) {
-                    foreach ($pendingMessages as $message) {
-                        yield new MessageStartEvent($message);
-                        yield new MessageEndEvent($message);
+                return PromiseHelper::resolve($config->getFollowUpMessages !== null ? ($config->getFollowUpMessages)() : [])
+                    ->then(function (array $followUpMessages) use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                        if (count($followUpMessages) > 0) {
+                            return $this->runOuterLoop($currentContext, $newMessages, $config, $signal, $streamFn, $followUpMessages);
+                        }
+
+                        return $this->emit(new AgentEndEvent($newMessages), $config);
+                    });
+            });
+    }
+
+    /**
+     * @param  array<AgentMessage>  $newMessages
+     * @param  array<AgentMessage>  $pendingMessages
+     * @return PromiseInterface<bool> True if the loop terminated early (error/aborted)
+     */
+    private function runToolCallLoop(
+        AgentContext $currentContext,
+        array &$newMessages,
+        AgentLoopConfig $config,
+        ?CancellationToken $signal,
+        ?callable $streamFn,
+        bool $firstTurn,
+        array $pendingMessages,
+        bool $hasMoreToolCalls = true,
+    ): PromiseInterface {
+        if (! $hasMoreToolCalls && count($pendingMessages) === 0) {
+            return resolve(false);
+        }
+
+        $promise = resolve(null);
+
+        if (! $firstTurn) {
+            $promise = $promise->then(fn () => $this->emit(new TurnStartEvent, $config));
+        }
+
+        if (count($pendingMessages) > 0) {
+            foreach ($pendingMessages as $message) {
+                $promise = $promise
+                    ->then(fn () => $this->emit(new MessageStartEvent($message), $config))
+                    ->then(function () use ($message, $currentContext, &$newMessages, $config) {
                         $currentContext->messages[] = $message;
                         $newMessages[] = $message;
-                    }
-                    $pendingMessages = [];
-                }
 
-                $message = yield from $this->streamAssistantResponse($currentContext, $config, $signal, $streamFn);
+                        return $this->emit(new MessageEndEvent($message), $config);
+                    });
+            }
+            $pendingMessages = [];
+        }
+
+        return $promise
+            ->then(fn () => $this->streamAssistantResponse($currentContext, $config, $signal, $streamFn))
+            ->then(function (AssistantMessage $message) use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
                 $newMessages[] = $message;
 
                 if ($message->stopReason === StopReason::Error || $message->stopReason === StopReason::Aborted) {
-                    yield new TurnEndEvent($message, []);
-                    yield new AgentEndEvent($newMessages);
-
-                    return;
+                    return $this->emit(new TurnEndEvent($message, []), $config)
+                        ->then(fn () => $this->emit(new AgentEndEvent($newMessages), $config))
+                        ->then(fn () => true);
                 }
 
                 $toolCalls = array_filter(
@@ -136,138 +192,145 @@ class AgentLoop
                     fn ($c) => $c instanceof ToolCall,
                 );
 
-                $toolResults = [];
-                $hasMoreToolCalls = false;
-                if (count($toolCalls) > 0) {
-                    $executedToolBatch = yield from $this->executeToolCalls(
-                        $currentContext,
-                        $message,
-                        $config,
-                        $signal,
-                    );
-                    $toolResults = $executedToolBatch['messages'];
-                    $hasMoreToolCalls = ! $executedToolBatch['terminate'];
-
-                    foreach ($toolResults as $result) {
-                        $currentContext->messages[] = $result;
-                        $newMessages[] = $result;
-                    }
+                if (count($toolCalls) === 0) {
+                    return $this->emit(new TurnEndEvent($message, []), $config)
+                        ->then(function () use ($config, $currentContext, &$newMessages, $signal, $streamFn) {
+                            return PromiseHelper::resolve($config->getSteeringMessages !== null ? ($config->getSteeringMessages)() : [])
+                                ->then(function (array $steeringMessages) use ($currentContext, &$newMessages, $config, $signal, $streamFn) {
+                                    return $this->runToolCallLoop($currentContext, $newMessages, $config, $signal, $streamFn, false, $steeringMessages, false);
+                                });
+                        });
                 }
 
-                yield new TurnEndEvent($message, $toolResults);
+                return $this->executeToolCalls($currentContext, $message, $config, $signal)
+                    ->then(function (array $executedToolBatch) use ($message, $currentContext, &$newMessages, $config, $signal, $streamFn) {
+                        $toolResults = $executedToolBatch['messages'];
+                        $hasMoreToolCalls = ! $executedToolBatch['terminate'];
 
-                $pendingMessages = $config->getSteeringMessages !== null
-                    ? ($config->getSteeringMessages)()
-                    : [];
-            }
+                        foreach ($toolResults as $result) {
+                            $currentContext->messages[] = $result;
+                            $newMessages[] = $result;
+                        }
 
-            $followUpMessages = $config->getFollowUpMessages !== null
-                ? ($config->getFollowUpMessages)()
-                : [];
-            if (count($followUpMessages) > 0) {
-                $pendingMessages = $followUpMessages;
-
-                continue;
-            }
-
-            break;
-        }
-
-        yield new AgentEndEvent($newMessages);
+                        return $this->emit(new TurnEndEvent($message, $toolResults), $config)
+                            ->then(function () use ($config, $currentContext, &$newMessages, $signal, $streamFn, $hasMoreToolCalls) {
+                                return PromiseHelper::resolve($config->getSteeringMessages !== null ? ($config->getSteeringMessages)() : [])
+                                    ->then(function (array $steeringMessages) use ($currentContext, &$newMessages, $config, $signal, $streamFn, $hasMoreToolCalls) {
+                                        return $this->runToolCallLoop($currentContext, $newMessages, $config, $signal, $streamFn, false, $steeringMessages, $hasMoreToolCalls);
+                                    });
+                            });
+                    });
+            });
     }
 
     /**
-     * @return Generator<AgentEvent, void, void, AssistantMessage>
+     * @return PromiseInterface<AssistantMessage>
      */
     private function streamAssistantResponse(
         AgentContext $context,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
         ?callable $streamFn,
-    ): Generator {
+    ): PromiseInterface {
         $messages = $context->messages;
-        if ($config->transformContext !== null) {
-            $messages = ($config->transformContext)($messages, $signal);
-        }
 
-        $llmMessages = ($config->convertToLlm)($messages);
+        return PromiseHelper::resolve($config->transformContext !== null ? ($config->transformContext)($messages, $signal) : $messages)
+            ->then(function (array $transformedMessages) use ($config, $signal) {
+                return PromiseHelper::resolve(($config->convertToLlm)($transformedMessages, $signal));
+            })
+            ->then(function (array $llmMessages) use ($context, $config, $signal, $streamFn) {
+                $llmContext = new AgentContext(
+                    $context->systemPrompt,
+                    $llmMessages,
+                    $context->tools,
+                );
 
-        $llmContext = new AgentContext(
-            $context->systemPrompt,
-            $llmMessages,
-            $context->tools,
-        );
+                $streamFunction = $streamFn ?? [$this, 'defaultStream'];
 
-        $streamFunction = $streamFn ?? [$this, 'defaultStream'];
-
-        $response = $streamFunction($config->model, $llmContext, $config, $signal);
-
-        $partialMessage = null;
-        $addedPartial = false;
-
-        foreach ($response as $event) {
-            $type = $event['type'] ?? '';
-
-            if ($type === 'start') {
-                $partialMessage = $event['partial'];
-                $context->messages[] = $partialMessage;
-                $addedPartial = true;
-                yield new MessageStartEvent($partialMessage);
-            } elseif (
-                in_array($type, [
-                    'text_start', 'text_delta', 'text_end',
-                    'thinking_start', 'thinking_delta', 'thinking_end',
-                    'toolcall_start', 'toolcall_delta', 'toolcall_end',
-                ], true)
-            ) {
-                if ($partialMessage !== null) {
-                    $partialMessage = $event['partial'];
-                    $context->messages[count($context->messages) - 1] = $partialMessage;
-                    yield new MessageUpdateEvent($partialMessage);
+                try {
+                    $response = $streamFunction($config->model, $llmContext, $config, $signal);
+                } catch (\Throwable $error) {
+                    return reject($error);
                 }
-            } elseif (in_array($type, ['done', 'error'], true)) {
-                $finalMessage = $event['message'];
-                if ($addedPartial) {
-                    $context->messages[count($context->messages) - 1] = $finalMessage;
-                } else {
-                    $context->messages[] = $finalMessage;
+
+                return PromiseHelper::resolve($response);
+            })
+            ->then(function (mixed $response) use ($context, $config) {
+                $partialMessage = null;
+                $addedPartial = false;
+                $finalMessage = null;
+                $emitPromise = resolve(null);
+
+                foreach ($response as $event) {
+                    $type = $event['type'] ?? '';
+
+                    if ($type === 'start') {
+                        $partialMessage = $event['partial'];
+                        $context->messages[] = $partialMessage;
+                        $addedPartial = true;
+                        $msg = $partialMessage;
+                        $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+                    } elseif (
+                        in_array($type, [
+                            'text_start', 'text_delta', 'text_end',
+                            'thinking_start', 'thinking_delta', 'thinking_end',
+                            'toolcall_start', 'toolcall_delta', 'toolcall_end',
+                        ], true)
+                    ) {
+                        if ($partialMessage !== null) {
+                            $partialMessage = $event['partial'];
+                            $context->messages[count($context->messages) - 1] = $partialMessage;
+                            $rawEvent = $event['raw'] ?? null;
+                            $msg = $partialMessage;
+                            $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageUpdateEvent($msg, $rawEvent), $config));
+                        }
+                    } elseif (in_array($type, ['done', 'error'], true)) {
+                        $finalMessage = $event['message'];
+                        if ($addedPartial) {
+                            $context->messages[count($context->messages) - 1] = $finalMessage;
+                        } else {
+                            $context->messages[] = $finalMessage;
+                        }
+                        if (! $addedPartial) {
+                            $msg = $finalMessage;
+                            $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+                        }
+                        $msg = $finalMessage;
+                        $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageEndEvent($msg), $config));
+                    }
                 }
-                if (! $addedPartial) {
-                    yield new MessageStartEvent($finalMessage);
+
+                if ($finalMessage === null) {
+                    $finalMessage = $response->getReturn();
+                    if ($addedPartial) {
+                        $context->messages[count($context->messages) - 1] = $finalMessage;
+                    } else {
+                        $context->messages[] = $finalMessage;
+                        $msg = $finalMessage;
+                        $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+                    }
+                    $msg = $finalMessage;
+                    $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageEndEvent($msg), $config));
                 }
-                yield new MessageEndEvent($finalMessage);
 
-                return $finalMessage;
-            }
-        }
-
-        $finalMessage = $response->getReturn();
-        if ($addedPartial) {
-            $context->messages[count($context->messages) - 1] = $finalMessage;
-        } else {
-            $context->messages[] = $finalMessage;
-            yield new MessageStartEvent($finalMessage);
-        }
-        yield new MessageEndEvent($finalMessage);
-
-        return $finalMessage;
+                return $emitPromise->then(fn () => $finalMessage);
+            });
     }
 
-    private function defaultStream(mixed $model, AgentContext $context, AgentLoopConfig $config, ?CancellationToken $signal): Generator
+    private function defaultStream(mixed $model, AgentContext $context, AgentLoopConfig $config, ?CancellationToken $signal): PromiseInterface
     {
-        throw new \RuntimeException('No stream function provided');
+        return reject(new \RuntimeException('No stream function provided'));
     }
 
     /**
-     * @param  array<ToolCall>  $toolCalls
-     * @return Generator<AgentEvent, void, void, array{messages: array<ToolResultMessage>, terminate: bool}>
+     * @return PromiseInterface<array{messages: array<ToolResultMessage>, terminate: bool}>
      */
     private function executeToolCalls(
         AgentContext $currentContext,
         AssistantMessage $assistantMessage,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
-    ): Generator {
+    ): PromiseInterface {
         $toolCalls = array_filter(
             $assistantMessage->content,
             fn ($c) => $c instanceof ToolCall,
@@ -284,15 +347,15 @@ class AgentLoop
         }
 
         if ($config->toolExecution === ToolExecutionMode::Sequential || $hasSequentialToolCall) {
-            return yield from $this->executeToolCallsSequential($currentContext, $assistantMessage, $toolCalls, $config, $signal);
+            return $this->executeToolCallsSequential($currentContext, $assistantMessage, $toolCalls, $config, $signal);
         }
 
-        return yield from $this->executeToolCallsParallel($currentContext, $assistantMessage, $toolCalls, $config, $signal);
+        return $this->executeToolCallsParallel($currentContext, $assistantMessage, $toolCalls, $config, $signal);
     }
 
     /**
      * @param  array<ToolCall>  $toolCalls
-     * @return Generator<AgentEvent, void, void, array{messages: array<ToolResultMessage>, terminate: bool}>
+     * @return PromiseInterface<array{messages: array<ToolResultMessage>, terminate: bool}>
      */
     private function executeToolCallsSequential(
         AgentContext $currentContext,
@@ -300,43 +363,56 @@ class AgentLoop
         array $toolCalls,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
-    ): Generator {
+    ): PromiseInterface {
+        $promise = resolve(null);
         $finalizedCalls = [];
         $messages = [];
 
         foreach ($toolCalls as $toolCall) {
-            yield new ToolExecutionStartEvent($toolCall->id, $toolCall->name, $toolCall->arguments);
+            $promise = $promise
+                ->then(fn () => $this->emit(new ToolExecutionStartEvent($toolCall->id, $toolCall->name, $toolCall->arguments), $config))
+                ->then(function () use ($currentContext, $assistantMessage, $toolCall, $config, $signal) {
+                    return $this->prepareToolCall($currentContext, $assistantMessage, $toolCall, $config, $signal)
+                        ->then(function (array $preparation) use ($signal, $currentContext, $assistantMessage, $config) {
+                            if ($preparation['kind'] === 'immediate') {
+                                return resolve([
+                                    'toolCall' => $preparation['toolCall'],
+                                    'result' => $preparation['result'],
+                                    'isError' => $preparation['isError'],
+                                ]);
+                            }
 
-            $preparation = $this->prepareToolCall($currentContext, $assistantMessage, $toolCall, $config, $signal);
+                            return $this->executePreparedToolCall($preparation, $signal, $config)
+                                ->then(function (array $executed) use ($currentContext, $assistantMessage, $preparation, $config, $signal) {
+                                    return $this->finalizeExecutedToolCall($currentContext, $assistantMessage, $preparation, $executed, $config, $signal);
+                                });
+                        });
+                })
+                ->then(function (array $finalized) use ($toolCall, $config, &$finalizedCalls, &$messages) {
+                    $finalizedCalls[] = $finalized;
 
-            if ($preparation['kind'] === 'immediate') {
-                $finalized = [
-                    'toolCall' => $toolCall,
-                    'result' => $preparation['result'],
-                    'isError' => $preparation['isError'],
-                ];
-            } else {
-                $executed = $this->executePreparedToolCall($preparation, $signal);
-                $finalized = $this->finalizeExecutedToolCall($currentContext, $assistantMessage, $preparation, $executed, $config, $signal);
-            }
+                    return $this->emit(new ToolExecutionEndEvent($toolCall->id, $toolCall->name, $finalized['result'], $finalized['isError']), $config)
+                        ->then(function () use ($finalized, &$messages, $config) {
+                            $toolResultMessage = $this->createToolResultMessage($finalized);
+                            $messages[] = $toolResultMessage;
 
-            yield new ToolExecutionEndEvent($toolCall->id, $toolCall->name, $finalized['result'], $finalized['isError']);
-            $toolResultMessage = $this->createToolResultMessage($finalized);
-            yield new MessageStartEvent($toolResultMessage);
-            yield new MessageEndEvent($toolResultMessage);
-            $finalizedCalls[] = $finalized;
-            $messages[] = $toolResultMessage;
+                            return $this->emit(new MessageStartEvent($toolResultMessage), $config)
+                                ->then(fn () => $this->emit(new MessageEndEvent($toolResultMessage), $config));
+                        });
+                });
         }
 
-        return [
-            'messages' => $messages,
-            'terminate' => $this->shouldTerminateToolBatch($finalizedCalls),
-        ];
+        return $promise->then(function () use ($messages, $finalizedCalls) {
+            return [
+                'messages' => $messages,
+                'terminate' => $this->shouldTerminateToolBatch($finalizedCalls),
+            ];
+        });
     }
 
     /**
      * @param  array<ToolCall>  $toolCalls
-     * @return Generator<AgentEvent, void, void, array{messages: array<ToolResultMessage>, terminate: bool}>
+     * @return PromiseInterface<array{messages: array<ToolResultMessage>, terminate: bool}>
      */
     private function executeToolCallsParallel(
         AgentContext $currentContext,
@@ -344,72 +420,66 @@ class AgentLoop
         array $toolCalls,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
-    ): Generator {
-        $finalizedEntries = [];
+    ): PromiseInterface {
+        $promises = [];
 
         foreach ($toolCalls as $toolCall) {
-            yield new ToolExecutionStartEvent($toolCall->id, $toolCall->name, $toolCall->arguments);
+            $promises[] = $this->emit(new ToolExecutionStartEvent($toolCall->id, $toolCall->name, $toolCall->arguments), $config)
+                ->then(function () use ($currentContext, $assistantMessage, $toolCall, $config, $signal) {
+                    return $this->prepareToolCall($currentContext, $assistantMessage, $toolCall, $config, $signal)
+                        ->then(function (array $preparation) use ($signal, $currentContext, $assistantMessage, $config) {
+                            if ($preparation['kind'] === 'immediate') {
+                                return resolve([
+                                    'toolCall' => $preparation['toolCall'],
+                                    'result' => $preparation['result'],
+                                    'isError' => $preparation['isError'],
+                                ]);
+                            }
 
-            $preparation = $this->prepareToolCall($currentContext, $assistantMessage, $toolCall, $config, $signal);
-
-            if ($preparation['kind'] === 'immediate') {
-                $finalized = [
-                    'toolCall' => $toolCall,
-                    'result' => $preparation['result'],
-                    'isError' => $preparation['isError'],
-                ];
-                yield new ToolExecutionEndEvent($toolCall->id, $toolCall->name, $finalized['result'], $finalized['isError']);
-                $finalizedEntries[] = $finalized;
-
-                continue;
-            }
-
-            $finalizedEntries[] = [
-                'preparation' => $preparation,
-                'toolCall' => $toolCall,
-            ];
+                            return $this->executePreparedToolCall($preparation, $signal, $config)
+                                ->then(function (array $executed) use ($currentContext, $assistantMessage, $preparation, $config, $signal) {
+                                    return $this->finalizeExecutedToolCall($currentContext, $assistantMessage, $preparation, $executed, $config, $signal);
+                                });
+                        });
+                })
+                ->then(function (array $finalized) use ($toolCall, $config) {
+                    return $this->emit(new ToolExecutionEndEvent($toolCall->id, $toolCall->name, $finalized['result'], $finalized['isError']), $config)
+                        ->then(fn () => $finalized);
+                });
         }
 
-        $orderedFinalized = [];
-        foreach ($finalizedEntries as $entry) {
-            if (isset($entry['result'])) {
-                $orderedFinalized[] = $entry;
-            } else {
-                $executed = $this->executePreparedToolCall($entry['preparation'], $signal);
-                $finalized = $this->finalizeExecutedToolCall(
-                    $currentContext,
-                    $assistantMessage,
-                    $entry['preparation'],
-                    $executed,
-                    $config,
-                    $signal,
-                );
-                yield new ToolExecutionEndEvent($entry['toolCall']->id, $entry['toolCall']->name, $finalized['result'], $finalized['isError']);
-                $orderedFinalized[] = $finalized;
-            }
-        }
+        return PromiseHelper::all($promises)
+            ->then(function (array $finalizedArray) use ($config) {
+                $messages = [];
+                $promise = resolve(null);
 
-        $messages = [];
-        foreach ($orderedFinalized as $finalized) {
-            $toolResultMessage = $this->createToolResultMessage($finalized);
-            yield new MessageStartEvent($toolResultMessage);
-            yield new MessageEndEvent($toolResultMessage);
-            $messages[] = $toolResultMessage;
-        }
+                foreach ($finalizedArray as $finalized) {
+                    $toolResultMessage = $this->createToolResultMessage($finalized);
+                    $messages[] = $toolResultMessage;
+                    $promise = $promise
+                        ->then(fn () => $this->emit(new MessageStartEvent($toolResultMessage), $config))
+                        ->then(fn () => $this->emit(new MessageEndEvent($toolResultMessage), $config));
+                }
 
-        return [
-            'messages' => $messages,
-            'terminate' => $this->shouldTerminateToolBatch($orderedFinalized),
-        ];
+                return $promise->then(function () use ($messages, $finalizedArray) {
+                    return [
+                        'messages' => $messages,
+                        'terminate' => $this->shouldTerminateToolBatch($finalizedArray),
+                    ];
+                });
+            });
     }
 
+    /**
+     * @return PromiseInterface<array{kind: string, toolCall?: ToolCall, result?: AgentToolResult, isError?: bool, tool?: mixed, args?: array}>
+     */
     private function prepareToolCall(
         AgentContext $currentContext,
         AssistantMessage $assistantMessage,
         ToolCall $toolCall,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
-    ): array {
+    ): PromiseInterface {
         $tool = null;
         foreach ($currentContext->tools as $t) {
             if ($t->getName() === $toolCall->name) {
@@ -419,76 +489,130 @@ class AgentLoop
         }
 
         if ($tool === null) {
-            return [
+            return resolve([
                 'kind' => 'immediate',
+                'toolCall' => $toolCall,
                 'result' => $this->createErrorToolResult("Tool {$toolCall->name} not found"),
                 'isError' => true,
-            ];
+            ]);
         }
 
         try {
             $preparedArgs = $tool->prepareArguments($toolCall->arguments);
+        } catch (\Throwable $error) {
+            return resolve([
+                'kind' => 'immediate',
+                'toolCall' => $toolCall,
+                'result' => $this->createErrorToolResult($error->getMessage()),
+                'isError' => true,
+            ]);
+        }
 
-            if ($config->beforeToolCall !== null) {
-                $beforeResult = ($config->beforeToolCall)([
+        if ($config->beforeToolCall !== null) {
+            try {
+                $beforePromise = PromiseHelper::resolve(($config->beforeToolCall)([
                     'assistantMessage' => $assistantMessage,
                     'toolCall' => $toolCall,
                     'args' => $preparedArgs,
                     'context' => $currentContext,
-                ], $signal);
+                ], $signal));
+            } catch (\Throwable $error) {
+                return resolve([
+                    'kind' => 'immediate',
+                    'toolCall' => $toolCall,
+                    'result' => $this->createErrorToolResult($error->getMessage()),
+                    'isError' => true,
+                ]);
+            }
 
+            return $beforePromise->then(function ($beforeResult) use ($toolCall, $tool, $preparedArgs) {
                 if (is_array($beforeResult) && ($beforeResult['block'] ?? false)) {
                     return [
                         'kind' => 'immediate',
+                        'toolCall' => $toolCall,
                         'result' => $this->createErrorToolResult($beforeResult['reason'] ?? 'Tool execution was blocked'),
                         'isError' => true,
                     ];
                 }
-            }
 
-            return [
-                'kind' => 'prepared',
-                'toolCall' => $toolCall,
-                'tool' => $tool,
-                'args' => $preparedArgs,
-            ];
-        } catch (\Throwable $error) {
-            return [
-                'kind' => 'immediate',
-                'result' => $this->createErrorToolResult($error->getMessage()),
-                'isError' => true,
-            ];
+                return [
+                    'kind' => 'prepared',
+                    'toolCall' => $toolCall,
+                    'tool' => $tool,
+                    'args' => $preparedArgs,
+                ];
+            })->catch(function (\Throwable $error) use ($toolCall) {
+                return [
+                    'kind' => 'immediate',
+                    'toolCall' => $toolCall,
+                    'result' => $this->createErrorToolResult($error->getMessage()),
+                    'isError' => true,
+                ];
+            });
         }
+
+        return resolve([
+            'kind' => 'prepared',
+            'toolCall' => $toolCall,
+            'tool' => $tool,
+            'args' => $preparedArgs,
+        ]);
     }
 
-    private function executePreparedToolCall(array $preparation, ?CancellationToken $signal): array
+    /**
+     * @return PromiseInterface<array{result: AgentToolResult, isError: bool, updateEvents: array<ToolExecutionUpdateEvent>}>
+     */
+    private function executePreparedToolCall(array $preparation, ?CancellationToken $signal, AgentLoopConfig $config): PromiseInterface
     {
         $updateEvents = [];
+        $emitPromises = [];
+
+        $onUpdate = function (AgentToolResult $partialResult) use (&$updateEvents, &$emitPromises, $preparation, $config): void {
+            $updateEvent = new ToolExecutionUpdateEvent(
+                $preparation['toolCall']->id,
+                $preparation['toolCall']->name,
+                $preparation['toolCall']->arguments,
+                $partialResult,
+            );
+            $updateEvents[] = $updateEvent;
+            $emitPromises[] = $this->emit($updateEvent, $config);
+        };
 
         try {
-            $result = $preparation['tool']->execute(
+            $promise = PromiseHelper::resolve($preparation['tool']->execute(
                 $preparation['toolCall']->id,
                 $preparation['args'],
                 $signal,
-                function (AgentToolResult $partialResult) use (&$updateEvents, $preparation): void {
-                    $updateEvents[] = [
-                        'toolCallId' => $preparation['toolCall']->id,
-                        'toolName' => $preparation['toolCall']->name,
-                        'args' => $preparation['toolCall']->arguments,
-                        'partialResult' => $partialResult,
-                    ];
-                },
-            );
-
-            return ['result' => $result, 'isError' => false];
+                $onUpdate,
+            ));
         } catch (\Throwable $error) {
-            return [
+            return resolve([
                 'result' => $this->createErrorToolResult($error->getMessage()),
                 'isError' => true,
-            ];
+                'updateEvents' => [],
+            ]);
         }
+
+        return $promise
+            ->then(function (AgentToolResult $result) use (&$updateEvents, &$emitPromises) {
+                return PromiseHelper::all($emitPromises)->then(fn () => [
+                    'result' => $result,
+                    'isError' => false,
+                    'updateEvents' => $updateEvents,
+                ]);
+            })
+            ->catch(function (\Throwable $error) {
+                return [
+                    'result' => $this->createErrorToolResult($error->getMessage()),
+                    'isError' => true,
+                    'updateEvents' => [],
+                ];
+            });
     }
 
+    /**
+     * @return PromiseInterface<array{toolCall: ToolCall, result: AgentToolResult, isError: bool}>
+     */
     private function finalizeExecutedToolCall(
         AgentContext $currentContext,
         AssistantMessage $assistantMessage,
@@ -496,21 +620,29 @@ class AgentLoop
         array $executed,
         AgentLoopConfig $config,
         ?CancellationToken $signal,
-    ): array {
+    ): PromiseInterface {
         $result = $executed['result'];
         $isError = $executed['isError'];
 
         if ($config->afterToolCall !== null) {
             try {
-                $afterResult = ($config->afterToolCall)([
+                $afterPromise = PromiseHelper::resolve(($config->afterToolCall)([
                     'assistantMessage' => $assistantMessage,
                     'toolCall' => $prepared['toolCall'],
                     'args' => $prepared['args'],
                     'result' => $result,
                     'isError' => $isError,
                     'context' => $currentContext,
-                ], $signal);
+                ], $signal));
+            } catch (\Throwable $error) {
+                return resolve([
+                    'toolCall' => $prepared['toolCall'],
+                    'result' => $this->createErrorToolResult($error->getMessage()),
+                    'isError' => true,
+                ]);
+            }
 
+            return $afterPromise->then(function ($afterResult) use ($prepared, $result, $isError) {
                 if (is_array($afterResult)) {
                     $result = new AgentToolResult(
                         $afterResult['content'] ?? $result->content,
@@ -519,17 +651,26 @@ class AgentLoop
                     );
                     $isError = $afterResult['isError'] ?? $isError;
                 }
-            } catch (\Throwable $error) {
-                $result = $this->createErrorToolResult($error->getMessage());
-                $isError = true;
-            }
+
+                return [
+                    'toolCall' => $prepared['toolCall'],
+                    'result' => $result,
+                    'isError' => $isError,
+                ];
+            })->catch(function (\Throwable $error) use ($prepared) {
+                return [
+                    'toolCall' => $prepared['toolCall'],
+                    'result' => $this->createErrorToolResult($error->getMessage()),
+                    'isError' => true,
+                ];
+            });
         }
 
-        return [
+        return resolve([
             'toolCall' => $prepared['toolCall'],
             'result' => $result,
             'isError' => $isError,
-        ];
+        ]);
     }
 
     private function shouldTerminateToolBatch(array $finalizedCalls): bool
@@ -566,5 +707,14 @@ class AgentLoop
             $finalized['isError'],
             $finalized['result']->details,
         );
+    }
+
+    private function emit(AgentEvent $event, AgentLoopConfig $config): PromiseInterface
+    {
+        if ($config->emit !== null) {
+            return PromiseHelper::resolve(($config->emit)($event));
+        }
+
+        return resolve(null);
     }
 }

@@ -10,6 +10,7 @@ readonly class MessageUpdateEvent implements AgentEvent
 {
     public function __construct(
         public AgentMessage $message,
+        public mixed $rawEvent = null,
     ) {}
 
     public function getType(): EventType

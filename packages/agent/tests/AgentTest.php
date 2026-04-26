@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
+require_once __DIR__.'/TestHelper.php';
+
 use Pi\Agent\Agent;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Event\AgentEvent;
+use Pi\Agent\Event\MessageUpdateEvent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\Message\UserMessage;
 use Pi\Agent\MutableAgentState;
 use Pi\Agent\StopReason;
 use Pi\Agent\ThinkingLevel;
 use Pi\Agent\ToolExecutionMode;
+use React\Promise\PromiseInterface;
 
 describe('Agent', function () {
     it('creates with default state', function () {
@@ -204,5 +208,176 @@ describe('Agent', function () {
         $agent->prompt($messages);
 
         expect(count($agent->getState()->getMessages()))->toBe(3);
+    });
+
+    it('returns a promise from prompt', function () {
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+        };
+
+        $agent = new Agent(streamFn: $streamFn);
+        $promise = $agent->prompt('hello');
+
+        expect($promise)->toBeInstanceOf(PromiseInterface::class);
+    });
+
+    it('returns a promise from continue', function () {
+        $state = new MutableAgentState;
+        $state->setMessages([
+            new UserMessage([new TextContent('hello')], time() * 1000),
+        ]);
+
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+        };
+
+        $agent = new Agent($state, streamFn: $streamFn);
+        $promise = $agent->continue();
+
+        expect($promise)->toBeInstanceOf(PromiseInterface::class);
+    });
+
+    it('waits for idle when not running', function () {
+        $agent = new Agent;
+        $promise = $agent->waitForIdle();
+
+        expect($promise)->toBeInstanceOf(PromiseInterface::class);
+        block($promise);
+        expect($agent->isRunning())->toBeFalse();
+    });
+
+    it('awaits async listeners', function () {
+        $listenerOrder = [];
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+        };
+
+        $agent = new Agent(streamFn: $streamFn);
+        $agent->subscribe(function (AgentEvent $event) use (&$listenerOrder) {
+            $listenerOrder[] = 'sync';
+        });
+        $agent->subscribe(function (AgentEvent $event) use (&$listenerOrder) {
+            return \React\Promise\resolve(null)->then(function () use (&$listenerOrder) {
+                $listenerOrder[] = 'async';
+            });
+        });
+
+        block($agent->prompt('hello'));
+
+        // Both listeners are called for every event; verify async listeners are
+        // awaited after sync listeners for each event pair.
+        expect(count($listenerOrder))->toBeGreaterThan(0);
+        foreach (array_chunk($listenerOrder, 2) as $pair) {
+            expect($pair)->toBe(['sync', 'async']);
+        }
+    });
+
+    it('includes raw event in message update', function () {
+        $rawEvent = ['type' => 'text_delta', 'delta' => 'ok'];
+        $streamFn = function () use ($rawEvent) {
+            yield ['type' => 'start', 'partial' => new AssistantMessage(
+                [new TextContent('')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+            yield ['type' => 'text_delta', 'partial' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            ), 'raw' => $rawEvent];
+            yield ['type' => 'done', 'message' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+        };
+
+        $updateEvents = [];
+        $agent = new Agent(streamFn: $streamFn);
+        $agent->subscribe(function (AgentEvent $event) use (&$updateEvents) {
+            if ($event instanceof MessageUpdateEvent) {
+                $updateEvents[] = $event;
+            }
+
+            return \React\Promise\resolve(null);
+        });
+
+        block($agent->prompt('hello'));
+
+        expect(count($updateEvents))->toBe(1);
+        expect($updateEvents[0]->rawEvent)->toBe($rawEvent);
+    });
+
+    it('agent_end is last event and run is idle after listeners settle', function () {
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => new AssistantMessage(
+                [new TextContent('ok')],
+                'api',
+                'provider',
+                'model',
+                StopReason::Done,
+                time() * 1000,
+            )];
+        };
+
+        $eventTypes = [];
+        $agent = new Agent(streamFn: $streamFn);
+        $agent->subscribe(function (AgentEvent $event) use (&$eventTypes) {
+            $eventTypes[] = $event->getType()->value;
+
+            return \React\Promise\resolve(null);
+        });
+
+        block($agent->prompt('hello'));
+
+        expect(end($eventTypes))->toBe('agent_end');
+        expect($agent->isRunning())->toBeFalse();
+    });
+
+    it('awaits async listeners on failure path before run is idle', function () {
+        $listenerSettled = false;
+        $agent = new Agent(streamFn: function () {
+            throw new RuntimeException('Stream exploded');
+        });
+        $agent->subscribe(function (AgentEvent $event) use (&$listenerSettled) {
+            return \React\Promise\resolve(null)->then(function () use (&$listenerSettled) {
+                $listenerSettled = true;
+            });
+        });
+
+        block($agent->prompt('hello'));
+
+        expect($listenerSettled)->toBeTrue();
+        expect($agent->isRunning())->toBeFalse();
     });
 });

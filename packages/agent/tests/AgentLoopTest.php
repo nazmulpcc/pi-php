@@ -2,20 +2,26 @@
 
 declare(strict_types=1);
 
+require_once __DIR__.'/TestHelper.php';
+
 use Pi\Agent\AgentContext;
 use Pi\Agent\AgentLoop;
 use Pi\Agent\AgentLoopConfig;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Content\ToolCall;
 use Pi\Agent\Event\AgentEndEvent;
+use Pi\Agent\Event\AgentEvent;
 use Pi\Agent\Event\ToolExecutionEndEvent;
 use Pi\Agent\Event\ToolExecutionStartEvent;
+use Pi\Agent\Event\ToolExecutionUpdateEvent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\Message\UserMessage;
 use Pi\Agent\StopReason;
 use Pi\Agent\Tool\AgentTool;
 use Pi\Agent\Tool\AgentToolResult;
 use Pi\Agent\ToolExecutionMode;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 
 function createAssistantMessage(array $content, StopReason $stopReason = StopReason::Done): AssistantMessage
 {
@@ -42,27 +48,33 @@ function identityConverter(array $messages): array
     );
 }
 
+function collectEventsAgentLoopConfig(callable $convertToLlm, array &$events): AgentLoopConfig
+{
+    return new AgentLoopConfig(
+        model: null,
+        convertToLlm: $convertToLlm,
+        emit: function (AgentEvent $event) use (&$events) {
+            $events[] = $event;
+
+            return \React\Promise\resolve(null);
+        },
+    );
+}
+
 describe('AgentLoop', function () {
     it('emits events for a simple response', function () {
         $context = new AgentContext('You are helpful.', [], []);
         $userPrompt = createUserMessage('Hello');
 
-        $config = new AgentLoopConfig(
-            model: null,
-            convertToLlm: identityConverter(...),
-        );
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
 
         $streamFn = function () {
             yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('Hi there!')])];
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-
-        $events = [];
-        foreach ($generator as $event) {
-            $events[] = $event;
-        }
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         $eventTypes = array_map(fn ($e) => $e->getType()->value, $events);
 
@@ -88,11 +100,7 @@ describe('AgentLoop', function () {
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-
-        foreach ($generator as $event) {
-        }
-        $messages = $generator->getReturn();
+        $messages = block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         expect(count($messages))->toBe(2);
         expect($messages[0]->getRole()->value)->toBe('user');
@@ -135,21 +143,19 @@ describe('AgentLoop', function () {
                 return $args;
             }
 
-            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): AgentToolResult
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
             {
                 $this->executed[] = $params['value'];
 
-                return new AgentToolResult([new TextContent("echoed: {$params['value']}")]);
+                return \React\Promise\resolve(new AgentToolResult([new TextContent("echoed: {$params['value']}")]));
             }
         };
 
         $context = new AgentContext('', [], [$tool]);
         $userPrompt = createUserMessage('echo something');
 
-        $config = new AgentLoopConfig(
-            model: null,
-            convertToLlm: identityConverter(...),
-        );
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
 
         $callIndex = 0;
         $streamFn = function () use (&$callIndex) {
@@ -164,12 +170,7 @@ describe('AgentLoop', function () {
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-
-        $events = [];
-        foreach ($generator as $event) {
-            $events[] = $event;
-        }
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         expect($executed)->toBe(['hello']);
 
@@ -211,9 +212,7 @@ describe('AgentLoop', function () {
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-        foreach ($generator as $event) {
-        }
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         expect(count($transformedMessages))->toBe(2);
         expect(count($convertedMessages))->toBe(2);
@@ -241,9 +240,7 @@ describe('AgentLoop', function () {
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-        foreach ($generator as $event) {
-        }
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         expect(count($convertedMessages))->toBe(1);
         expect($convertedMessages[0]->getRole()->value)->toBe('user');
@@ -253,22 +250,15 @@ describe('AgentLoop', function () {
         $context = new AgentContext('', [], []);
         $userPrompt = createUserMessage('Hello');
 
-        $config = new AgentLoopConfig(
-            model: null,
-            convertToLlm: identityConverter(...),
-        );
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
 
         $streamFn = function () {
             yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('')], StopReason::Error)];
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
-
-        $events = [];
-        foreach ($generator as $event) {
-            $events[] = $event;
-        }
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
 
         $lastEvent = end($events);
         expect($lastEvent)->toBeInstanceOf(AgentEndEvent::class);
@@ -281,22 +271,15 @@ describe('AgentLoop', function () {
             createUserMessage('How are you?'),
         ], []);
 
-        $config = new AgentLoopConfig(
-            model: null,
-            convertToLlm: identityConverter(...),
-        );
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
 
         $streamFn = function () {
             yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('I am fine')])];
         };
 
         $loop = new AgentLoop;
-        $generator = $loop->agentLoopContinue($context, $config, null, $streamFn);
-
-        $events = [];
-        foreach ($generator as $event) {
-            $events[] = $event;
-        }
+        block($loop->agentLoopContinue($context, $config, null, $streamFn));
 
         $eventTypes = array_map(fn ($e) => $e->getType()->value, $events);
         expect($eventTypes)->toContain('agent_start');
@@ -313,9 +296,375 @@ describe('AgentLoop', function () {
         $loop = new AgentLoop;
 
         expect(function () use ($loop, $context, $config) {
-            $generator = $loop->agentLoopContinue($context, $config);
-            foreach ($generator as $event) {
-            }
+            block($loop->agentLoopContinue($context, $config));
         })->toThrow(RuntimeException::class, 'Cannot continue from message role: assistant');
+    });
+
+    it('emits tool_execution_update events', function () {
+        $tool = new class implements AgentTool
+        {
+            public function getName(): string
+            {
+                return 'updater';
+            }
+
+            public function getLabel(): string
+            {
+                return 'Updater';
+            }
+
+            public function getDescription(): string
+            {
+                return 'Updater tool';
+            }
+
+            public function getParameters(): array
+            {
+                return [];
+            }
+
+            public function getExecutionMode(): ToolExecutionMode
+            {
+                return ToolExecutionMode::Parallel;
+            }
+
+            public function prepareArguments(array $args): array
+            {
+                return $args;
+            }
+
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
+            {
+                if ($onUpdate !== null) {
+                    $onUpdate(new AgentToolResult([new TextContent('partial')]));
+                }
+
+                return \React\Promise\resolve(new AgentToolResult([new TextContent('final')]));
+            }
+        };
+
+        $context = new AgentContext('', [], [$tool]);
+        $userPrompt = createUserMessage('update');
+
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
+
+        $callIndex = 0;
+        $streamFn = function () use (&$callIndex) {
+            if ($callIndex === 0) {
+                $callIndex++;
+                yield ['type' => 'done', 'message' => createAssistantMessage([
+                    new ToolCall('tool-1', 'updater', []),
+                ], StopReason::Done)];
+            } else {
+                yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('done')])];
+            }
+        };
+
+        $loop = new AgentLoop;
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        $updateEvents = array_values(array_filter($events, fn ($e) => $e instanceof ToolExecutionUpdateEvent));
+        expect(count($updateEvents))->toBe(1);
+        expect($updateEvents[0]->partialResult)->toBeInstanceOf(AgentToolResult::class);
+    });
+
+    it('emits tool_execution_update events before the tool promise resolves', function () {
+        $deferred = new Deferred;
+
+        $tool = new class($deferred) implements AgentTool
+        {
+            public function __construct(private Deferred $deferred) {}
+
+            public function getName(): string
+            {
+                return 'slow-updater';
+            }
+
+            public function getLabel(): string
+            {
+                return 'Slow Updater';
+            }
+
+            public function getDescription(): string
+            {
+                return 'Slow updater tool';
+            }
+
+            public function getParameters(): array
+            {
+                return [];
+            }
+
+            public function getExecutionMode(): ToolExecutionMode
+            {
+                return ToolExecutionMode::Sequential;
+            }
+
+            public function prepareArguments(array $args): array
+            {
+                return $args;
+            }
+
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
+            {
+                if ($onUpdate !== null) {
+                    $onUpdate(new AgentToolResult([new TextContent('partial')]));
+                }
+
+                return $this->deferred->promise();
+            }
+        };
+
+        $context = new AgentContext('', [], [$tool]);
+        $userPrompt = createUserMessage('update');
+
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
+
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => createAssistantMessage([
+                new ToolCall('tool-1', 'slow-updater', []),
+            ], StopReason::Done)];
+        };
+
+        $loop = new AgentLoop;
+        $promise = $loop->agentLoop([$userPrompt], $context, $config, null, $streamFn);
+
+        // The tool has been called and its $onUpdate should have fired,
+        // but its returned promise is still pending.
+        $updateEvents = array_values(array_filter($events, fn ($e) => $e instanceof ToolExecutionUpdateEvent));
+        expect(count($updateEvents))->toBe(1);
+
+        // Now resolve the tool and let the loop finish.
+        // terminate: true so the loop knows there are no more tool calls.
+        $deferred->resolve(new AgentToolResult([new TextContent('final')], null, true));
+
+        block($promise);
+    });
+
+    it('executes parallel tools concurrently', function () {
+        $executionOrder = [];
+        $toolA = new class($executionOrder) implements AgentTool
+        {
+            public function __construct(private array &$order) {}
+
+            public function getName(): string
+            {
+                return 'a';
+            }
+
+            public function getLabel(): string
+            {
+                return 'A';
+            }
+
+            public function getDescription(): string
+            {
+                return 'Tool A';
+            }
+
+            public function getParameters(): array
+            {
+                return [];
+            }
+
+            public function getExecutionMode(): ToolExecutionMode
+            {
+                return ToolExecutionMode::Parallel;
+            }
+
+            public function prepareArguments(array $args): array
+            {
+                return $args;
+            }
+
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
+            {
+                $this->order[] = 'a-start';
+
+                return \React\Promise\resolve(new AgentToolResult([new TextContent('a')]))
+                    ->then(function ($r) {
+                        $this->order[] = 'a-end';
+
+                        return $r;
+                    });
+            }
+        };
+
+        $toolB = new class($executionOrder) implements AgentTool
+        {
+            public function __construct(private array &$order) {}
+
+            public function getName(): string
+            {
+                return 'b';
+            }
+
+            public function getLabel(): string
+            {
+                return 'B';
+            }
+
+            public function getDescription(): string
+            {
+                return 'Tool B';
+            }
+
+            public function getParameters(): array
+            {
+                return [];
+            }
+
+            public function getExecutionMode(): ToolExecutionMode
+            {
+                return ToolExecutionMode::Parallel;
+            }
+
+            public function prepareArguments(array $args): array
+            {
+                return $args;
+            }
+
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
+            {
+                $this->order[] = 'b-start';
+
+                return \React\Promise\resolve(new AgentToolResult([new TextContent('b')]))
+                    ->then(function ($r) {
+                        $this->order[] = 'b-end';
+
+                        return $r;
+                    });
+            }
+        };
+
+        $context = new AgentContext('', [], [$toolA, $toolB]);
+        $userPrompt = createUserMessage('parallel');
+
+        $config = new AgentLoopConfig(
+            model: null,
+            convertToLlm: identityConverter(...),
+            toolExecution: ToolExecutionMode::Parallel,
+        );
+
+        $callIndex = 0;
+        $streamFn = function () use (&$callIndex) {
+            if ($callIndex === 0) {
+                $callIndex++;
+                yield ['type' => 'done', 'message' => createAssistantMessage([
+                    new ToolCall('tc-a', 'a', []),
+                    new ToolCall('tc-b', 'b', []),
+                ], StopReason::Done)];
+            } else {
+                yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('done')])];
+            }
+        };
+
+        $loop = new AgentLoop;
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        // Both tools should execute and complete
+        expect($executionOrder)->toContain('a-start');
+        expect($executionOrder)->toContain('a-end');
+        expect($executionOrder)->toContain('b-start');
+        expect($executionOrder)->toContain('b-end');
+    });
+
+    it('awaits async hooks', function () {
+        $context = new AgentContext('You are helpful.', [], []);
+        $userPrompt = createUserMessage('Hello');
+
+        $hookCalled = false;
+        $config = new AgentLoopConfig(
+            model: null,
+            convertToLlm: identityConverter(...),
+            transformContext: function (array $messages) use (&$hookCalled): PromiseInterface {
+                return \React\Promise\resolve($messages)->then(function ($m) use (&$hookCalled) {
+                    $hookCalled = true;
+
+                    return $m;
+                });
+            },
+        );
+
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('Response')])];
+        };
+
+        $loop = new AgentLoop;
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        expect($hookCalled)->toBeTrue();
+    });
+
+    it('preserves follow-up messages across outer loop iterations', function () {
+        $context = new AgentContext('You are helpful.', [], []);
+        $userPrompt = createUserMessage('Hello');
+
+        $followUpDepleted = false;
+        $config = new AgentLoopConfig(
+            model: null,
+            convertToLlm: identityConverter(...),
+            getFollowUpMessages: function () use (&$followUpDepleted): array {
+                if ($followUpDepleted) {
+                    return [];
+                }
+                $followUpDepleted = true;
+
+                return [createUserMessage('follow-up')];
+            },
+        );
+
+        $callIndex = 0;
+        $streamFn = function () use (&$callIndex) {
+            $callIndex++;
+            yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent("Response {$callIndex}")])];
+        };
+
+        $loop = new AgentLoop;
+        $messages = block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        expect(count($messages))->toBe(4);
+        expect($messages[0]->getRole()->value)->toBe('user');
+        expect($messages[1]->getRole()->value)->toBe('assistant');
+        expect($messages[2]->getRole()->value)->toBe('user');
+        expect($messages[3]->getRole()->value)->toBe('assistant');
+    });
+
+    it('emits agent_end exactly once on error stop reason', function () {
+        $context = new AgentContext('', [], []);
+        $userPrompt = createUserMessage('Hello');
+
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
+
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('')], StopReason::Error)];
+        };
+
+        $loop = new AgentLoop;
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        $agentEndEvents = array_values(array_filter($events, fn ($e) => $e instanceof AgentEndEvent));
+        expect(count($agentEndEvents))->toBe(1);
+    });
+
+    it('emits agent_end exactly once on aborted stop reason', function () {
+        $context = new AgentContext('', [], []);
+        $userPrompt = createUserMessage('Hello');
+
+        $events = [];
+        $config = collectEventsAgentLoopConfig(identityConverter(...), $events);
+
+        $streamFn = function () {
+            yield ['type' => 'done', 'message' => createAssistantMessage([new TextContent('')], StopReason::Aborted)];
+        };
+
+        $loop = new AgentLoop;
+        block($loop->agentLoop([$userPrompt], $context, $config, null, $streamFn));
+
+        $agentEndEvents = array_values(array_filter($events, fn ($e) => $e instanceof AgentEndEvent));
+        expect(count($agentEndEvents))->toBe(1);
     });
 });
