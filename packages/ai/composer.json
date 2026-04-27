@@ -1,0 +1,24 @@
+{
+  "name": "nazmulpcc/pi-ai",
+  "description": "Provider-agnostic LLM layer for the Pi PHP runtime",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=8.3",
+    "react/promise": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Pi\\AI\\": "src/"
+    },
+    "files": [
+      "src/functions.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Pi\\AI\\Tests\\": "tests/"
+    }
+  }
+}

@@ -20,6 +20,9 @@ use Pi\Agent\StopReason;
 use Pi\Agent\Tool\AgentTool;
 use Pi\Agent\Tool\AgentToolResult;
 use Pi\Agent\ToolExecutionMode;
+use Pi\AI\Faux;
+use Pi\AI\Schema\Schema as AiSchema;
+use Pi\AI\Schema\Type;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -441,6 +444,96 @@ describe('AgentLoop', function () {
         $deferred->resolve(new AgentToolResult([new TextContent('final')], null, true));
 
         block($promise);
+    });
+
+    it('bridges the default stream path through the Pi AI faux provider', function () {
+        $registration = Faux::registerProvider();
+        $registration->setResponses([
+            Faux::assistantMessage([
+                Faux::toolCall('echo', ['value' => 'hello'], ['id' => 'tool-1']),
+            ], ['stopReason' => Pi\AI\StopReason::ToolUse]),
+            Faux::assistantMessage('done'),
+        ]);
+
+        $executed = [];
+        $tool = new class($executed) implements AgentTool
+        {
+            public function __construct(private array &$executed) {}
+
+            public function getName(): string
+            {
+                return 'echo';
+            }
+
+            public function getLabel(): string
+            {
+                return 'Echo';
+            }
+
+            public function getDescription(): string
+            {
+                return 'Echo tool';
+            }
+
+            public function getParameters(): array|AiSchema
+            {
+                return Type::object(['value' => Type::string()]);
+            }
+
+            public function getExecutionMode(): ToolExecutionMode
+            {
+                return ToolExecutionMode::Parallel;
+            }
+
+            public function prepareArguments(array $args): array
+            {
+                return $args;
+            }
+
+            public function execute(string $toolCallId, array $params, $signal = null, $onUpdate = null): PromiseInterface
+            {
+                $this->executed[] = $params['value'];
+
+                return \React\Promise\resolve(new AgentToolResult([new TextContent('echoed: '.$params['value'])]));
+            }
+        };
+
+        $context = new AgentContext('You are helpful.', [], [$tool]);
+        $config = new AgentLoopConfig(
+            model: $registration->getModel(),
+            convertToLlm: identityConverter(...),
+        );
+
+        $loop = new AgentLoop;
+        $messages = block($loop->agentLoop([createUserMessage('echo hi')], $context, $config));
+        $registration->unregister();
+
+        expect($executed)->toBe(['hello']);
+        expect(end($messages))->toBeInstanceOf(AssistantMessage::class);
+        expect(end($messages)->content[0])->toBeInstanceOf(TextContent::class);
+        expect(end($messages)->content[0]->text)->toBe('done');
+    });
+
+    it('bridges the default stream path with async faux provider factories', function () {
+        $registration = Faux::registerProvider();
+        $registration->setResponses([
+            static fn ($context, $_options, $state) => \React\Promise\resolve(Faux::assistantMessage(count($context->messages).':'.$state['callCount'])),
+        ]);
+
+        $context = new AgentContext('You are helpful.', [], []);
+        $config = new AgentLoopConfig(
+            model: $registration->getModel(),
+            convertToLlm: identityConverter(...),
+        );
+
+        $loop = new AgentLoop;
+        $messages = block($loop->agentLoop([createUserMessage('hi')], $context, $config));
+        $registration->unregister();
+
+        expect(count($messages))->toBe(2);
+        expect($messages[1])->toBeInstanceOf(AssistantMessage::class);
+        expect($messages[1]->content[0])->toBeInstanceOf(TextContent::class);
+        expect($messages[1]->content[0]->text)->toBe('1:1');
     });
 
     it('executes parallel tools concurrently', function () {

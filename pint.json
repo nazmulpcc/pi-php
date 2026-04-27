@@ -2,6 +2,8 @@
     "preset": "laravel",
     "paths": [
         "packages/agent/src",
-        "packages/agent/tests"
+        "packages/agent/tests",
+        "packages/ai/src",
+        "packages/ai/tests"
     ]
 }

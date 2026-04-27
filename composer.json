@@ -15,23 +15,28 @@
   },
   "autoload": {
     "psr-4": {
-      "Pi\\Agent\\": "packages/agent/src/"
-    }
+      "Pi\\Agent\\": "packages/agent/src/",
+      "Pi\\AI\\": "packages/ai/src/"
+    },
+    "files": [
+      "packages/ai/src/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
-      "Pi\\Agent\\Tests\\": "packages/agent/tests/"
+      "Pi\\Agent\\Tests\\": "packages/agent/tests/",
+      "Pi\\AI\\Tests\\": "packages/ai/tests/"
     },
     "files": [
     ]
   },
   "scripts": {
-    "lint": "vendor/bin/pint packages/agent/src packages/agent/tests",
-    "lint:check": "vendor/bin/pint --test packages/agent/src packages/agent/tests",
+    "lint": "vendor/bin/pint packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests",
+    "lint:check": "vendor/bin/pint --test packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests",
     "test": [
       "Composer\\Config::disableProcessTimeout",
       "@lint",
-      "vendor/bin/pest packages/agent/tests"
+      "vendor/bin/pest packages/agent/tests packages/ai/tests"
     ]
   },
   "config": {

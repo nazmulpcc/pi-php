@@ -8,10 +8,14 @@
         <testsuite name="Agent">
             <directory suffix="Test.php">packages/agent/tests</directory>
         </testsuite>
+        <testsuite name="AI">
+            <directory suffix="Test.php">packages/ai/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
             <directory>packages/agent/src</directory>
+            <directory>packages/ai/src</directory>
         </include>
     </source>
 </phpunit>

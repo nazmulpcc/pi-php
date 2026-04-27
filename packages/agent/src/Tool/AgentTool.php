@@ -6,6 +6,7 @@ namespace Pi\Agent\Tool;
 
 use Pi\Agent\CancellationToken;
 use Pi\Agent\ToolExecutionMode;
+use Pi\AI\Schema\Schema;
 use React\Promise\PromiseInterface;
 
 interface AgentTool
@@ -16,7 +17,7 @@ interface AgentTool
 
     public function getDescription(): string;
 
-    public function getParameters(): array;
+    public function getParameters(): array|Schema;
 
     public function getExecutionMode(): ToolExecutionMode;
 

@@ -20,6 +20,12 @@ use Pi\Agent\Event\TurnStartEvent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\Message\ToolResultMessage;
 use Pi\Agent\Tool\AgentToolResult;
+use Pi\AI\AssistantMessageEventStream as AiAssistantMessageEventStream;
+use Pi\AI\Event\DoneEvent as AiDoneEvent;
+use Pi\AI\Event\ErrorEvent as AiErrorEvent;
+use Pi\AI\Event\StartEvent as AiStartEvent;
+use Pi\AI\Model;
+use Pi\AI\StreamOptions;
 use React\Promise\PromiseInterface;
 
 use function React\Promise\reject;
@@ -256,6 +262,10 @@ class AgentLoop
                 return PromiseHelper::resolve($response);
             })
             ->then(function (mixed $response) use ($context, $config) {
+                if ($response instanceof AiAssistantMessageEventStream) {
+                    return $this->consumeAiStream($response, $context, $config);
+                }
+
                 $partialMessage = null;
                 $addedPartial = false;
                 $finalMessage = null;
@@ -319,7 +329,106 @@ class AgentLoop
 
     private function defaultStream(mixed $model, AgentContext $context, AgentLoopConfig $config, ?CancellationToken $signal): PromiseInterface
     {
-        return reject(new \RuntimeException('No stream function provided'));
+        if (! $model instanceof Model) {
+            return reject(new \RuntimeException('No stream function provided'));
+        }
+
+        return PromiseHelper::resolve($config->getApiKey !== null ? ($config->getApiKey)($model->provider->value) : null)
+            ->then(function (?string $apiKey) use ($model, $context, $signal) {
+                return \Pi\AI\stream(
+                    $model,
+                    AiAdapter::toAiContext($context),
+                    new StreamOptions(
+                        apiKey: $apiKey,
+                        signal: AiAdapter::toAiCancellation($signal),
+                    ),
+                );
+            });
+    }
+
+    /**
+     * @return PromiseInterface<AssistantMessage>
+     */
+    private function consumeAiStream(AiAssistantMessageEventStream $response, AgentContext $context, AgentLoopConfig $config): PromiseInterface
+    {
+        return $this->doConsumeAiStream($response, $context, $config, null, false, null, resolve(null));
+    }
+
+    /**
+     * @return PromiseInterface<AssistantMessage>
+     */
+    private function doConsumeAiStream(
+        AiAssistantMessageEventStream $response,
+        AgentContext $context,
+        AgentLoopConfig $config,
+        ?AssistantMessage $partialMessage,
+        bool $addedPartial,
+        ?AssistantMessage $finalMessage,
+        PromiseInterface $emitPromise,
+    ): PromiseInterface {
+        return $response->next()->then(function ($event) use ($response, $context, $config, $partialMessage, $addedPartial, $finalMessage, $emitPromise) {
+            if ($event === null) {
+                if ($finalMessage !== null) {
+                    return $emitPromise->then(fn () => $finalMessage);
+                }
+
+                return $response->result()->then(function ($result) use ($context, $config, $addedPartial, $emitPromise) {
+                    $finalMessage = AiAdapter::toAgentAssistantMessage($result);
+                    if ($addedPartial) {
+                        $context->messages[count($context->messages) - 1] = $finalMessage;
+                    } else {
+                        $context->messages[] = $finalMessage;
+                        $msg = $finalMessage;
+                        $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+                    }
+                    $msg = $finalMessage;
+                    $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageEndEvent($msg), $config));
+
+                    return $emitPromise->then(fn () => $finalMessage);
+                });
+            }
+
+            if ($event instanceof AiStartEvent) {
+                $partialMessage = AiAdapter::toAgentAssistantMessage($event->partial);
+                $context->messages[] = $partialMessage;
+                $addedPartial = true;
+                $msg = $partialMessage;
+                $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+
+                return $this->doConsumeAiStream($response, $context, $config, $partialMessage, $addedPartial, $finalMessage, $emitPromise);
+            }
+
+            if ($event instanceof AiDoneEvent) {
+                $finalMessage = AiAdapter::toAgentAssistantMessage($event->message);
+            } elseif ($event instanceof AiErrorEvent) {
+                $finalMessage = AiAdapter::toAgentAssistantMessage($event->error);
+            } else {
+                $partialMessage = AiAdapter::toAgentAssistantMessage($event->partial);
+                if ($addedPartial) {
+                    $context->messages[count($context->messages) - 1] = $partialMessage;
+                }
+                $msg = $partialMessage;
+                $rawEvent = $event;
+                $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageUpdateEvent($msg, $rawEvent), $config));
+
+                return $this->doConsumeAiStream($response, $context, $config, $partialMessage, $addedPartial, $finalMessage, $emitPromise);
+            }
+
+            if ($finalMessage !== null) {
+                if ($addedPartial) {
+                    $context->messages[count($context->messages) - 1] = $finalMessage;
+                } else {
+                    $context->messages[] = $finalMessage;
+                    $msg = $finalMessage;
+                    $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageStartEvent($msg), $config));
+                }
+
+                $msg = $finalMessage;
+                $emitPromise = $emitPromise->then(fn () => $this->emit(new MessageEndEvent($msg), $config));
+            }
+
+            return $this->doConsumeAiStream($response, $context, $config, $partialMessage, $addedPartial, $finalMessage, $emitPromise);
+        });
     }
 
     /**

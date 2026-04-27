@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pi\Agent\Content;
+namespace Pi\AI\Content;
 
 readonly class ThinkingContent
 {
