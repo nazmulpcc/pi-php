@@ -110,12 +110,51 @@ final class HttpTransport
                 $events = [];
                 $rawBody = '';
                 $buffer = '';
+                $queue = [];
+                $processing = false;
+                $ended = false;
+                $drain = null;
 
                 $cancel = static function () use ($body): void {
                     $body->close();
                 };
 
-                $body->on('data', function (string $chunk) use (&$buffer, &$events, &$rawBody, $status, $onEvent): void {
+                $drain = function () use (&$drain, &$queue, &$processing, &$ended, &$events, &$rawBody, $status, $onEvent, $deferred): void {
+                    if ($processing) {
+                        return;
+                    }
+
+                    if ($queue === []) {
+                        if ($ended) {
+                            if ($status >= 400) {
+                                $deferred->reject($this->createProviderError($status, $rawBody));
+
+                                return;
+                            }
+
+                            $deferred->resolve($events);
+                        }
+
+                        return;
+                    }
+
+                    $processing = true;
+                    $event = array_shift($queue);
+                    $events[] = $event;
+
+                    resolve($onEvent !== null ? $onEvent($event) : null)->then(
+                        function () use (&$processing, $drain): void {
+                            $processing = false;
+                            $drain();
+                        },
+                        function (mixed $error) use (&$processing, $deferred): void {
+                            $processing = false;
+                            $deferred->reject($this->normalizeTransportError($error));
+                        },
+                    );
+                };
+
+                $body->on('data', function (string $chunk) use (&$buffer, &$rawBody, &$queue, $status, &$drain): void {
                     $rawBody .= $chunk;
 
                     if ($status >= 400) {
@@ -128,33 +167,27 @@ final class HttpTransport
                         $buffer = substr($buffer, $separator + 2);
                         $event = SseParser::parseFrame($frame);
                         if ($event !== null) {
-                            $events[] = $event;
-                            if ($onEvent !== null) {
-                                $onEvent($event);
-                            }
+                            $queue[] = $event;
                         }
                     }
+
+                    $drain();
                 });
 
                 $body->on('error', function (\Throwable $error) use ($deferred): void {
                     $deferred->reject($error);
                 });
 
-                $body->on('close', function () use ($deferred, &$buffer, &$events, &$rawBody, $status): void {
+                $body->on('close', function () use (&$buffer, &$queue, &$ended, $status, &$drain): void {
                     if ($buffer !== '' && $status < 400) {
                         $event = SseParser::parseFrame($buffer);
                         if ($event !== null) {
-                            $events[] = $event;
+                            $queue[] = $event;
                         }
                     }
 
-                    if ($status >= 400) {
-                        $deferred->reject($this->createProviderError($status, $rawBody));
-
-                        return;
-                    }
-
-                    $deferred->resolve($events);
+                    $ended = true;
+                    $drain();
                 });
 
                 $body->resume();

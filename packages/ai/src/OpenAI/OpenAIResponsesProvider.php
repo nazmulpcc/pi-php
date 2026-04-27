@@ -69,15 +69,23 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
                         }
 
                         if (! is_callable($this->transport)) {
-                            return $this->runDefaultTransport($model, $context, $providerOptions, $params);
+                            return $this->runDefaultTransport($model, $context, $providerOptions, $params, $stream);
                         }
 
                         return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
                     })
                     ->then(function ($result) use ($stream, $model) {
+                        if ($result instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
                         OpenAIResponsesShared::processStream($events, $stream, $model);
                         $stream->end();
+
+                        return null;
                     });
             },
             function (\Throwable $error) use ($stream, $model): void {
@@ -167,9 +175,9 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
     }
 
     /**
-     * @return array{events: array<int, array<string, mixed>>, status: int, headers: array<string, string>}
+     * @return PromiseInterface<AssistantMessage>
      */
-    private function runDefaultTransport(Model $model, Context $context, ProviderOptions $options, array $params): PromiseInterface
+    private function runDefaultTransport(Model $model, Context $context, ProviderOptions $options, array $params, AssistantMessageEventStream $stream): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai') ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -186,6 +194,8 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
             maxRetryDelayMs: $options->maxRetryDelayMs,
         );
 
+        $state = OpenAIResponsesShared::initializeStreamState($stream, $model);
+
         return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
@@ -198,6 +208,14 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
                     ], $model);
                 }
                 : null,
-        ]);
+            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                OpenAIResponsesShared::processStreamEvent($event, $stream, $model, $state);
+            },
+        ])->then(function () use (&$state, $stream, $model): AssistantMessage {
+            $output = OpenAIResponsesShared::finalizeStreamState($stream, $model, $state);
+            $stream->push(new \Pi\AI\Event\DoneEvent($output->stopReason, $output));
+
+            return $output;
+        });
     }
 }
