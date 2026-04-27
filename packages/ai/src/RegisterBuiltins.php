@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace Pi\AI;
 
-use Pi\AI\Anthropic\AnthropicProvider;
-use Pi\AI\Azure\AzureOpenAIResponsesProvider;
-use Pi\AI\OpenAI\Completions\OpenAICompletionsProvider;
-use Pi\AI\OpenAI\OpenAIResponsesProvider;
-
 final class RegisterBuiltins
 {
     private const SOURCE_ID = 'builtin-providers';
@@ -21,16 +16,16 @@ final class RegisterBuiltins
             return;
         }
 
-        $providers = [
-            new OpenAIResponsesProvider,
-            new OpenAICompletionsProvider,
-            new AnthropicProvider,
-            new AzureOpenAIResponsesProvider,
+        $factories = [
+            Api::OPENAI_RESPONSES => static fn (): ApiProviderInterface => new OpenAI\OpenAIResponsesProvider,
+            Api::OPENAI_COMPLETIONS => static fn (): ApiProviderInterface => new OpenAI\Completions\OpenAICompletionsProvider,
+            Api::ANTHROPIC_MESSAGES => static fn (): ApiProviderInterface => new Anthropic\AnthropicProvider,
+            Api::AZURE_OPENAI_RESPONSES => static fn (): ApiProviderInterface => new Azure\AzureOpenAIResponsesProvider,
         ];
 
-        foreach ($providers as $provider) {
-            if (ApiRegistry::getProvider($provider->getApi()) === null) {
-                ApiRegistry::registerProvider($provider, self::SOURCE_ID);
+        foreach ($factories as $api => $factory) {
+            if (ApiRegistry::getProvider($api) === null) {
+                ApiRegistry::registerProviderFactory($api, $factory, self::SOURCE_ID);
             }
         }
 

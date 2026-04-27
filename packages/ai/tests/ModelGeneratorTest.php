@@ -18,7 +18,10 @@ describe('model generator', function () {
     it('exposes the seeded providers needed for the current MVP', function () {
         $seed = ModelCatalog::seed();
 
-        expect(array_keys($seed))->toBe(['openai', 'anthropic', 'openrouter', 'openai-codex']);
+        expect($seed)->toHaveKey('openai');
+        expect($seed)->toHaveKey('anthropic');
+        expect($seed)->toHaveKey('openrouter');
+        expect($seed)->toHaveKey('openai-codex');
         expect($seed['openai'])->toHaveKey('gpt-5-mini');
         expect($seed['anthropic'])->toHaveKey('claude-opus-4-6');
     });

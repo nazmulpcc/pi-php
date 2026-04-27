@@ -9,10 +9,22 @@ final class ApiRegistry
     /** @var array<string, array{provider: ApiProviderInterface, sourceId: string|null}> */
     private static array $providers = [];
 
+    /** @var array<string, \Closure(): ApiProviderInterface> */
+    private static array $factories = [];
+
     public static function registerProvider(ApiProviderInterface $provider, ?string $sourceId = null): void
     {
         self::$providers[$provider->getApi()->value] = [
             'provider' => new RegisteredApiProvider($provider),
+            'sourceId' => $sourceId,
+        ];
+    }
+
+    public static function registerProviderFactory(string $api, \Closure $factory, ?string $sourceId = null): void
+    {
+        self::$factories[$api] = $factory;
+        self::$providers[$api] = [
+            'provider' => new LazyApiProvider($api, $factory),
             'sourceId' => $sourceId,
         ];
     }
@@ -38,6 +50,7 @@ final class ApiRegistry
         foreach (self::$providers as $api => $entry) {
             if ($entry['sourceId'] === $sourceId) {
                 unset(self::$providers[$api]);
+                unset(self::$factories[$api]);
             }
         }
     }
@@ -45,6 +58,7 @@ final class ApiRegistry
     public static function clear(): void
     {
         self::$providers = [];
+        self::$factories = [];
     }
 
     private static function normalizeApi(Api|string $api): string
