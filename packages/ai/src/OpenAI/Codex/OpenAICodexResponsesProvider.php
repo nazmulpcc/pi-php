@@ -11,6 +11,7 @@ use Pi\AI\AssistantMessageEventStream;
 use Pi\AI\CacheRetention;
 use Pi\AI\Context;
 use Pi\AI\EnvApiKeys;
+use Pi\AI\Event\DoneEvent;
 use Pi\AI\Event\ErrorEvent;
 use Pi\AI\Message\AssistantMessage;
 use Pi\AI\Model;
@@ -21,6 +22,7 @@ use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\PromiseHelper;
 use Pi\AI\ThinkingLevel;
+use Pi\AI\Transport;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Usage;
 use React\Promise\PromiseInterface;
@@ -49,18 +51,24 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
                 $params = $this->buildParams($model, $context, $providerOptions);
 
                 return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
-                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params, $stream) {
                         if (is_array($nextParams)) {
                             $params = $nextParams;
                         }
 
                         if (! is_callable($this->transport)) {
-                            return $this->runDefaultTransport($model, $providerOptions, $params);
+                            return $this->runDefaultTransport($model, $providerOptions, $params, $stream);
                         }
 
                         return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
                     })
                     ->then(function ($result) use ($providerOptions, $stream, $model) {
+                        if ($result instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
                         OpenAIResponsesShared::processStream($events, $stream, $model);
 
@@ -182,9 +190,9 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
     }
 
     /**
-     * @return PromiseInterface<array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
+     * @return PromiseInterface<AssistantMessage|array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, OpenAICodexResponsesOptions $options, array $params): PromiseInterface
+    private function runDefaultTransport(Model $model, OpenAICodexResponsesOptions $options, array $params, AssistantMessageEventStream $stream): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai-codex') ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -192,17 +200,82 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
         }
 
         $accountId = self::extractAccountId($apiKey);
-        $url = self::resolveCodexUrl($model->baseUrl);
-        $headers = array_merge($model->headers, $options->headers, [
-            'Accept' => 'text/event-stream',
-            'chatgpt-account-id' => $accountId,
-            'originator' => 'pi',
-            'OpenAI-Beta' => 'responses=experimental',
-        ]);
+        $transportMode = $options->transport ?? Transport::Sse;
+        $sseUrl = self::resolveCodexUrl($model->baseUrl);
+        $webSocketUrl = self::resolveCodexWebSocketUrl($model->baseUrl);
+        $sseHeaders = self::buildSseHeaders($model, $options, $accountId, $apiKey);
+        $requestId = $options->sessionId ?: self::createCodexRequestId();
+        $webSocketHeaders = self::buildWebSocketHeaders($model, $options, $accountId, $apiKey, $requestId);
 
-        $onResponse = null;
+        if ($transportMode !== Transport::Sse) {
+            $started = false;
+            $webSocketTransport = new CodexWebSocketTransport;
+            $state = null;
+
+            $attempt = $webSocketTransport->stream(
+                $webSocketUrl,
+                $webSocketHeaders,
+                $params,
+                $options->sessionId,
+                $options->signal,
+                function () use (&$started, &$state, $stream, $model): void {
+                    $started = true;
+                    $state = OpenAIResponsesShared::initializeStreamState($stream, $model);
+                },
+                function (array $event) use (&$state, $stream, $model): void {
+                    if (! is_array($state)) {
+                        throw new \RuntimeException('Codex websocket stream started without initialized state.');
+                    }
+
+                    OpenAIResponsesShared::processStreamEvent($event, $stream, $model, $state);
+                },
+            )->then(function () use (&$state, $stream, $model): AssistantMessage {
+                if (! is_array($state)) {
+                    throw new \RuntimeException('Codex websocket stream completed without initialized state.');
+                }
+
+                $output = OpenAIResponsesShared::finalizeStreamState($stream, $model, $state);
+                $stream->push(new DoneEvent($output->stopReason, $output));
+
+                return $output;
+            });
+
+            if ($transportMode === Transport::Websocket) {
+                return $attempt;
+            }
+
+            return $attempt->then(
+                null,
+                function (\Throwable $error) use (&$started, $model, $options, $params, $stream, $sseUrl, $sseHeaders, $apiKey) {
+                    if ($started) {
+                        throw $error;
+                    }
+
+                    return $this->runSseTransport($model, $options, $params, $stream, $sseUrl, $sseHeaders, $apiKey);
+                },
+            );
+        }
+
+        return $this->runSseTransport($model, $options, $params, $stream, $sseUrl, $sseHeaders, $apiKey);
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     * @return PromiseInterface<AssistantMessage>
+     */
+    private function runSseTransport(
+        Model $model,
+        OpenAICodexResponsesOptions $options,
+        array $params,
+        AssistantMessageEventStream $stream,
+        string $url,
+        array $headers,
+        string $apiKey,
+    ): PromiseInterface {
         $responseStatus = 200;
         $responseHeaders = [];
+
+        $onResponse = null;
         if ($options->onResponse !== null) {
             $onResponse = static function (array $response) use (&$responseStatus, &$responseHeaders): void {
                 $responseStatus = $response['status'];
@@ -217,18 +290,87 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
             maxRetryDelayMs: $options->maxRetryDelayMs,
         );
 
+        $state = OpenAIResponsesShared::initializeStreamState($stream, $model);
+
         return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
             'apiKey' => $apiKey,
             'onResponse' => $onResponse,
-        ])->then(
-            static fn ($events): array => [
-                'events' => $events,
-                'status' => $responseStatus,
-                'headers' => $responseHeaders,
-            ],
-        );
+            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                OpenAIResponsesShared::processStreamEvent($event, $stream, $model, $state);
+            },
+        ])->then(function () use (&$state, $stream, $model, $options, $responseHeaders): AssistantMessage {
+            $output = OpenAIResponsesShared::finalizeStreamState($stream, $model, $state);
+            $stream->push(new DoneEvent($output->stopReason, $output));
+
+            if ($options->onResponse !== null && $responseHeaders !== []) {
+                // onResponse already ran inside transport; keep captured data only for parity/debugging.
+            }
+
+            return $output;
+        });
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function buildSseHeaders(Model $model, OpenAICodexResponsesOptions $options, string $accountId, string $token): array
+    {
+        $headers = array_merge($model->headers, $options->headers, [
+            'Authorization' => 'Bearer '.$token,
+            'chatgpt-account-id' => $accountId,
+            'originator' => 'pi',
+            'OpenAI-Beta' => 'responses=experimental',
+            'Accept' => 'text/event-stream',
+            'Content-Type' => 'application/json',
+        ]);
+
+        if ($options->sessionId !== null && $options->sessionId !== '') {
+            $headers['session_id'] = $options->sessionId;
+            $headers['x-client-request-id'] = $options->sessionId;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function buildWebSocketHeaders(Model $model, OpenAICodexResponsesOptions $options, string $accountId, string $token, string $requestId): array
+    {
+        return array_merge($model->headers, $options->headers, [
+            'Authorization' => 'Bearer '.$token,
+            'chatgpt-account-id' => $accountId,
+            'originator' => 'pi',
+            'OpenAI-Beta' => 'responses_websockets=2026-02-06',
+            'x-client-request-id' => $requestId,
+            'session_id' => $requestId,
+        ]);
+    }
+
+    private static function resolveCodexWebSocketUrl(?string $baseUrl): string
+    {
+        $httpsUrl = self::resolveCodexUrl($baseUrl);
+
+        if (str_starts_with($httpsUrl, 'https://')) {
+            return 'wss://'.substr($httpsUrl, 8);
+        }
+
+        if (str_starts_with($httpsUrl, 'http://')) {
+            return 'ws://'.substr($httpsUrl, 7);
+        }
+
+        return $httpsUrl;
+    }
+
+    private static function createCodexRequestId(): string
+    {
+        if (function_exists('random_bytes')) {
+            return sprintf('codex_%s', bin2hex(random_bytes(8)));
+        }
+
+        return sprintf('codex_%s', uniqid('', true));
     }
 
     private static function resolveCodexUrl(?string $baseUrl): string

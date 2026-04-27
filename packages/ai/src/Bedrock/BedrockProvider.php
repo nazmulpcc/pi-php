@@ -94,64 +94,64 @@ final readonly class BedrockProvider implements ApiProviderInterface
                     })
                     ->then(function ($events) use ($model, $providerOptions, $stream, &$blocks, &$blockStates, &$output, &$started) {
                         foreach ($events as $event) {
-                if (! is_array($event)) {
-                    continue;
-                }
+                            if (! is_array($event)) {
+                                continue;
+                            }
 
-                if (isset($event['messageStart']) && is_array($event['messageStart'])) {
-                    $started = true;
-                    $stream->push(new StartEvent($output));
+                            if (isset($event['messageStart']) && is_array($event['messageStart'])) {
+                                $started = true;
+                                $stream->push(new StartEvent($output));
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                if (! $started) {
-                    $started = true;
-                    $stream->push(new StartEvent($output));
-                }
+                            if (! $started) {
+                                $started = true;
+                                $stream->push(new StartEvent($output));
+                            }
 
-                if (isset($event['contentBlockStart']) && is_array($event['contentBlockStart'])) {
-                    $output = $this->handleContentBlockStart($event['contentBlockStart'], $model, $blocks, $blockStates, $output, $stream);
+                            if (isset($event['contentBlockStart']) && is_array($event['contentBlockStart'])) {
+                                $output = $this->handleContentBlockStart($event['contentBlockStart'], $model, $blocks, $blockStates, $output, $stream);
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                if (isset($event['contentBlockDelta']) && is_array($event['contentBlockDelta'])) {
-                    $output = $this->handleContentBlockDelta($event['contentBlockDelta'], $model, $blocks, $blockStates, $output, $stream);
+                            if (isset($event['contentBlockDelta']) && is_array($event['contentBlockDelta'])) {
+                                $output = $this->handleContentBlockDelta($event['contentBlockDelta'], $model, $blocks, $blockStates, $output, $stream);
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                if (isset($event['contentBlockStop']) && is_array($event['contentBlockStop'])) {
-                    $output = $this->handleContentBlockStop($event['contentBlockStop'], $model, $blocks, $blockStates, $output, $stream);
+                            if (isset($event['contentBlockStop']) && is_array($event['contentBlockStop'])) {
+                                $output = $this->handleContentBlockStop($event['contentBlockStop'], $model, $blocks, $blockStates, $output, $stream);
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                if (isset($event['messageStop']) && is_array($event['messageStop'])) {
-                    $output = $this->snapshot(
-                        $model,
-                        $blocks,
-                        $output->usage,
-                        self::mapStopReason(is_string($event['messageStop']['stopReason'] ?? null) ? $event['messageStop']['stopReason'] : null),
-                        $output->responseId,
-                        $output->errorMessage,
-                    );
+                            if (isset($event['messageStop']) && is_array($event['messageStop'])) {
+                                $output = $this->snapshot(
+                                    $model,
+                                    $blocks,
+                                    $output->usage,
+                                    self::mapStopReason(is_string($event['messageStop']['stopReason'] ?? null) ? $event['messageStop']['stopReason'] : null),
+                                    $output->responseId,
+                                    $output->errorMessage,
+                                );
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                if (isset($event['metadata']) && is_array($event['metadata'])) {
-                    $output = $this->handleMetadata($event['metadata'], $model, $blocks, $output);
+                            if (isset($event['metadata']) && is_array($event['metadata'])) {
+                                $output = $this->handleMetadata($event['metadata'], $model, $blocks, $output);
 
-                    continue;
-                }
+                                continue;
+                            }
 
-                foreach (['internalServerException', 'modelStreamErrorException', 'validationException', 'throttlingException', 'serviceUnavailableException'] as $key) {
-                    if (isset($event[$key])) {
-                        throw new ProviderError(self::extractErrorMessage($event[$key], $key));
-                    }
-                }
+                            foreach (['internalServerException', 'modelStreamErrorException', 'validationException', 'throttlingException', 'serviceUnavailableException'] as $key) {
+                                if (isset($event[$key])) {
+                                    throw new ProviderError(self::extractErrorMessage($event[$key], $key));
+                                }
+                            }
                         }
 
                         if ($providerOptions->signal?->isCancelled()) {

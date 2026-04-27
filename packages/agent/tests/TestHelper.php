@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 
 if (! function_exists('block')) {
@@ -10,20 +11,40 @@ if (! function_exists('block')) {
         $value = null;
         $error = null;
         $settled = false;
+        $loop = Loop::get();
+        $timer = null;
 
         $promise->then(
-            function ($v) use (&$value, &$settled) {
-                $value = $v;
+            function ($resolved) use (&$value, &$settled, $loop, &$timer): void {
+                $value = $resolved;
                 $settled = true;
+                if ($timer !== null) {
+                    Loop::cancelTimer($timer);
+                }
+                $loop->stop();
             },
-            function ($e) use (&$error, &$settled) {
-                $error = $e;
+            function ($rejected) use (&$error, &$settled, $loop, &$timer): void {
+                $error = $rejected;
                 $settled = true;
-            }
+                if ($timer !== null) {
+                    Loop::cancelTimer($timer);
+                }
+                $loop->stop();
+            },
         );
 
         if (! $settled) {
-            throw new RuntimeException('Promise did not settle synchronously');
+            $timer = Loop::addTimer(5.0, function () use (&$settled, &$error, $loop): void {
+                if ($settled) {
+                    return;
+                }
+
+                $settled = true;
+                $error = new RuntimeException('Promise did not settle before timeout');
+                $loop->stop();
+            });
+
+            $loop->run();
         }
 
         if ($error !== null) {

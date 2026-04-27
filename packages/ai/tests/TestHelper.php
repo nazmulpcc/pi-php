@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use React\Promise\PromiseInterface;
 use React\EventLoop\Loop;
+use React\Promise\PromiseInterface;
 
 use function Pi\AI\packageRoot;
 

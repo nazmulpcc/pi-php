@@ -75,7 +75,7 @@ final readonly class MistralProvider implements ApiProviderInterface
                 $params = $this->buildParams($model, $context, $providerOptions);
 
                 return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
-                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params, $stream) {
                         if (is_array($nextParams)) {
                             $params = $nextParams;
                         }
@@ -84,9 +84,15 @@ final readonly class MistralProvider implements ApiProviderInterface
                             return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
                         }
 
-                        return $this->runDefaultTransport($model, $providerOptions, $params);
+                        return $this->runDefaultTransport($model, $providerOptions, $params, $stream);
                     })
                     ->then(function ($result) use ($model, $providerOptions, $stream) {
+                        if ($result instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
                         $status = is_array($result) && isset($result['status']) && is_int($result['status']) ? $result['status'] : 200;
                         $headers = is_array($result) && isset($result['headers']) && is_array($result['headers']) ? $result['headers'] : [];
@@ -138,9 +144,9 @@ final readonly class MistralProvider implements ApiProviderInterface
     }
 
     /**
-     * @return PromiseInterface<array{events: iterable<mixed>, status: int, headers: array<string, string>}>
+     * @return PromiseInterface<AssistantMessage|array{events: iterable<mixed>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, MistralOptions $providerOptions, array $params): PromiseInterface
+    private function runDefaultTransport(Model $model, MistralOptions $providerOptions, array $params, AssistantMessageEventStream $stream): PromiseInterface
     {
         $apiKey = $providerOptions->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -157,6 +163,8 @@ final readonly class MistralProvider implements ApiProviderInterface
             maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
         );
 
+        $state = $this->initializeStreamState($stream, $model);
+
         return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
@@ -169,13 +177,15 @@ final readonly class MistralProvider implements ApiProviderInterface
                     ], $model);
                 }
                 : null,
-        ])->then(
-            static fn ($events): array => [
-                'events' => $events,
-                'status' => 200,
-                'headers' => [],
-            ],
-        );
+            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                $this->processStreamEvent($state, $event, $stream, $model);
+            },
+        ])->then(function () use (&$state, $stream, $model): AssistantMessage {
+            $output = $this->finalizeStreamState($state, $stream, $model);
+            $stream->push(new DoneEvent($output->stopReason, $output));
+
+            return $output;
+        });
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream
@@ -406,6 +416,193 @@ final readonly class MistralProvider implements ApiProviderInterface
 
             $stream->push(new ToolCallEndEvent($index, $block, $output));
         }
+
+        return $output;
+    }
+
+    /**
+     * @return array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   toolBlocksByIndex: array<int, int>,
+     *   toolBlocksById: array<string, int>,
+     *   toolScratch: array<int, string>
+     * }
+     */
+    private function initializeStreamState(AssistantMessageEventStream $stream, Model $model): array
+    {
+        $output = $this->createOutput($model);
+        $stream->push(new StartEvent($output));
+
+        return [
+            'output' => $output,
+            'blocks' => [],
+            'currentBlock' => null,
+            'toolBlocksByIndex' => [],
+            'toolBlocksById' => [],
+            'toolScratch' => [],
+        ];
+    }
+
+    /**
+     * @param  array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   toolBlocksByIndex: array<int, int>,
+     *   toolBlocksById: array<string, int>,
+     *   toolScratch: array<int, string>
+     * }  $state
+     * @param  array<string, mixed>  $event
+     */
+    private function processStreamEvent(array &$state, array $event, AssistantMessageEventStream $stream, Model $model): void
+    {
+        $blocks = $state['blocks'];
+        $currentBlock = $state['currentBlock'];
+        $toolBlocksByIndex = $state['toolBlocksByIndex'];
+        $toolBlocksById = $state['toolBlocksById'];
+        $toolScratch = $state['toolScratch'];
+        $output = $state['output'];
+
+        $chunk = isset($event['data']) && is_array($event['data']) ? $event['data'] : $event;
+        $eventType = $event['type'] ?? $chunk['type'] ?? $event['_eventType'] ?? $chunk['_eventType'] ?? null;
+
+        if (is_array($chunk['usage'] ?? null)) {
+            $output = $this->updateUsage($model, $blocks, $output, $chunk['usage']);
+        }
+
+        $responseId = $chunk['id'] ?? $event['id'] ?? null;
+        if (is_string($responseId) && $responseId !== '') {
+            $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $responseId, $output->errorMessage);
+        }
+
+        if (is_array($chunk['choices'] ?? null)) {
+            $choice = $chunk['choices'][0] ?? null;
+            if (is_array($choice)) {
+                $finishReason = $choice['finishReason'] ?? $choice['finish_reason'] ?? null;
+                if (is_string($finishReason)) {
+                    $output = $this->snapshot(
+                        $model,
+                        $blocks,
+                        $output->usage,
+                        $this->mapChatStopReason($finishReason),
+                        $output->responseId,
+                        $output->errorMessage,
+                    );
+                }
+
+                if (isset($choice['delta']) && is_array($choice['delta'])) {
+                    $output = $this->processDelta(
+                        model: $model,
+                        delta: $choice['delta'],
+                        output: $output,
+                        stream: $stream,
+                        blocks: $blocks,
+                        currentBlock: $currentBlock,
+                        toolBlocksByIndex: $toolBlocksByIndex,
+                        toolBlocksById: $toolBlocksById,
+                        toolScratch: $toolScratch,
+                    );
+                }
+            }
+        }
+
+        if ($eventType === 'text_delta') {
+            $delta = (string) ($event['delta'] ?? $chunk['delta'] ?? $event['text'] ?? $chunk['text'] ?? $event['content'] ?? $chunk['content'] ?? '');
+            if ($delta !== '') {
+                $output = $this->appendTextDelta($model, $delta, $output, $stream, $blocks, $currentBlock);
+            }
+        } elseif ($eventType === 'thinking_delta') {
+            $delta = (string) ($event['delta'] ?? $chunk['delta'] ?? $event['thinking'] ?? $chunk['thinking'] ?? '');
+            if ($delta !== '') {
+                $output = $this->appendThinkingDelta($model, $delta, $output, $stream, $blocks, $currentBlock);
+            }
+        } elseif ($eventType === 'toolcall_delta') {
+            $toolCall = is_array($event['toolCall'] ?? null) ? $event['toolCall'] : (is_array($chunk['toolCall'] ?? null) ? $chunk['toolCall'] : $event);
+            $output = $this->appendToolCallDelta(
+                model: $model,
+                toolCall: $toolCall,
+                output: $output,
+                stream: $stream,
+                blocks: $blocks,
+                currentBlock: $currentBlock,
+                toolBlocksByIndex: $toolBlocksByIndex,
+                toolBlocksById: $toolBlocksById,
+                toolScratch: $toolScratch,
+            );
+        } elseif ($eventType === 'done') {
+            $reason = $event['reason'] ?? $chunk['reason'] ?? null;
+            if (is_string($reason)) {
+                $output = $this->snapshot($model, $blocks, $output->usage, $this->mapChatStopReason($reason), $output->responseId, $output->errorMessage);
+            }
+        } elseif ($eventType === 'error') {
+            $message = (string) ($event['message'] ?? $chunk['message'] ?? 'Mistral API error');
+            $output = $this->snapshot($model, $blocks, $output->usage, StopReason::Error, $output->responseId, $message);
+            $state['output'] = $output;
+            $state['blocks'] = $blocks;
+            $state['currentBlock'] = $currentBlock;
+            $state['toolBlocksByIndex'] = $toolBlocksByIndex;
+            $state['toolBlocksById'] = $toolBlocksById;
+            $state['toolScratch'] = $toolScratch;
+
+            throw new \RuntimeException($message);
+        } elseif ($eventType === 'content_delta' || $eventType === 'reasoning_delta') {
+            $delta = (string) ($event['delta'] ?? $chunk['delta'] ?? '');
+            if ($delta !== '') {
+                $output = $this->appendTextDelta($model, $delta, $output, $stream, $blocks, $currentBlock);
+            }
+        }
+
+        $state['output'] = $output;
+        $state['blocks'] = $blocks;
+        $state['currentBlock'] = $currentBlock;
+        $state['toolBlocksByIndex'] = $toolBlocksByIndex;
+        $state['toolBlocksById'] = $toolBlocksById;
+        $state['toolScratch'] = $toolScratch;
+    }
+
+    /**
+     * @param  array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   toolBlocksByIndex: array<int, int>,
+     *   toolBlocksById: array<string, int>,
+     *   toolScratch: array<int, string>
+     * }  $state
+     */
+    private function finalizeStreamState(array &$state, AssistantMessageEventStream $stream, Model $model): AssistantMessage
+    {
+        $blocks = $state['blocks'];
+        $currentBlock = $state['currentBlock'];
+        $toolScratch = $state['toolScratch'];
+        $output = $state['output'];
+
+        $output = $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
+
+        foreach ($blocks as $index => $block) {
+            if (! $block instanceof ToolCall) {
+                continue;
+            }
+
+            if (isset($toolScratch[$index]) && is_string($toolScratch[$index])) {
+                $blocks[$index] = new ToolCall(
+                    $block->id,
+                    $block->name,
+                    JsonParse::parseStreamingJson($toolScratch[$index]),
+                    $block->thoughtSignature,
+                );
+                $block = $blocks[$index];
+            }
+
+            $stream->push(new ToolCallEndEvent($index, $block, $output));
+        }
+
+        $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
+        $state['output'] = $output;
+        $state['blocks'] = $blocks;
+        $state['currentBlock'] = null;
 
         return $output;
     }

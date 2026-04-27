@@ -258,7 +258,7 @@ final class HttpTransport
         return $requestHeaders;
     }
 
-    private function encodeBody(mixed $body): string|null
+    private function encodeBody(mixed $body): ?string
     {
         if ($body === null) {
             return null;

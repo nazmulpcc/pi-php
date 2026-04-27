@@ -37,11 +37,12 @@ use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
+use React\Promise\PromiseInterface;
 
 final readonly class OpenAICompletionsProvider implements ApiProviderInterface
 {
     /**
-     * @param  null|callable(Model, Context, OpenAICompletionsOptions, array<string, mixed>): iterable<array<string, mixed>>  $transport
+     * @param  null|callable(Model, Context, OpenAICompletionsOptions, array<string, mixed>): PromiseInterface<iterable<array<string, mixed>>>|iterable<array<string, mixed>>  $transport
      */
     public function __construct(
         private ?\Closure $transport = null,
@@ -87,6 +88,8 @@ final readonly class OpenAICompletionsProvider implements ApiProviderInterface
                             maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
                         );
 
+                        $state = $this->initializeStreamState($stream, $model);
+
                         return $transport->stream('POST', $url, [
                             'headers' => $headers,
                             'body' => $params,
@@ -99,9 +102,23 @@ final readonly class OpenAICompletionsProvider implements ApiProviderInterface
                                     ], $model);
                                 }
                                 : null,
-                        ]);
+                            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                                $this->processStreamEvent($state, $event, $stream, $model);
+                            },
+                        ])->then(function () use (&$state, $stream, $model): AssistantMessage {
+                            $output = $this->finalizeStreamState($state, $stream, $model);
+                            $stream->push(new DoneEvent($output->stopReason, $output));
+
+                            return $output;
+                        });
                     })
                     ->then(function ($events) use ($model, $providerOptions, $stream) {
+                        if ($events instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $output = $this->createOutput($model);
                         $stream->push(new StartEvent($output));
 
@@ -269,6 +286,8 @@ final readonly class OpenAICompletionsProvider implements ApiProviderInterface
 
                         $stream->push(new DoneEvent($stopReason, $output));
                         $stream->end();
+
+                        return null;
                     });
             },
             function (\Throwable $error) use ($stream, $options, $model): void {
@@ -428,6 +447,200 @@ final readonly class OpenAICompletionsProvider implements ApiProviderInterface
             stopReason: StopReason::Stop,
             timestamp: time(),
         );
+    }
+
+    /**
+     * @return array{
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   scratch: array{partialArgs: string, streamIndex: ?int},
+     *   responseId: ?string,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   errorMessage: ?string
+     * }
+     */
+    private function initializeStreamState(AssistantMessageEventStream $stream, Model $model): array
+    {
+        $output = $this->createOutput($model);
+        $stream->push(new StartEvent($output));
+
+        return [
+            'currentBlock' => null,
+            'blocks' => [],
+            'scratch' => ['partialArgs' => '', 'streamIndex' => null],
+            'responseId' => null,
+            'usage' => Usage::zero(),
+            'stopReason' => StopReason::Stop,
+            'errorMessage' => null,
+        ];
+    }
+
+    /**
+     * @param  array{
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   scratch: array{partialArgs: string, streamIndex: ?int},
+     *   responseId: ?string,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   errorMessage: ?string
+     * }  $state
+     * @param  array<string, mixed>  $event
+     */
+    private function processStreamEvent(array &$state, array $event, AssistantMessageEventStream $stream, Model $model): void
+    {
+        $state['responseId'] ??= $event['id'] ?? null;
+
+        if (isset($event['usage']) && is_array($event['usage'])) {
+            $state['usage'] = OpenAICompletionsShared::parseChunkUsage($event['usage'], $model);
+        }
+
+        $choice = isset($event['choices']) && is_array($event['choices']) ? ($event['choices'][0] ?? null) : null;
+        if (! is_array($choice)) {
+            return;
+        }
+
+        if (! isset($event['usage']) && isset($choice['usage']) && is_array($choice['usage'])) {
+            $state['usage'] = OpenAICompletionsShared::parseChunkUsage($choice['usage'], $model);
+        }
+
+        if (isset($choice['finish_reason'])) {
+            $finishResult = OpenAICompletionsShared::mapStopReason($choice['finish_reason']);
+            $state['stopReason'] = $finishResult['stopReason'];
+            if (isset($finishResult['errorMessage'])) {
+                $state['errorMessage'] = $finishResult['errorMessage'];
+            }
+        }
+
+        if (! isset($choice['delta']) || ! is_array($choice['delta'])) {
+            return;
+        }
+
+        $delta = $choice['delta'];
+        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+
+        if (isset($delta['content']) && $delta['content'] !== null && $delta['content'] !== '') {
+            if ($state['currentBlock'] === null || ! $state['currentBlock'] instanceof TextContent) {
+                $this->finishCurrentBlock($state['currentBlock'], $state['blocks'], $stream, $output);
+                $state['currentBlock'] = new TextContent('');
+                $state['blocks'][] = $state['currentBlock'];
+                $stream->push(new TextStartEvent(array_key_last($state['blocks']), $output));
+            }
+            $state['currentBlock'] = new TextContent($state['currentBlock']->text.$delta['content']);
+            $state['blocks'][array_key_last($state['blocks'])] = $state['currentBlock'];
+            $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+            $stream->push(new TextDeltaEvent(array_key_last($state['blocks']), $delta['content'], $output));
+        }
+
+        $reasoningFields = ['reasoning_content', 'reasoning', 'reasoning_text'];
+        $foundReasoningField = null;
+        foreach ($reasoningFields as $field) {
+            if (isset($delta[$field]) && $delta[$field] !== null && $delta[$field] !== '') {
+                $foundReasoningField = $field;
+                break;
+            }
+        }
+
+        if ($foundReasoningField !== null) {
+            if ($state['currentBlock'] === null || ! $state['currentBlock'] instanceof ThinkingContent) {
+                $this->finishCurrentBlock($state['currentBlock'], $state['blocks'], $stream, $output);
+                $state['currentBlock'] = new ThinkingContent('', $foundReasoningField);
+                $state['blocks'][] = $state['currentBlock'];
+                $stream->push(new ThinkingStartEvent(array_key_last($state['blocks']), $output));
+            }
+            $state['currentBlock'] = new ThinkingContent($state['currentBlock']->thinking.$delta[$foundReasoningField], $foundReasoningField);
+            $state['blocks'][array_key_last($state['blocks'])] = $state['currentBlock'];
+            $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+            $stream->push(new ThinkingDeltaEvent(array_key_last($state['blocks']), $delta[$foundReasoningField], $output));
+        }
+
+        if (isset($delta['tool_calls']) && is_array($delta['tool_calls'])) {
+            foreach ($delta['tool_calls'] as $toolCall) {
+                if (! is_array($toolCall)) {
+                    continue;
+                }
+                $streamIndex = isset($toolCall['index']) && is_int($toolCall['index']) ? $toolCall['index'] : null;
+                $toolCallId = isset($toolCall['id']) && is_string($toolCall['id']) ? $toolCall['id'] : '';
+                $toolCallName = isset($toolCall['function']['name']) && is_string($toolCall['function']['name'])
+                    ? $toolCall['function']['name']
+                    : '';
+
+                $sameToolCall = $state['currentBlock'] instanceof ToolCall
+                    && (($streamIndex !== null && $state['scratch']['streamIndex'] === $streamIndex)
+                        || ($streamIndex === null && $toolCallId !== '' && $state['currentBlock']->id === $toolCallId));
+
+                if (! $sameToolCall) {
+                    $this->finishCurrentBlock($state['currentBlock'], $state['blocks'], $stream, $output);
+                    $state['scratch'] = ['partialArgs' => '', 'streamIndex' => $streamIndex];
+                    $state['currentBlock'] = new ToolCall($toolCallId, $toolCallName, []);
+                    $state['blocks'][] = $state['currentBlock'];
+                    $stream->push(new ToolCallStartEvent(array_key_last($state['blocks']), $output));
+                }
+
+                if ($state['currentBlock'] instanceof ToolCall) {
+                    if ($state['currentBlock']->id === '' && $toolCallId !== '') {
+                        $state['currentBlock'] = new ToolCall($toolCallId, $state['currentBlock']->name, $state['currentBlock']->arguments, $state['currentBlock']->thoughtSignature);
+                        $state['blocks'][array_key_last($state['blocks'])] = $state['currentBlock'];
+                    }
+                    if ($state['currentBlock']->name === '' && $toolCallName !== '') {
+                        $state['currentBlock'] = new ToolCall($state['currentBlock']->id, $toolCallName, $state['currentBlock']->arguments, $state['currentBlock']->thoughtSignature);
+                        $state['blocks'][array_key_last($state['blocks'])] = $state['currentBlock'];
+                    }
+                    if ($state['scratch']['streamIndex'] === null && $streamIndex !== null) {
+                        $state['scratch']['streamIndex'] = $streamIndex;
+                    }
+                    if (isset($toolCall['function']['arguments']) && is_string($toolCall['function']['arguments'])) {
+                        $state['scratch']['partialArgs'] .= $toolCall['function']['arguments'];
+                        $state['currentBlock'] = new ToolCall(
+                            $state['currentBlock']->id,
+                            $state['currentBlock']->name,
+                            JsonParse::parseStreamingJson($state['scratch']['partialArgs']),
+                            $state['currentBlock']->thoughtSignature,
+                        );
+                        $state['blocks'][array_key_last($state['blocks'])] = $state['currentBlock'];
+                        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+                        $stream->push(new ToolCallDeltaEvent(array_key_last($state['blocks']), $toolCall['function']['arguments'], $output));
+                    }
+                }
+            }
+        }
+
+        if (isset($delta['reasoning_details']) && is_array($delta['reasoning_details'])) {
+            foreach ($delta['reasoning_details'] as $detail) {
+                if (! is_array($detail) || ($detail['type'] ?? null) !== 'reasoning.encrypted') {
+                    continue;
+                }
+                $detailId = $detail['id'] ?? null;
+                if ($detailId === null) {
+                    continue;
+                }
+                foreach ($state['blocks'] as $idx => $block) {
+                    if ($block instanceof ToolCall && $block->id === $detailId) {
+                        $state['blocks'][$idx] = new ToolCall($block->id, $block->name, $block->arguments, json_encode($detail, JSON_THROW_ON_ERROR));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param  array{
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   scratch: array{partialArgs: string, streamIndex: ?int},
+     *   responseId: ?string,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   errorMessage: ?string
+     * }  $state
+     */
+    private function finalizeStreamState(array &$state, AssistantMessageEventStream $stream, Model $model): AssistantMessage
+    {
+        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+        $this->finishCurrentBlock($state['currentBlock'], $state['blocks'], $stream, $output);
+
+        return $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
     }
 
     private function snapshot(

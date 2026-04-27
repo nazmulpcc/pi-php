@@ -89,6 +89,8 @@ final readonly class AnthropicProvider implements ApiProviderInterface
                             maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
                         );
 
+                        $state = $this->initializeStreamState($stream, $model);
+
                         return $transport->stream('POST', $url, [
                             'headers' => $headers,
                             'body' => $params,
@@ -101,9 +103,23 @@ final readonly class AnthropicProvider implements ApiProviderInterface
                                     ], $model);
                                 }
                                 : null,
-                        ]);
+                            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                                $this->processStreamEvent($state, $event, $stream, $model);
+                            },
+                        ])->then(function () use (&$state, $stream, $model): AssistantMessage {
+                            $output = $this->finalizeStreamState($state, $stream, $model);
+                            $stream->push(new DoneEvent($output->stopReason, $output));
+
+                            return $output;
+                        });
                     })
                     ->then(function ($events) use ($model, $providerOptions, $stream) {
+                        if ($events instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $output = $this->createOutput($model);
                         $stream->push(new StartEvent($output));
 
@@ -116,134 +132,134 @@ final readonly class AnthropicProvider implements ApiProviderInterface
                                 continue;
                             }
 
-                $eventType = $event['_eventType'] ?? null;
-                unset($event['_eventType']);
+                            $eventType = $event['_eventType'] ?? null;
+                            unset($event['_eventType']);
 
-                if ($eventType === 'message_start') {
-                    $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $event['message']['id'] ?? null, $output->errorMessage);
-                    if (isset($event['message']['usage']) && is_array($event['message']['usage'])) {
-                        $usage = new Usage(
-                            input: $event['message']['usage']['input_tokens'] ?? 0,
-                            output: $event['message']['usage']['output_tokens'] ?? 0,
-                            cacheRead: $event['message']['usage']['cache_read_input_tokens'] ?? 0,
-                            cacheWrite: $event['message']['usage']['cache_creation_input_tokens'] ?? 0,
-                            totalTokens: 0,
-                            cost: $output->usage->cost,
-                        );
-                        $usage = new Usage(
-                            input: $usage->input,
-                            output: $usage->output,
-                            cacheRead: $usage->cacheRead,
-                            cacheWrite: $usage->cacheWrite,
-                            totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
-                            cost: $output->usage->cost,
-                        );
-                        Models::calculateCost($model, $usage);
-                        $output = $this->snapshot($model, $blocks, $usage, $output->stopReason, $output->responseId, $output->errorMessage);
-                    }
-                } elseif ($eventType === 'content_block_start') {
-                    $index = $event['index'] ?? 0;
-                    $contentBlock = $event['content_block'] ?? [];
-                    $blockType = $contentBlock['type'] ?? null;
+                            if ($eventType === 'message_start') {
+                                $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $event['message']['id'] ?? null, $output->errorMessage);
+                                if (isset($event['message']['usage']) && is_array($event['message']['usage'])) {
+                                    $usage = new Usage(
+                                        input: $event['message']['usage']['input_tokens'] ?? 0,
+                                        output: $event['message']['usage']['output_tokens'] ?? 0,
+                                        cacheRead: $event['message']['usage']['cache_read_input_tokens'] ?? 0,
+                                        cacheWrite: $event['message']['usage']['cache_creation_input_tokens'] ?? 0,
+                                        totalTokens: 0,
+                                        cost: $output->usage->cost,
+                                    );
+                                    $usage = new Usage(
+                                        input: $usage->input,
+                                        output: $usage->output,
+                                        cacheRead: $usage->cacheRead,
+                                        cacheWrite: $usage->cacheWrite,
+                                        totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
+                                        cost: $output->usage->cost,
+                                    );
+                                    Models::calculateCost($model, $usage);
+                                    $output = $this->snapshot($model, $blocks, $usage, $output->stopReason, $output->responseId, $output->errorMessage);
+                                }
+                            } elseif ($eventType === 'content_block_start') {
+                                $index = $event['index'] ?? 0;
+                                $contentBlock = $event['content_block'] ?? [];
+                                $blockType = $contentBlock['type'] ?? null;
 
-                    if ($blockType === 'text') {
-                        $blocks[] = new TextContent('');
-                        $blockIndices[$index] = count($blocks) - 1;
-                        $stream->push(new TextStartEvent($blockIndices[$index], $output));
-                    } elseif ($blockType === 'thinking') {
-                        $blocks[] = new ThinkingContent('', '');
-                        $blockIndices[$index] = count($blocks) - 1;
-                        $stream->push(new ThinkingStartEvent($blockIndices[$index], $output));
-                    } elseif ($blockType === 'redacted_thinking') {
-                        $blocks[] = new ThinkingContent('[Reasoning redacted]', $contentBlock['data'] ?? '', true);
-                        $blockIndices[$index] = count($blocks) - 1;
-                        $stream->push(new ThinkingStartEvent($blockIndices[$index], $output));
-                    } elseif ($blockType === 'tool_use') {
-                        $toolIdx = count($blocks);
-                        $blocks[] = new ToolCall(
-                            $contentBlock['id'] ?? '',
-                            $contentBlock['name'] ?? '',
-                            $contentBlock['input'] ?? [],
-                        );
-                        $toolScratch[$toolIdx] = ['partialJson' => ''];
-                        $blockIndices[$index] = $toolIdx;
-                        $stream->push(new ToolCallStartEvent($blockIndices[$index], $output));
-                    }
-                } elseif ($eventType === 'content_block_delta') {
-                    $index = $event['index'] ?? 0;
-                    $delta = $event['delta'] ?? [];
-                    $blockIdx = $blockIndices[$index] ?? null;
+                                if ($blockType === 'text') {
+                                    $blocks[] = new TextContent('');
+                                    $blockIndices[$index] = count($blocks) - 1;
+                                    $stream->push(new TextStartEvent($blockIndices[$index], $output));
+                                } elseif ($blockType === 'thinking') {
+                                    $blocks[] = new ThinkingContent('', '');
+                                    $blockIndices[$index] = count($blocks) - 1;
+                                    $stream->push(new ThinkingStartEvent($blockIndices[$index], $output));
+                                } elseif ($blockType === 'redacted_thinking') {
+                                    $blocks[] = new ThinkingContent('[Reasoning redacted]', $contentBlock['data'] ?? '', true);
+                                    $blockIndices[$index] = count($blocks) - 1;
+                                    $stream->push(new ThinkingStartEvent($blockIndices[$index], $output));
+                                } elseif ($blockType === 'tool_use') {
+                                    $toolIdx = count($blocks);
+                                    $blocks[] = new ToolCall(
+                                        $contentBlock['id'] ?? '',
+                                        $contentBlock['name'] ?? '',
+                                        $contentBlock['input'] ?? [],
+                                    );
+                                    $toolScratch[$toolIdx] = ['partialJson' => ''];
+                                    $blockIndices[$index] = $toolIdx;
+                                    $stream->push(new ToolCallStartEvent($blockIndices[$index], $output));
+                                }
+                            } elseif ($eventType === 'content_block_delta') {
+                                $index = $event['index'] ?? 0;
+                                $delta = $event['delta'] ?? [];
+                                $blockIdx = $blockIndices[$index] ?? null;
 
-                    if ($blockIdx === null) {
-                        continue;
-                    }
+                                if ($blockIdx === null) {
+                                    continue;
+                                }
 
-                    $block = $blocks[$blockIdx];
+                                $block = $blocks[$blockIdx];
 
-                    if ($delta['type'] === 'text_delta' && $block instanceof TextContent) {
-                        $blocks[$blockIdx] = new TextContent($block->text.$delta['text']);
-                        $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
-                        $stream->push(new TextDeltaEvent($blockIdx, $delta['text'], $output));
-                    } elseif ($delta['type'] === 'thinking_delta' && $block instanceof ThinkingContent) {
-                        $blocks[$blockIdx] = new ThinkingContent($block->thinking.$delta['thinking'], $block->thinkingSignature);
-                        $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
-                        $stream->push(new ThinkingDeltaEvent($blockIdx, $delta['thinking'], $output));
-                    } elseif ($delta['type'] === 'input_json_delta' && $block instanceof ToolCall) {
-                        $toolScratch[$blockIdx]['partialJson'] = ($toolScratch[$blockIdx]['partialJson'] ?? '').$delta['partial_json'];
-                        $blocks[$blockIdx] = new ToolCall(
-                            $block->id,
-                            $block->name,
-                            JsonParse::parseStreamingJson($toolScratch[$blockIdx]['partialJson']),
-                            $block->thoughtSignature,
-                        );
-                        $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
-                        $stream->push(new ToolCallDeltaEvent($blockIdx, $delta['partial_json'], $output));
-                    } elseif ($delta['type'] === 'signature_delta' && $block instanceof ThinkingContent) {
-                        $blocks[$blockIdx] = new ThinkingContent($block->thinking, $block->thinkingSignature.$delta['signature']);
-                    }
-                } elseif ($eventType === 'content_block_stop') {
-                    $index = $event['index'] ?? 0;
-                    $blockIdx = $blockIndices[$index] ?? null;
+                                if ($delta['type'] === 'text_delta' && $block instanceof TextContent) {
+                                    $blocks[$blockIdx] = new TextContent($block->text.$delta['text']);
+                                    $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
+                                    $stream->push(new TextDeltaEvent($blockIdx, $delta['text'], $output));
+                                } elseif ($delta['type'] === 'thinking_delta' && $block instanceof ThinkingContent) {
+                                    $blocks[$blockIdx] = new ThinkingContent($block->thinking.$delta['thinking'], $block->thinkingSignature);
+                                    $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
+                                    $stream->push(new ThinkingDeltaEvent($blockIdx, $delta['thinking'], $output));
+                                } elseif ($delta['type'] === 'input_json_delta' && $block instanceof ToolCall) {
+                                    $toolScratch[$blockIdx]['partialJson'] = ($toolScratch[$blockIdx]['partialJson'] ?? '').$delta['partial_json'];
+                                    $blocks[$blockIdx] = new ToolCall(
+                                        $block->id,
+                                        $block->name,
+                                        JsonParse::parseStreamingJson($toolScratch[$blockIdx]['partialJson']),
+                                        $block->thoughtSignature,
+                                    );
+                                    $output = $this->snapshot($model, $blocks, $output->usage, $output->stopReason, $output->responseId, $output->errorMessage);
+                                    $stream->push(new ToolCallDeltaEvent($blockIdx, $delta['partial_json'], $output));
+                                } elseif ($delta['type'] === 'signature_delta' && $block instanceof ThinkingContent) {
+                                    $blocks[$blockIdx] = new ThinkingContent($block->thinking, $block->thinkingSignature.$delta['signature']);
+                                }
+                            } elseif ($eventType === 'content_block_stop') {
+                                $index = $event['index'] ?? 0;
+                                $blockIdx = $blockIndices[$index] ?? null;
 
-                    if ($blockIdx === null) {
-                        continue;
-                    }
+                                if ($blockIdx === null) {
+                                    continue;
+                                }
 
-                    $block = $blocks[$blockIdx];
+                                $block = $blocks[$blockIdx];
 
-                    if ($block instanceof TextContent) {
-                        $stream->push(new TextEndEvent($blockIdx, $block->text, $output));
-                    } elseif ($block instanceof ThinkingContent) {
-                        $stream->push(new ThinkingEndEvent($blockIdx, $block->thinking, $output));
-                    } elseif ($block instanceof ToolCall) {
-                        unset($toolScratch[$blockIdx]);
-                        $stream->push(new ToolCallEndEvent($blockIdx, $block, $output));
-                    }
-                } elseif ($eventType === 'message_delta') {
-                    if (isset($event['delta']['stop_reason']) && is_string($event['delta']['stop_reason'])) {
-                        $output = $this->snapshot($model, $blocks, $output->usage, AnthropicShared::mapStopReason($event['delta']['stop_reason']), $output->responseId, $output->errorMessage);
-                    }
-                    if (isset($event['usage']) && is_array($event['usage'])) {
-                        $usage = new Usage(
-                            input: $event['usage']['input_tokens'] ?? $output->usage->input,
-                            output: $event['usage']['output_tokens'] ?? $output->usage->output,
-                            cacheRead: $event['usage']['cache_read_input_tokens'] ?? $output->usage->cacheRead,
-                            cacheWrite: $event['usage']['cache_creation_input_tokens'] ?? $output->usage->cacheWrite,
-                            totalTokens: 0,
-                            cost: $output->usage->cost,
-                        );
-                        $usage = new Usage(
-                            input: $usage->input,
-                            output: $usage->output,
-                            cacheRead: $usage->cacheRead,
-                            cacheWrite: $usage->cacheWrite,
-                            totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
-                            cost: $output->usage->cost,
-                        );
-                        Models::calculateCost($model, $usage);
-                        $output = $this->snapshot($model, $blocks, $usage, $output->stopReason, $output->responseId, $output->errorMessage);
-                    }
-                }
+                                if ($block instanceof TextContent) {
+                                    $stream->push(new TextEndEvent($blockIdx, $block->text, $output));
+                                } elseif ($block instanceof ThinkingContent) {
+                                    $stream->push(new ThinkingEndEvent($blockIdx, $block->thinking, $output));
+                                } elseif ($block instanceof ToolCall) {
+                                    unset($toolScratch[$blockIdx]);
+                                    $stream->push(new ToolCallEndEvent($blockIdx, $block, $output));
+                                }
+                            } elseif ($eventType === 'message_delta') {
+                                if (isset($event['delta']['stop_reason']) && is_string($event['delta']['stop_reason'])) {
+                                    $output = $this->snapshot($model, $blocks, $output->usage, AnthropicShared::mapStopReason($event['delta']['stop_reason']), $output->responseId, $output->errorMessage);
+                                }
+                                if (isset($event['usage']) && is_array($event['usage'])) {
+                                    $usage = new Usage(
+                                        input: $event['usage']['input_tokens'] ?? $output->usage->input,
+                                        output: $event['usage']['output_tokens'] ?? $output->usage->output,
+                                        cacheRead: $event['usage']['cache_read_input_tokens'] ?? $output->usage->cacheRead,
+                                        cacheWrite: $event['usage']['cache_creation_input_tokens'] ?? $output->usage->cacheWrite,
+                                        totalTokens: 0,
+                                        cost: $output->usage->cost,
+                                    );
+                                    $usage = new Usage(
+                                        input: $usage->input,
+                                        output: $usage->output,
+                                        cacheRead: $usage->cacheRead,
+                                        cacheWrite: $usage->cacheWrite,
+                                        totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
+                                        cost: $output->usage->cost,
+                                    );
+                                    Models::calculateCost($model, $usage);
+                                    $output = $this->snapshot($model, $blocks, $usage, $output->stopReason, $output->responseId, $output->errorMessage);
+                                }
+                            }
                         }
 
                         if ($providerOptions->signal?->isCancelled()) {
@@ -256,6 +272,8 @@ final readonly class AnthropicProvider implements ApiProviderInterface
 
                         $stream->push(new DoneEvent($output->stopReason, $output));
                         $stream->end();
+
+                        return null;
                     });
             },
             function (\Throwable $error) use ($stream, $model, $options): void {
@@ -276,6 +294,204 @@ final readonly class AnthropicProvider implements ApiProviderInterface
         );
 
         return $stream;
+    }
+
+    /**
+     * @return array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   blockIndices: array<int, int>,
+     *   toolScratch: array<int, array{partialJson: string}>
+     * }
+     */
+    private function initializeStreamState(AssistantMessageEventStream $stream, Model $model): array
+    {
+        $output = $this->createOutput($model);
+        $stream->push(new StartEvent($output));
+
+        return [
+            'output' => $output,
+            'blocks' => [],
+            'blockIndices' => [],
+            'toolScratch' => [],
+        ];
+    }
+
+    /**
+     * @param  array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   blockIndices: array<int, int>,
+     *   toolScratch: array<int, array{partialJson: string}>
+     * }  $state
+     * @param  array<string, mixed>  $event
+     */
+    private function processStreamEvent(array &$state, array $event, AssistantMessageEventStream $stream, Model $model): void
+    {
+        $eventType = $event['_eventType'] ?? null;
+        unset($event['_eventType']);
+
+        if ($eventType === 'message_start') {
+            $state['output'] = $this->snapshot($model, $state['blocks'], $state['output']->usage, $state['output']->stopReason, $event['message']['id'] ?? null, $state['output']->errorMessage);
+            if (isset($event['message']['usage']) && is_array($event['message']['usage'])) {
+                $usage = new Usage(
+                    input: $event['message']['usage']['input_tokens'] ?? 0,
+                    output: $event['message']['usage']['output_tokens'] ?? 0,
+                    cacheRead: $event['message']['usage']['cache_read_input_tokens'] ?? 0,
+                    cacheWrite: $event['message']['usage']['cache_creation_input_tokens'] ?? 0,
+                    totalTokens: 0,
+                    cost: $state['output']->usage->cost,
+                );
+                $usage = new Usage(
+                    input: $usage->input,
+                    output: $usage->output,
+                    cacheRead: $usage->cacheRead,
+                    cacheWrite: $usage->cacheWrite,
+                    totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
+                    cost: $state['output']->usage->cost,
+                );
+                Models::calculateCost($model, $usage);
+                $state['output'] = $this->snapshot($model, $state['blocks'], $usage, $state['output']->stopReason, $state['output']->responseId, $state['output']->errorMessage);
+            }
+
+            return;
+        }
+
+        if ($eventType === 'content_block_start') {
+            $index = $event['index'] ?? 0;
+            $contentBlock = $event['content_block'] ?? [];
+            $blockType = $contentBlock['type'] ?? null;
+
+            if ($blockType === 'text') {
+                $state['blocks'][] = new TextContent('');
+                $state['blockIndices'][$index] = count($state['blocks']) - 1;
+                $stream->push(new TextStartEvent($state['blockIndices'][$index], $state['output']));
+            } elseif ($blockType === 'thinking') {
+                $state['blocks'][] = new ThinkingContent('', '');
+                $state['blockIndices'][$index] = count($state['blocks']) - 1;
+                $stream->push(new ThinkingStartEvent($state['blockIndices'][$index], $state['output']));
+            } elseif ($blockType === 'redacted_thinking') {
+                $state['blocks'][] = new ThinkingContent('[Reasoning redacted]', $contentBlock['data'] ?? '', true);
+                $state['blockIndices'][$index] = count($state['blocks']) - 1;
+                $stream->push(new ThinkingStartEvent($state['blockIndices'][$index], $state['output']));
+            } elseif ($blockType === 'tool_use') {
+                $toolIdx = count($state['blocks']);
+                $state['blocks'][] = new ToolCall(
+                    $contentBlock['id'] ?? '',
+                    $contentBlock['name'] ?? '',
+                    $contentBlock['input'] ?? [],
+                );
+                $state['toolScratch'][$toolIdx] = ['partialJson' => ''];
+                $state['blockIndices'][$index] = $toolIdx;
+                $stream->push(new ToolCallStartEvent($state['blockIndices'][$index], $state['output']));
+            }
+
+            return;
+        }
+
+        if ($eventType === 'content_block_delta') {
+            $index = $event['index'] ?? 0;
+            $delta = $event['delta'] ?? [];
+            $blockIdx = $state['blockIndices'][$index] ?? null;
+
+            if ($blockIdx === null) {
+                return;
+            }
+
+            $block = $state['blocks'][$blockIdx];
+
+            if ($delta['type'] === 'text_delta' && $block instanceof TextContent) {
+                $state['blocks'][$blockIdx] = new TextContent($block->text.$delta['text']);
+                $state['output'] = $this->snapshot($model, $state['blocks'], $state['output']->usage, $state['output']->stopReason, $state['output']->responseId, $state['output']->errorMessage);
+                $stream->push(new TextDeltaEvent($blockIdx, $delta['text'], $state['output']));
+            } elseif ($delta['type'] === 'thinking_delta' && $block instanceof ThinkingContent) {
+                $state['blocks'][$blockIdx] = new ThinkingContent($block->thinking.$delta['thinking'], $block->thinkingSignature);
+                $state['output'] = $this->snapshot($model, $state['blocks'], $state['output']->usage, $state['output']->stopReason, $state['output']->responseId, $state['output']->errorMessage);
+                $stream->push(new ThinkingDeltaEvent($blockIdx, $delta['thinking'], $state['output']));
+            } elseif ($delta['type'] === 'input_json_delta' && $block instanceof ToolCall) {
+                $state['toolScratch'][$blockIdx]['partialJson'] = ($state['toolScratch'][$blockIdx]['partialJson'] ?? '').$delta['partial_json'];
+                $state['blocks'][$blockIdx] = new ToolCall(
+                    $block->id,
+                    $block->name,
+                    JsonParse::parseStreamingJson($state['toolScratch'][$blockIdx]['partialJson']),
+                    $block->thoughtSignature,
+                );
+                $state['output'] = $this->snapshot($model, $state['blocks'], $state['output']->usage, $state['output']->stopReason, $state['output']->responseId, $state['output']->errorMessage);
+                $stream->push(new ToolCallDeltaEvent($blockIdx, $delta['partial_json'], $state['output']));
+            } elseif ($delta['type'] === 'signature_delta' && $block instanceof ThinkingContent) {
+                $state['blocks'][$blockIdx] = new ThinkingContent($block->thinking, $block->thinkingSignature.$delta['signature']);
+            }
+
+            return;
+        }
+
+        if ($eventType === 'content_block_stop') {
+            $index = $event['index'] ?? 0;
+            $blockIdx = $state['blockIndices'][$index] ?? null;
+
+            if ($blockIdx === null) {
+                return;
+            }
+
+            $block = $state['blocks'][$blockIdx];
+
+            if ($block instanceof TextContent) {
+                $stream->push(new TextEndEvent($blockIdx, $block->text, $state['output']));
+            } elseif ($block instanceof ThinkingContent) {
+                $stream->push(new ThinkingEndEvent($blockIdx, $block->thinking, $state['output']));
+            } elseif ($block instanceof ToolCall) {
+                unset($state['toolScratch'][$blockIdx]);
+                $stream->push(new ToolCallEndEvent($blockIdx, $block, $state['output']));
+            }
+
+            return;
+        }
+
+        if ($eventType === 'message_delta') {
+            if (isset($event['delta']['stop_reason']) && is_string($event['delta']['stop_reason'])) {
+                $state['output'] = $this->snapshot($model, $state['blocks'], $state['output']->usage, AnthropicShared::mapStopReason($event['delta']['stop_reason']), $state['output']->responseId, $state['output']->errorMessage);
+            }
+            if (isset($event['usage']) && is_array($event['usage'])) {
+                $usage = new Usage(
+                    input: $event['usage']['input_tokens'] ?? $state['output']->usage->input,
+                    output: $event['usage']['output_tokens'] ?? $state['output']->usage->output,
+                    cacheRead: $event['usage']['cache_read_input_tokens'] ?? $state['output']->usage->cacheRead,
+                    cacheWrite: $event['usage']['cache_creation_input_tokens'] ?? $state['output']->usage->cacheWrite,
+                    totalTokens: 0,
+                    cost: $state['output']->usage->cost,
+                );
+                $usage = new Usage(
+                    input: $usage->input,
+                    output: $usage->output,
+                    cacheRead: $usage->cacheRead,
+                    cacheWrite: $usage->cacheWrite,
+                    totalTokens: $usage->input + $usage->output + $usage->cacheRead + $usage->cacheWrite,
+                    cost: $state['output']->usage->cost,
+                );
+                Models::calculateCost($model, $usage);
+                $state['output'] = $this->snapshot($model, $state['blocks'], $usage, $state['output']->stopReason, $state['output']->responseId, $state['output']->errorMessage);
+            }
+        }
+    }
+
+    /**
+     * @param  array{
+     *   output: AssistantMessage,
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   blockIndices: array<int, int>,
+     *   toolScratch: array<int, array{partialJson: string}>
+     * }  $state
+     */
+    private function finalizeStreamState(array $state, AssistantMessageEventStream $stream, Model $model): AssistantMessage
+    {
+        return $this->snapshot(
+            $model,
+            $state['blocks'],
+            $state['output']->usage,
+            $state['output']->stopReason,
+            $state['output']->responseId,
+            $state['output']->errorMessage,
+        );
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream

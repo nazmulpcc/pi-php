@@ -5,7 +5,7 @@ declare(strict_types=1);
 $tsPath = dirname(__DIR__).'/../../pi-mono/packages/ai/src/models.generated.ts';
 $phpPath = dirname(__DIR__).'/src/models.generated.php';
 
-if (!file_exists($tsPath)) {
+if (! file_exists($tsPath)) {
     fwrite(STDERR, "TS model file not found: {$tsPath}\n");
     fwrite(STDERR, "Make sure pi-mono is cloned and up to date.\n");
     exit(1);
@@ -38,6 +38,7 @@ function convertTsToPhp(string $input): string
             $out .= $ch;
             $escapeNext = false;
             $i++;
+
             continue;
         }
 
@@ -45,6 +46,7 @@ function convertTsToPhp(string $input): string
             $out .= $ch;
             $escapeNext = true;
             $i++;
+
             continue;
         }
 
@@ -54,6 +56,7 @@ function convertTsToPhp(string $input): string
             }
             $out .= $ch;
             $i++;
+
             continue;
         }
 
@@ -62,6 +65,7 @@ function convertTsToPhp(string $input): string
             $stringChar = $ch;
             $out .= $ch;
             $i++;
+
             continue;
         }
 
@@ -69,6 +73,7 @@ function convertTsToPhp(string $input): string
             while ($i < $len && $input[$i] !== "\n") {
                 $i++;
             }
+
             continue;
         }
 
@@ -81,18 +86,21 @@ function convertTsToPhp(string $input): string
                 }
                 $i++;
             }
+
             continue;
         }
 
         if ($ch === '{') {
             $out .= '[';
             $i++;
+
             continue;
         }
 
         if ($ch === '}') {
             $out .= ']';
             $i++;
+
             continue;
         }
 
@@ -102,6 +110,7 @@ function convertTsToPhp(string $input): string
             if ($afterKey < $len && $input[$afterKey] === ':') {
                 $out .= "'{$key}' => ";
                 $i = $afterKey + 1;
+
                 continue;
             }
         }
@@ -121,7 +130,7 @@ $evalCheck = "return {$phpBody};";
 $result = @eval($evalCheck);
 if ($result === false && error_get_last() !== null) {
     $err = error_get_last();
-    fwrite(STDERR, "Generated PHP is not valid. Error: ".($err['message'] ?? 'unknown')."\n");
+    fwrite(STDERR, 'Generated PHP is not valid. Error: '.($err['message'] ?? 'unknown')."\n");
     exit(1);
 }
 

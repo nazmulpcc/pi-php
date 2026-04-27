@@ -68,7 +68,7 @@ final readonly class GoogleProvider implements ApiProviderInterface
                 $params = $this->buildParams($model, $context, $providerOptions);
 
                 return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
-                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params, $stream) {
                         if (is_array($nextParams)) {
                             $params = $nextParams;
                         }
@@ -77,9 +77,15 @@ final readonly class GoogleProvider implements ApiProviderInterface
                             return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
                         }
 
-                        return $this->runDefaultTransport($model, $providerOptions, $params);
+                        return $this->runDefaultTransport($model, $providerOptions, $params, $stream);
                     })
                     ->then(function ($result) use ($model, $providerOptions, $stream) {
+                        if ($result instanceof AssistantMessage) {
+                            $stream->end();
+
+                            return null;
+                        }
+
                         $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
                         $status = is_array($result) && array_key_exists('status', $result) ? (int) $result['status'] : 200;
                         $headers = is_array($result) && array_key_exists('headers', $result) && is_array($result['headers']) ? $result['headers'] : [];
@@ -97,109 +103,109 @@ final readonly class GoogleProvider implements ApiProviderInterface
                         $toolCallSeen = false;
 
                         foreach ($events as $event) {
-                if (! is_array($event)) {
-                    continue;
-                }
+                            if (! is_array($event)) {
+                                continue;
+                            }
 
-                $responseId ??= $event['responseId'] ?? $event['id'] ?? null;
+                            $responseId ??= $event['responseId'] ?? $event['id'] ?? null;
 
-                if (isset($event['usageMetadata']) && is_array($event['usageMetadata'])) {
-                    $usage = $this->parseUsage($event['usageMetadata'], $model);
-                    $output = $this->snapshot($model, $output->content, $usage, $stopReason, $responseId, $errorMessage);
-                }
+                            if (isset($event['usageMetadata']) && is_array($event['usageMetadata'])) {
+                                $usage = $this->parseUsage($event['usageMetadata'], $model);
+                                $output = $this->snapshot($model, $output->content, $usage, $stopReason, $responseId, $errorMessage);
+                            }
 
-                $candidate = isset($event['candidates']) && is_array($event['candidates']) ? ($event['candidates'][0] ?? null) : null;
-                if (! is_array($candidate)) {
-                    continue;
-                }
+                            $candidate = isset($event['candidates']) && is_array($event['candidates']) ? ($event['candidates'][0] ?? null) : null;
+                            if (! is_array($candidate)) {
+                                continue;
+                            }
 
-                if (isset($candidate['finishReason']) && is_string($candidate['finishReason'])) {
-                    $stopReason = GoogleShared::mapStopReason($candidate['finishReason']);
-                }
+                            if (isset($candidate['finishReason']) && is_string($candidate['finishReason'])) {
+                                $stopReason = GoogleShared::mapStopReason($candidate['finishReason']);
+                            }
 
-                if (isset($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
-                    foreach ($candidate['content']['parts'] as $part) {
-                        if (! is_array($part)) {
-                            continue;
-                        }
+                            if (isset($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+                                foreach ($candidate['content']['parts'] as $part) {
+                                    if (! is_array($part)) {
+                                        continue;
+                                    }
 
-                        if (isset($part['text']) && is_string($part['text'])) {
-                            $isThinking = ($part['thought'] ?? false) === true;
-                            $signature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
+                                    if (isset($part['text']) && is_string($part['text'])) {
+                                        $isThinking = ($part['thought'] ?? false) === true;
+                                        $signature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
 
-                            if ($currentBlock === null || ($isThinking && ! $currentBlock instanceof ThinkingContent) || (! $isThinking && ! $currentBlock instanceof TextContent)) {
-                                $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
+                                        if ($currentBlock === null || ($isThinking && ! $currentBlock instanceof ThinkingContent) || (! $isThinking && ! $currentBlock instanceof TextContent)) {
+                                            $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
 
-                                if ($isThinking) {
-                                    $currentBlock = new ThinkingContent('', $signature);
-                                    $blocks[] = $currentBlock;
-                                    $currentBlockIndex = array_key_last($blocks);
-                                    $stream->push(new ThinkingStartEvent($currentBlockIndex, $output));
-                                } else {
-                                    $currentBlock = new TextContent('', $signature);
-                                    $blocks[] = $currentBlock;
-                                    $currentBlockIndex = array_key_last($blocks);
-                                    $stream->push(new TextStartEvent($currentBlockIndex, $output));
+                                            if ($isThinking) {
+                                                $currentBlock = new ThinkingContent('', $signature);
+                                                $blocks[] = $currentBlock;
+                                                $currentBlockIndex = array_key_last($blocks);
+                                                $stream->push(new ThinkingStartEvent($currentBlockIndex, $output));
+                                            } else {
+                                                $currentBlock = new TextContent('', $signature);
+                                                $blocks[] = $currentBlock;
+                                                $currentBlockIndex = array_key_last($blocks);
+                                                $stream->push(new TextStartEvent($currentBlockIndex, $output));
+                                            }
+                                        }
+
+                                        if ($currentBlock instanceof ThinkingContent) {
+                                            $currentBlock = new ThinkingContent(
+                                                $currentBlock->thinking.$part['text'],
+                                                is_string($signature) && $signature !== '' ? $signature : $currentBlock->thinkingSignature,
+                                            );
+                                            $blocks[$currentBlockIndex] = $currentBlock;
+                                            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                            $stream->push(new ThinkingDeltaEvent($currentBlockIndex, $part['text'], $output));
+                                        } elseif ($currentBlock instanceof TextContent) {
+                                            $currentBlock = new TextContent(
+                                                $currentBlock->text.$part['text'],
+                                                is_string($signature) && $signature !== '' ? $signature : $currentBlock->textSignature,
+                                            );
+                                            $blocks[$currentBlockIndex] = $currentBlock;
+                                            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                            $stream->push(new TextDeltaEvent($currentBlockIndex, $part['text'], $output));
+                                        }
+                                    }
+
+                                    if (isset($part['functionCall']) && is_array($part['functionCall'])) {
+                                        $toolCallSeen = true;
+
+                                        $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
+                                        $currentBlock = null;
+                                        $currentBlockIndex = null;
+
+                                        $functionCall = $part['functionCall'];
+                                        $providedId = isset($functionCall['id']) && is_string($functionCall['id']) ? $functionCall['id'] : '';
+                                        $name = isset($functionCall['name']) && is_string($functionCall['name']) ? $functionCall['name'] : '';
+                                        $arguments = isset($functionCall['args']) && is_array($functionCall['args']) ? $functionCall['args'] : [];
+                                        $toolCallId = $providedId !== '' ? $providedId : sprintf('%s_%s', $name !== '' ? $name : 'tool', uniqid('', true));
+                                        $thoughtSignature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
+
+                                        $toolCall = new ToolCall($toolCallId, $name, [], $thoughtSignature);
+                                        $blocks[] = $toolCall;
+                                        $index = array_key_last($blocks);
+                                        $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                        $stream->push(new ToolCallStartEvent($index, $output));
+
+                                        $toolCall = new ToolCall($toolCallId, $name, JsonParse::parseStreamingJson(json_encode($arguments, JSON_THROW_ON_ERROR)), $thoughtSignature);
+                                        $blocks[$index] = $toolCall;
+                                        $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                        $stream->push(new ToolCallDeltaEvent($index, json_encode($arguments, JSON_THROW_ON_ERROR), $output));
+                                        $stream->push(new ToolCallEndEvent($index, $toolCall, $output));
+                                    }
                                 }
                             }
 
-                            if ($currentBlock instanceof ThinkingContent) {
-                                $currentBlock = new ThinkingContent(
-                                    $currentBlock->thinking.$part['text'],
-                                    is_string($signature) && $signature !== '' ? $signature : $currentBlock->thinkingSignature,
-                                );
-                                $blocks[$currentBlockIndex] = $currentBlock;
-                                $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                                $stream->push(new ThinkingDeltaEvent($currentBlockIndex, $part['text'], $output));
-                            } elseif ($currentBlock instanceof TextContent) {
-                                $currentBlock = new TextContent(
-                                    $currentBlock->text.$part['text'],
-                                    is_string($signature) && $signature !== '' ? $signature : $currentBlock->textSignature,
-                                );
-                                $blocks[$currentBlockIndex] = $currentBlock;
-                                $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                                $stream->push(new TextDeltaEvent($currentBlockIndex, $part['text'], $output));
+                            if ($candidate['finishReason'] ?? null) {
+                                $stopReason = GoogleShared::mapStopReason(is_string($candidate['finishReason']) ? $candidate['finishReason'] : null);
                             }
-                        }
 
-                        if (isset($part['functionCall']) && is_array($part['functionCall'])) {
-                            $toolCallSeen = true;
+                            if ($stopReason === StopReason::ToolUse || $toolCallSeen) {
+                                $stopReason = StopReason::ToolUse;
+                            }
 
-                            $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
-                            $currentBlock = null;
-                            $currentBlockIndex = null;
-
-                            $functionCall = $part['functionCall'];
-                            $providedId = isset($functionCall['id']) && is_string($functionCall['id']) ? $functionCall['id'] : '';
-                            $name = isset($functionCall['name']) && is_string($functionCall['name']) ? $functionCall['name'] : '';
-                            $arguments = isset($functionCall['args']) && is_array($functionCall['args']) ? $functionCall['args'] : [];
-                            $toolCallId = $providedId !== '' ? $providedId : sprintf('%s_%s', $name !== '' ? $name : 'tool', uniqid('', true));
-                            $thoughtSignature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
-
-                            $toolCall = new ToolCall($toolCallId, $name, [], $thoughtSignature);
-                            $blocks[] = $toolCall;
-                            $index = array_key_last($blocks);
                             $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                            $stream->push(new ToolCallStartEvent($index, $output));
-
-                            $toolCall = new ToolCall($toolCallId, $name, JsonParse::parseStreamingJson(json_encode($arguments, JSON_THROW_ON_ERROR)), $thoughtSignature);
-                            $blocks[$index] = $toolCall;
-                            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                            $stream->push(new ToolCallDeltaEvent($index, json_encode($arguments, JSON_THROW_ON_ERROR), $output));
-                            $stream->push(new ToolCallEndEvent($index, $toolCall, $output));
-                        }
-                    }
-                }
-
-                if ($candidate['finishReason'] ?? null) {
-                    $stopReason = GoogleShared::mapStopReason(is_string($candidate['finishReason']) ? $candidate['finishReason'] : null);
-                }
-
-                if ($stopReason === StopReason::ToolUse || $toolCallSeen) {
-                    $stopReason = StopReason::ToolUse;
-                }
-
-                $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
                         }
 
                         $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
@@ -249,6 +255,170 @@ final readonly class GoogleProvider implements ApiProviderInterface
         );
 
         return $stream;
+    }
+
+    /**
+     * @return array{
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   currentBlockIndex: ?int,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   responseId: ?string,
+     *   errorMessage: ?string,
+     *   toolCallSeen: bool
+     * }
+     */
+    private function initializeStreamState(AssistantMessageEventStream $stream, Model $model): array
+    {
+        $output = $this->createOutput($model);
+        $stream->push(new StartEvent($output));
+
+        return [
+            'blocks' => [],
+            'currentBlock' => null,
+            'currentBlockIndex' => null,
+            'usage' => $output->usage,
+            'stopReason' => StopReason::Stop,
+            'responseId' => null,
+            'errorMessage' => null,
+            'toolCallSeen' => false,
+        ];
+    }
+
+    /**
+     * @param  array{
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   currentBlockIndex: ?int,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   responseId: ?string,
+     *   errorMessage: ?string,
+     *   toolCallSeen: bool
+     * }  $state
+     * @param  array<string, mixed>  $event
+     */
+    private function processStreamEvent(array &$state, array $event, AssistantMessageEventStream $stream, Model $model): void
+    {
+        $state['responseId'] ??= $event['responseId'] ?? $event['id'] ?? null;
+        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+
+        if (isset($event['usageMetadata']) && is_array($event['usageMetadata'])) {
+            $state['usage'] = $this->parseUsage($event['usageMetadata'], $model);
+            $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+        }
+
+        $candidate = isset($event['candidates']) && is_array($event['candidates']) ? ($event['candidates'][0] ?? null) : null;
+        if (! is_array($candidate)) {
+            return;
+        }
+
+        if (isset($candidate['finishReason']) && is_string($candidate['finishReason'])) {
+            $state['stopReason'] = GoogleShared::mapStopReason($candidate['finishReason']);
+        }
+
+        if (isset($candidate['content']['parts']) && is_array($candidate['content']['parts'])) {
+            foreach ($candidate['content']['parts'] as $part) {
+                if (! is_array($part)) {
+                    continue;
+                }
+
+                if (isset($part['text']) && is_string($part['text'])) {
+                    $isThinking = ($part['thought'] ?? false) === true;
+                    $signature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
+
+                    if ($state['currentBlock'] === null || ($isThinking && ! $state['currentBlock'] instanceof ThinkingContent) || (! $isThinking && ! $state['currentBlock'] instanceof TextContent)) {
+                        $this->finishCurrentBlock($state['currentBlock'], $state['currentBlockIndex'], $stream, $output);
+
+                        if ($isThinking) {
+                            $state['currentBlock'] = new ThinkingContent('', $signature);
+                            $state['blocks'][] = $state['currentBlock'];
+                            $state['currentBlockIndex'] = array_key_last($state['blocks']);
+                            $stream->push(new ThinkingStartEvent($state['currentBlockIndex'], $output));
+                        } else {
+                            $state['currentBlock'] = new TextContent('', $signature);
+                            $state['blocks'][] = $state['currentBlock'];
+                            $state['currentBlockIndex'] = array_key_last($state['blocks']);
+                            $stream->push(new TextStartEvent($state['currentBlockIndex'], $output));
+                        }
+                    }
+
+                    if ($state['currentBlock'] instanceof ThinkingContent) {
+                        $state['currentBlock'] = new ThinkingContent(
+                            $state['currentBlock']->thinking.$part['text'],
+                            is_string($signature) && $signature !== '' ? $signature : $state['currentBlock']->thinkingSignature,
+                        );
+                        $state['blocks'][$state['currentBlockIndex']] = $state['currentBlock'];
+                        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+                        $stream->push(new ThinkingDeltaEvent($state['currentBlockIndex'], $part['text'], $output));
+                    } elseif ($state['currentBlock'] instanceof TextContent) {
+                        $state['currentBlock'] = new TextContent(
+                            $state['currentBlock']->text.$part['text'],
+                            is_string($signature) && $signature !== '' ? $signature : $state['currentBlock']->textSignature,
+                        );
+                        $state['blocks'][$state['currentBlockIndex']] = $state['currentBlock'];
+                        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+                        $stream->push(new TextDeltaEvent($state['currentBlockIndex'], $part['text'], $output));
+                    }
+                }
+
+                if (isset($part['functionCall']) && is_array($part['functionCall'])) {
+                    $state['toolCallSeen'] = true;
+
+                    $this->finishCurrentBlock($state['currentBlock'], $state['currentBlockIndex'], $stream, $output);
+                    $state['currentBlock'] = null;
+                    $state['currentBlockIndex'] = null;
+
+                    $functionCall = $part['functionCall'];
+                    $providedId = isset($functionCall['id']) && is_string($functionCall['id']) ? $functionCall['id'] : '';
+                    $name = isset($functionCall['name']) && is_string($functionCall['name']) ? $functionCall['name'] : '';
+                    $arguments = isset($functionCall['args']) && is_array($functionCall['args']) ? $functionCall['args'] : [];
+                    $toolCallId = $providedId !== '' ? $providedId : sprintf('%s_%s', $name !== '' ? $name : 'tool', uniqid('', true));
+                    $thoughtSignature = isset($part['thoughtSignature']) && is_string($part['thoughtSignature']) ? $part['thoughtSignature'] : null;
+
+                    $toolCall = new ToolCall($toolCallId, $name, [], $thoughtSignature);
+                    $state['blocks'][] = $toolCall;
+                    $index = array_key_last($state['blocks']);
+                    $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+                    $stream->push(new ToolCallStartEvent($index, $output));
+
+                    $toolCall = new ToolCall($toolCallId, $name, JsonParse::parseStreamingJson(json_encode($arguments, JSON_THROW_ON_ERROR)), $thoughtSignature);
+                    $state['blocks'][$index] = $toolCall;
+                    $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+                    $stream->push(new ToolCallDeltaEvent($index, json_encode($arguments, JSON_THROW_ON_ERROR), $output));
+                    $stream->push(new ToolCallEndEvent($index, $toolCall, $output));
+                }
+            }
+        }
+
+        if ($candidate['finishReason'] ?? null) {
+            $state['stopReason'] = GoogleShared::mapStopReason(is_string($candidate['finishReason']) ? $candidate['finishReason'] : null);
+        }
+
+        if ($state['stopReason'] === StopReason::ToolUse || $state['toolCallSeen']) {
+            $state['stopReason'] = StopReason::ToolUse;
+        }
+    }
+
+    /**
+     * @param  array{
+     *   blocks: array<int, TextContent|ThinkingContent|ToolCall>,
+     *   currentBlock: TextContent|ThinkingContent|ToolCall|null,
+     *   currentBlockIndex: ?int,
+     *   usage: Usage,
+     *   stopReason: StopReason,
+     *   responseId: ?string,
+     *   errorMessage: ?string,
+     *   toolCallSeen: bool
+     * }  $state
+     */
+    private function finalizeStreamState(array &$state, AssistantMessageEventStream $stream, Model $model): AssistantMessage
+    {
+        $output = $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
+        $this->finishCurrentBlock($state['currentBlock'], $state['currentBlockIndex'], $stream, $output);
+
+        return $this->snapshot($model, $state['blocks'], $state['usage'], $state['stopReason'], $state['responseId'], $state['errorMessage']);
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream
@@ -448,9 +618,9 @@ final readonly class GoogleProvider implements ApiProviderInterface
     }
 
     /**
-     * @return PromiseInterface<array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
+     * @return PromiseInterface<AssistantMessage|array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, GoogleOptions $options, array $params): PromiseInterface
+    private function runDefaultTransport(Model $model, GoogleOptions $options, array $params, AssistantMessageEventStream $stream): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -479,18 +649,22 @@ final readonly class GoogleProvider implements ApiProviderInterface
             }
         : null;
 
+        $state = $this->initializeStreamState($stream, $model);
+
         return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
             'apiKey' => null,
             'onResponse' => $onResponse,
-        ])->then(
-            static fn ($events): array => [
-                'events' => $events,
-                'status' => 200,
-                'headers' => [],
-            ],
-        );
+            'onEvent' => function (array $event) use (&$state, $stream, $model): void {
+                $this->processStreamEvent($state, $event, $stream, $model);
+            },
+        ])->then(function () use (&$state, $stream, $model): AssistantMessage {
+            $output = $this->finalizeStreamState($state, $stream, $model);
+            $stream->push(new DoneEvent($output->stopReason, $output));
+
+            return $output;
+        });
     }
 
     private static function mapToProviderOptions(?StreamOptions $options): GoogleOptions

@@ -11,6 +11,7 @@ use Pi\AI\AssistantMessageEventStream;
 use Pi\AI\CacheRetention;
 use Pi\AI\Context;
 use Pi\AI\EnvApiKeys;
+use Pi\AI\Event\DoneEvent;
 use Pi\AI\Event\ErrorEvent;
 use Pi\AI\Message\AssistantMessage;
 use Pi\AI\Model;
@@ -213,7 +214,7 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
             },
         ])->then(function () use (&$state, $stream, $model): AssistantMessage {
             $output = OpenAIResponsesShared::finalizeStreamState($stream, $model, $state);
-            $stream->push(new \Pi\AI\Event\DoneEvent($output->stopReason, $output));
+            $stream->push(new DoneEvent($output->stopReason, $output));
 
             return $output;
         });

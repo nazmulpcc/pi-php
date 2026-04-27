@@ -11,6 +11,7 @@ use Pi\AI\Api;
 use Pi\AI\Content\ThinkingContent as AiThinkingContent;
 use Pi\AI\Message\AssistantMessage as AiAssistantMessage;
 use Pi\AI\Provider;
+use Pi\AI\StopReason;
 use Pi\AI\Usage;
 
 describe('AiAdapter', function () {
@@ -24,7 +25,7 @@ describe('AiAdapter', function () {
             provider: new Provider('openai'),
             model: 'o3-mini',
             usage: Usage::zero(),
-            stopReason: Pi\AI\StopReason::Stop,
+            stopReason: StopReason::Stop,
             timestamp: time(),
         );
 
