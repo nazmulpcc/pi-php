@@ -2,9 +2,16 @@
 
 declare(strict_types=1);
 
+require_once __DIR__.'/TestHelper.php';
+
+use Pi\AI\CacheRetention;
 use Pi\AI\EnvApiKeys;
+use Pi\AI\SimpleCancellationToken;
+use Pi\AI\StreamOptions;
 use Pi\AI\Support\SimpleOptions;
 use Pi\AI\ThinkingLevel;
+use Pi\AI\Transport\HttpTransport;
+use Pi\AI\Transport\ProviderError;
 use Pi\AI\Transport\SseParser;
 
 describe('SseParser', function () {
@@ -114,5 +121,90 @@ describe('SimpleOptions', function () {
             customBudgets: ['medium' => 4096],
         );
         expect($result['thinkingBudget'])->toBe(4096);
+    });
+});
+
+describe('HttpTransport', function () {
+    it('throws when cancelled before request', function () {
+        $token = new SimpleCancellationToken;
+        $token->cancel();
+
+        $transport = new HttpTransport(signal: $token);
+
+        expect(fn () => $transport->request('GET', 'http://localhost:1/test'))
+            ->toThrow(ProviderError::class, 'cancelled');
+    });
+
+    it('throws when header contains newline injection', function () {
+        $transport = new HttpTransport;
+
+        expect(fn () => $transport->request('GET', 'http://localhost:1/test', [
+            'headers' => ["X-Evil: \r\n\r\nHTTP/1.1 200 OK" => 'value'],
+        ]))->toThrow(ProviderError::class, 'Invalid header');
+    });
+
+    it('detects transient curl errors', function () {
+        $transport = new HttpTransport(maxRetries: 2);
+        $reflection = new ReflectionClass($transport);
+        $method = $reflection->getMethod('isTransientCurlError');
+        expect($method->invoke($transport, 'Connection timed out'))->toBeTrue();
+        expect($method->invoke($transport, 'Could not resolve host'))->toBeTrue();
+        expect($method->invoke($transport, 'SSL connection timeout'))->toBeTrue();
+        expect($method->invoke($transport, 'Some random error'))->toBeFalse();
+    });
+
+    it('detects transient http statuses', function () {
+        $transport = new HttpTransport;
+        $reflection = new ReflectionClass($transport);
+        $method = $reflection->getMethod('isTransientHttpStatus');
+        expect($method->invoke($transport, 500))->toBeTrue();
+        expect($method->invoke($transport, 502))->toBeTrue();
+        expect($method->invoke($transport, 429))->toBeTrue();
+        expect($method->invoke($transport, 400))->toBeFalse();
+        expect($method->invoke($transport, 404))->toBeFalse();
+    });
+
+    it('truncates error response bodies', function () {
+        $transport = new HttpTransport;
+        $reflection = new ReflectionClass($transport);
+        $method = $reflection->getMethod('throwProviderError');
+        $longBody = str_repeat('a', 5000);
+        try {
+            $method->invoke($transport, 500, $longBody);
+        } catch (ProviderError $e) {
+            expect(strlen($e->rawBody ?? ''))->toBeLessThan(5000);
+            expect(str_contains($e->rawBody ?? '', '[truncated]'))->toBeTrue();
+        }
+    });
+
+    it('preserves short error response bodies', function () {
+        $transport = new HttpTransport;
+        $reflection = new ReflectionClass($transport);
+        $method = $reflection->getMethod('throwProviderError');
+        $shortBody = json_encode(['error' => ['message' => 'Something went wrong']]);
+        try {
+            $method->invoke($transport, 500, $shortBody);
+        } catch (ProviderError $e) {
+            expect($e->rawBody)->toBe($shortBody);
+            expect($e->getMessage())->toBe('Something went wrong');
+        }
+    });
+});
+
+describe('CacheRetention', function () {
+    it('has the expected enum values', function () {
+        expect(CacheRetention::None->value)->toBe('none');
+        expect(CacheRetention::Short->value)->toBe('short');
+        expect(CacheRetention::Long->value)->toBe('long');
+    });
+
+    it('defaults to short in stream options', function () {
+        $options = new StreamOptions;
+        expect($options->cacheRetention)->toBe(CacheRetention::Short);
+    });
+
+    it('can be set to long for extended retention', function () {
+        $options = new StreamOptions(cacheRetention: CacheRetention::Long);
+        expect($options->cacheRetention)->toBe(CacheRetention::Long);
     });
 });

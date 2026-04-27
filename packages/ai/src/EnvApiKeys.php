@@ -20,6 +20,7 @@ final class EnvApiKeys
         }
 
         $map = [
+            Provider::AMAZON_BEDROCK => 'AWS_BEARER_TOKEN_BEDROCK',
             Provider::OPENAI => 'OPENAI_API_KEY',
             Provider::AZURE_OPENAI_RESPONSES => 'AZURE_OPENAI_API_KEY',
             Provider::DEEPSEEK => 'DEEPSEEK_API_KEY',

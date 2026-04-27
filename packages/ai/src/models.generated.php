@@ -6,12 +6,12 @@ return
 
 [
     'amazon-bedrock' => [
-        "amazon.nova-2-lite-'v1' => 0" => [
-            'id' => "amazon.nova-2-lite-'v1' => 0",
+        'amazon.nova-2-lite-v1:0' => [
+            'id' => 'amazon.nova-2-lite-v1:0',
             'name' => 'Nova 2 Lite',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -23,12 +23,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "amazon.nova-lite-'v1' => 0" => [
-            'id' => "amazon.nova-lite-'v1' => 0",
+        'amazon.nova-lite-v1:0' => [
+            'id' => 'amazon.nova-lite-v1:0',
             'name' => 'Nova Lite',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -40,12 +40,12 @@ return
             'contextWindow' => 300000,
             'maxTokens' => 8192,
         ],
-        "amazon.nova-micro-'v1' => 0" => [
-            'id' => "amazon.nova-micro-'v1' => 0",
+        'amazon.nova-micro-v1:0' => [
+            'id' => 'amazon.nova-micro-v1:0',
             'name' => 'Nova Micro',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -57,12 +57,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 8192,
         ],
-        "amazon.nova-premier-'v1' => 0" => [
-            'id' => "amazon.nova-premier-'v1' => 0",
+        'amazon.nova-premier-v1:0' => [
+            'id' => 'amazon.nova-premier-v1:0',
             'name' => 'Nova Premier',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -74,12 +74,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 16384,
         ],
-        "amazon.nova-pro-'v1' => 0" => [
-            'id' => "amazon.nova-pro-'v1' => 0",
+        'amazon.nova-pro-v1:0' => [
+            'id' => 'amazon.nova-pro-v1:0',
             'name' => 'Nova Pro',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -91,12 +91,12 @@ return
             'contextWindow' => 300000,
             'maxTokens' => 8192,
         ],
-        "anthropic.claude-3-5-haiku-20241022-'v1' => 0" => [
-            'id' => "anthropic.claude-3-5-haiku-20241022-'v1' => 0",
+        'anthropic.claude-3-5-haiku-20241022-v1:0' => [
+            'id' => 'anthropic.claude-3-5-haiku-20241022-v1:0',
             'name' => 'Claude Haiku 3.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -108,12 +108,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 8192,
         ],
-        "anthropic.claude-3-5-sonnet-20240620-'v1' => 0" => [
-            'id' => "anthropic.claude-3-5-sonnet-20240620-'v1' => 0",
+        'anthropic.claude-3-5-sonnet-20240620-v1:0' => [
+            'id' => 'anthropic.claude-3-5-sonnet-20240620-v1:0',
             'name' => 'Claude Sonnet 3.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -125,12 +125,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 8192,
         ],
-        "anthropic.claude-3-5-sonnet-20241022-'v2' => 0" => [
-            'id' => "anthropic.claude-3-5-sonnet-20241022-'v2' => 0",
+        'anthropic.claude-3-5-sonnet-20241022-v2:0' => [
+            'id' => 'anthropic.claude-3-5-sonnet-20241022-v2:0',
             'name' => 'Claude Sonnet 3.5 v2',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -142,12 +142,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 8192,
         ],
-        "anthropic.claude-3-7-sonnet-20250219-'v1' => 0" => [
-            'id' => "anthropic.claude-3-7-sonnet-20250219-'v1' => 0",
+        'anthropic.claude-3-7-sonnet-20250219-v1:0' => [
+            'id' => 'anthropic.claude-3-7-sonnet-20250219-v1:0',
             'name' => 'Claude Sonnet 3.7',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -159,12 +159,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 8192,
         ],
-        "anthropic.claude-3-haiku-20240307-'v1' => 0" => [
-            'id' => "anthropic.claude-3-haiku-20240307-'v1' => 0",
+        'anthropic.claude-3-haiku-20240307-v1:0' => [
+            'id' => 'anthropic.claude-3-haiku-20240307-v1:0',
             'name' => 'Claude Haiku 3',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -176,12 +176,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 4096,
         ],
-        "anthropic.claude-haiku-4-5-20251001-'v1' => 0" => [
-            'id' => "anthropic.claude-haiku-4-5-20251001-'v1' => 0",
+        'anthropic.claude-haiku-4-5-20251001-v1:0' => [
+            'id' => 'anthropic.claude-haiku-4-5-20251001-v1:0',
             'name' => 'Claude Haiku 4.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -193,12 +193,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "anthropic.claude-opus-4-1-20250805-'v1' => 0" => [
-            'id' => "anthropic.claude-opus-4-1-20250805-'v1' => 0",
+        'anthropic.claude-opus-4-1-20250805-v1:0' => [
+            'id' => 'anthropic.claude-opus-4-1-20250805-v1:0',
             'name' => 'Claude Opus 4.1',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -210,12 +210,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 32000,
         ],
-        "anthropic.claude-opus-4-20250514-'v1' => 0" => [
-            'id' => "anthropic.claude-opus-4-20250514-'v1' => 0",
+        'anthropic.claude-opus-4-20250514-v1:0' => [
+            'id' => 'anthropic.claude-opus-4-20250514-v1:0',
             'name' => 'Claude Opus 4',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -227,12 +227,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 32000,
         ],
-        "anthropic.claude-opus-4-5-20251101-'v1' => 0" => [
-            'id' => "anthropic.claude-opus-4-5-20251101-'v1' => 0",
+        'anthropic.claude-opus-4-5-20251101-v1:0' => [
+            'id' => 'anthropic.claude-opus-4-5-20251101-v1:0',
             'name' => 'Claude Opus 4.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -249,7 +249,7 @@ return
             'name' => 'Claude Opus 4.6',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -266,7 +266,7 @@ return
             'name' => 'Claude Opus 4.7',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -278,12 +278,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 128000,
         ],
-        "anthropic.claude-sonnet-4-20250514-'v1' => 0" => [
-            'id' => "anthropic.claude-sonnet-4-20250514-'v1' => 0",
+        'anthropic.claude-sonnet-4-20250514-v1:0' => [
+            'id' => 'anthropic.claude-sonnet-4-20250514-v1:0',
             'name' => 'Claude Sonnet 4',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -295,12 +295,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "anthropic.claude-sonnet-4-5-20250929-'v1' => 0" => [
-            'id' => "anthropic.claude-sonnet-4-5-20250929-'v1' => 0",
+        'anthropic.claude-sonnet-4-5-20250929-v1:0' => [
+            'id' => 'anthropic.claude-sonnet-4-5-20250929-v1:0',
             'name' => 'Claude Sonnet 4.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -317,7 +317,7 @@ return
             'name' => 'Claude Sonnet 4.6',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -334,7 +334,7 @@ return
             'name' => 'AU Anthropic Claude Opus 4.6',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -351,7 +351,7 @@ return
             'name' => 'AU Anthropic Claude Sonnet 4.6',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -363,12 +363,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 128000,
         ],
-        "deepseek.r1-'v1' => 0" => [
-            'id' => "deepseek.r1-'v1' => 0",
+        'deepseek.r1-v1:0' => [
+            'id' => 'deepseek.r1-v1:0',
             'name' => 'DeepSeek-R1',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -380,12 +380,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 32768,
         ],
-        "deepseek.v3-'v1' => 0" => [
-            'id' => "deepseek.v3-'v1' => 0",
+        'deepseek.v3-v1:0' => [
+            'id' => 'deepseek.v3-v1:0',
             'name' => 'DeepSeek-V3.1',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -402,7 +402,7 @@ return
             'name' => 'DeepSeek-V3.2',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -414,12 +414,12 @@ return
             'contextWindow' => 163840,
             'maxTokens' => 81920,
         ],
-        "eu.anthropic.claude-haiku-4-5-20251001-'v1' => 0" => [
-            'id' => "eu.anthropic.claude-haiku-4-5-20251001-'v1' => 0",
+        'eu.anthropic.claude-haiku-4-5-20251001-v1:0' => [
+            'id' => 'eu.anthropic.claude-haiku-4-5-20251001-v1:0',
             'name' => 'Claude Haiku 4.5 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -431,12 +431,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "eu.anthropic.claude-opus-4-5-20251101-'v1' => 0" => [
-            'id' => "eu.anthropic.claude-opus-4-5-20251101-'v1' => 0",
+        'eu.anthropic.claude-opus-4-5-20251101-v1:0' => [
+            'id' => 'eu.anthropic.claude-opus-4-5-20251101-v1:0',
             'name' => 'Claude Opus 4.5 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -453,7 +453,7 @@ return
             'name' => 'Claude Opus 4.6 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -470,7 +470,7 @@ return
             'name' => 'Claude Opus 4.7 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -482,12 +482,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 128000,
         ],
-        "eu.anthropic.claude-sonnet-4-20250514-'v1' => 0" => [
-            'id' => "eu.anthropic.claude-sonnet-4-20250514-'v1' => 0",
+        'eu.anthropic.claude-sonnet-4-20250514-v1:0' => [
+            'id' => 'eu.anthropic.claude-sonnet-4-20250514-v1:0',
             'name' => 'Claude Sonnet 4 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -499,12 +499,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "eu.anthropic.claude-sonnet-4-5-20250929-'v1' => 0" => [
-            'id' => "eu.anthropic.claude-sonnet-4-5-20250929-'v1' => 0",
+        'eu.anthropic.claude-sonnet-4-5-20250929-v1:0' => [
+            'id' => 'eu.anthropic.claude-sonnet-4-5-20250929-v1:0',
             'name' => 'Claude Sonnet 4.5 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -521,7 +521,7 @@ return
             'name' => 'Claude Sonnet 4.6 (EU)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.eu-central-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.eu-central-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -533,12 +533,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 64000,
         ],
-        "global.anthropic.claude-haiku-4-5-20251001-'v1' => 0" => [
-            'id' => "global.anthropic.claude-haiku-4-5-20251001-'v1' => 0",
+        'global.anthropic.claude-haiku-4-5-20251001-v1:0' => [
+            'id' => 'global.anthropic.claude-haiku-4-5-20251001-v1:0',
             'name' => 'Claude Haiku 4.5 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -550,12 +550,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "global.anthropic.claude-opus-4-5-20251101-'v1' => 0" => [
-            'id' => "global.anthropic.claude-opus-4-5-20251101-'v1' => 0",
+        'global.anthropic.claude-opus-4-5-20251101-v1:0' => [
+            'id' => 'global.anthropic.claude-opus-4-5-20251101-v1:0',
             'name' => 'Claude Opus 4.5 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -572,7 +572,7 @@ return
             'name' => 'Claude Opus 4.6 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -589,7 +589,7 @@ return
             'name' => 'Claude Opus 4.7 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -601,12 +601,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 128000,
         ],
-        "global.anthropic.claude-sonnet-4-20250514-'v1' => 0" => [
-            'id' => "global.anthropic.claude-sonnet-4-20250514-'v1' => 0",
+        'global.anthropic.claude-sonnet-4-20250514-v1:0' => [
+            'id' => 'global.anthropic.claude-sonnet-4-20250514-v1:0',
             'name' => 'Claude Sonnet 4 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -618,12 +618,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "global.anthropic.claude-sonnet-4-5-20250929-'v1' => 0" => [
-            'id' => "global.anthropic.claude-sonnet-4-5-20250929-'v1' => 0",
+        'global.anthropic.claude-sonnet-4-5-20250929-v1:0' => [
+            'id' => 'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
             'name' => 'Claude Sonnet 4.5 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -640,7 +640,7 @@ return
             'name' => 'Claude Sonnet 4.6 (Global)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -657,7 +657,7 @@ return
             'name' => 'Google Gemma 3 27B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -674,7 +674,7 @@ return
             'name' => 'Gemma 3 4B IT',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -686,12 +686,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-1-405b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-1-405b-instruct-'v1' => 0",
+        'meta.llama3-1-405b-instruct-v1:0' => [
+            'id' => 'meta.llama3-1-405b-instruct-v1:0',
             'name' => 'Llama 3.1 405B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -703,12 +703,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-1-70b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-1-70b-instruct-'v1' => 0",
+        'meta.llama3-1-70b-instruct-v1:0' => [
+            'id' => 'meta.llama3-1-70b-instruct-v1:0',
             'name' => 'Llama 3.1 70B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -720,12 +720,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-1-8b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-1-8b-instruct-'v1' => 0",
+        'meta.llama3-1-8b-instruct-v1:0' => [
+            'id' => 'meta.llama3-1-8b-instruct-v1:0',
             'name' => 'Llama 3.1 8B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -737,12 +737,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-2-11b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-2-11b-instruct-'v1' => 0",
+        'meta.llama3-2-11b-instruct-v1:0' => [
+            'id' => 'meta.llama3-2-11b-instruct-v1:0',
             'name' => 'Llama 3.2 11B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -754,12 +754,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-2-1b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-2-1b-instruct-'v1' => 0",
+        'meta.llama3-2-1b-instruct-v1:0' => [
+            'id' => 'meta.llama3-2-1b-instruct-v1:0',
             'name' => 'Llama 3.2 1B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -771,12 +771,12 @@ return
             'contextWindow' => 131000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-2-3b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-2-3b-instruct-'v1' => 0",
+        'meta.llama3-2-3b-instruct-v1:0' => [
+            'id' => 'meta.llama3-2-3b-instruct-v1:0',
             'name' => 'Llama 3.2 3B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -788,12 +788,12 @@ return
             'contextWindow' => 131000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-2-90b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-2-90b-instruct-'v1' => 0",
+        'meta.llama3-2-90b-instruct-v1:0' => [
+            'id' => 'meta.llama3-2-90b-instruct-v1:0',
             'name' => 'Llama 3.2 90B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -805,12 +805,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama3-3-70b-instruct-'v1' => 0" => [
-            'id' => "meta.llama3-3-70b-instruct-'v1' => 0",
+        'meta.llama3-3-70b-instruct-v1:0' => [
+            'id' => 'meta.llama3-3-70b-instruct-v1:0',
             'name' => 'Llama 3.3 70B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -822,12 +822,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "meta.llama4-maverick-17b-instruct-'v1' => 0" => [
-            'id' => "meta.llama4-maverick-17b-instruct-'v1' => 0",
+        'meta.llama4-maverick-17b-instruct-v1:0' => [
+            'id' => 'meta.llama4-maverick-17b-instruct-v1:0',
             'name' => 'Llama 4 Maverick 17B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -839,12 +839,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 16384,
         ],
-        "meta.llama4-scout-17b-instruct-'v1' => 0" => [
-            'id' => "meta.llama4-scout-17b-instruct-'v1' => 0",
+        'meta.llama4-scout-17b-instruct-v1:0' => [
+            'id' => 'meta.llama4-scout-17b-instruct-v1:0',
             'name' => 'Llama 4 Scout 17B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -861,7 +861,7 @@ return
             'name' => 'MiniMax M2',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -878,7 +878,7 @@ return
             'name' => 'MiniMax M2.1',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -895,7 +895,7 @@ return
             'name' => 'MiniMax M2.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -912,7 +912,7 @@ return
             'name' => 'Devstral 2 123B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -929,7 +929,7 @@ return
             'name' => 'Magistral Small 1.2',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -946,7 +946,7 @@ return
             'name' => 'Ministral 14B 3.0',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -963,7 +963,7 @@ return
             'name' => 'Ministral 3 3B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -980,7 +980,7 @@ return
             'name' => 'Ministral 3 8B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -997,7 +997,7 @@ return
             'name' => 'Mistral Large 3',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1009,12 +1009,12 @@ return
             'contextWindow' => 256000,
             'maxTokens' => 8192,
         ],
-        "mistral.pixtral-large-2502-'v1' => 0" => [
-            'id' => "mistral.pixtral-large-2502-'v1' => 0",
+        'mistral.pixtral-large-2502-v1:0' => [
+            'id' => 'mistral.pixtral-large-2502-v1:0',
             'name' => 'Pixtral Large (25.02)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1031,7 +1031,7 @@ return
             'name' => 'Voxtral Mini 3B 2507',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1048,7 +1048,7 @@ return
             'name' => 'Voxtral Small 24B 2507',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1065,7 +1065,7 @@ return
             'name' => 'Kimi K2 Thinking',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1082,7 +1082,7 @@ return
             'name' => 'Kimi K2.5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1099,7 +1099,7 @@ return
             'name' => 'NVIDIA Nemotron Nano 12B v2 VL BF16',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1116,7 +1116,7 @@ return
             'name' => 'NVIDIA Nemotron Nano 3 30B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1133,7 +1133,7 @@ return
             'name' => 'NVIDIA Nemotron Nano 9B v2',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1150,7 +1150,7 @@ return
             'name' => 'NVIDIA Nemotron 3 Super 120B A12B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1167,7 +1167,7 @@ return
             'name' => 'gpt-oss-120b',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1184,7 +1184,7 @@ return
             'name' => 'gpt-oss-20b',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1201,7 +1201,7 @@ return
             'name' => 'GPT OSS Safeguard 120B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1218,7 +1218,7 @@ return
             'name' => 'GPT OSS Safeguard 20B',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1230,12 +1230,12 @@ return
             'contextWindow' => 128000,
             'maxTokens' => 4096,
         ],
-        "qwen.qwen3-235b-a22b-2507-'v1' => 0" => [
-            'id' => "qwen.qwen3-235b-a22b-2507-'v1' => 0",
+        'qwen.qwen3-235b-a22b-2507-v1:0' => [
+            'id' => 'qwen.qwen3-235b-a22b-2507-v1:0',
             'name' => 'Qwen3 235B A22B 2507',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1247,12 +1247,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 131072,
         ],
-        "qwen.qwen3-32b-'v1' => 0" => [
-            'id' => "qwen.qwen3-32b-'v1' => 0",
+        'qwen.qwen3-32b-v1:0' => [
+            'id' => 'qwen.qwen3-32b-v1:0',
             'name' => 'Qwen3 32B (dense)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1264,12 +1264,12 @@ return
             'contextWindow' => 16384,
             'maxTokens' => 16384,
         ],
-        "qwen.qwen3-coder-30b-a3b-'v1' => 0" => [
-            'id' => "qwen.qwen3-coder-30b-a3b-'v1' => 0",
+        'qwen.qwen3-coder-30b-a3b-v1:0' => [
+            'id' => 'qwen.qwen3-coder-30b-a3b-v1:0',
             'name' => 'Qwen3 Coder 30B A3B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1281,12 +1281,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 131072,
         ],
-        "qwen.qwen3-coder-480b-a35b-'v1' => 0" => [
-            'id' => "qwen.qwen3-coder-480b-a35b-'v1' => 0",
+        'qwen.qwen3-coder-480b-a35b-v1:0' => [
+            'id' => 'qwen.qwen3-coder-480b-a35b-v1:0',
             'name' => 'Qwen3 Coder 480B A35B Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1303,7 +1303,7 @@ return
             'name' => 'Qwen3 Coder Next',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1320,7 +1320,7 @@ return
             'name' => 'Qwen/Qwen3-Next-80B-A3B-Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -1337,7 +1337,7 @@ return
             'name' => 'Qwen/Qwen3-VL-235B-A22B-Instruct',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1349,12 +1349,12 @@ return
             'contextWindow' => 262000,
             'maxTokens' => 262000,
         ],
-        "us.anthropic.claude-haiku-4-5-20251001-'v1' => 0" => [
-            'id' => "us.anthropic.claude-haiku-4-5-20251001-'v1' => 0",
+        'us.anthropic.claude-haiku-4-5-20251001-v1:0' => [
+            'id' => 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
             'name' => 'Claude Haiku 4.5 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1366,12 +1366,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "us.anthropic.claude-opus-4-1-20250805-'v1' => 0" => [
-            'id' => "us.anthropic.claude-opus-4-1-20250805-'v1' => 0",
+        'us.anthropic.claude-opus-4-1-20250805-v1:0' => [
+            'id' => 'us.anthropic.claude-opus-4-1-20250805-v1:0',
             'name' => 'Claude Opus 4.1 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1383,12 +1383,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 32000,
         ],
-        "us.anthropic.claude-opus-4-20250514-'v1' => 0" => [
-            'id' => "us.anthropic.claude-opus-4-20250514-'v1' => 0",
+        'us.anthropic.claude-opus-4-20250514-v1:0' => [
+            'id' => 'us.anthropic.claude-opus-4-20250514-v1:0',
             'name' => 'Claude Opus 4 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1400,12 +1400,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 32000,
         ],
-        "us.anthropic.claude-opus-4-5-20251101-'v1' => 0" => [
-            'id' => "us.anthropic.claude-opus-4-5-20251101-'v1' => 0",
+        'us.anthropic.claude-opus-4-5-20251101-v1:0' => [
+            'id' => 'us.anthropic.claude-opus-4-5-20251101-v1:0',
             'name' => 'Claude Opus 4.5 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1422,7 +1422,7 @@ return
             'name' => 'Claude Opus 4.6 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1439,7 +1439,7 @@ return
             'name' => 'Claude Opus 4.7 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1451,12 +1451,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 128000,
         ],
-        "us.anthropic.claude-sonnet-4-20250514-'v1' => 0" => [
-            'id' => "us.anthropic.claude-sonnet-4-20250514-'v1' => 0",
+        'us.anthropic.claude-sonnet-4-20250514-v1:0' => [
+            'id' => 'us.anthropic.claude-sonnet-4-20250514-v1:0',
             'name' => 'Claude Sonnet 4 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1468,12 +1468,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 64000,
         ],
-        "us.anthropic.claude-sonnet-4-5-20250929-'v1' => 0" => [
-            'id' => "us.anthropic.claude-sonnet-4-5-20250929-'v1' => 0",
+        'us.anthropic.claude-sonnet-4-5-20250929-v1:0' => [
+            'id' => 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
             'name' => 'Claude Sonnet 4.5 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1490,7 +1490,7 @@ return
             'name' => 'Claude Sonnet 4.6 (US)',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1502,12 +1502,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 64000,
         ],
-        "writer.palmyra-x4-'v1' => 0" => [
-            'id' => "writer.palmyra-x4-'v1' => 0",
+        'writer.palmyra-x4-v1:0' => [
+            'id' => 'writer.palmyra-x4-v1:0',
             'name' => 'Palmyra X4',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1519,12 +1519,12 @@ return
             'contextWindow' => 122880,
             'maxTokens' => 8192,
         ],
-        "writer.palmyra-x5-'v1' => 0" => [
-            'id' => "writer.palmyra-x5-'v1' => 0",
+        'writer.palmyra-x5-v1:0' => [
+            'id' => 'writer.palmyra-x5-v1:0',
             'name' => 'Palmyra X5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1541,7 +1541,7 @@ return
             'name' => 'GLM-4.7',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1558,7 +1558,7 @@ return
             'name' => 'GLM-4.7-Flash',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1575,7 +1575,7 @@ return
             'name' => 'GLM-5',
             'api' => 'bedrock-converse-stream',
             'provider' => 'amazon-bedrock',
-            'baseUrl' => "'https' => //bedrock-runtime.us-east-1.amazonaws.com",
+            'baseUrl' => 'https://bedrock-runtime.us-east-1.amazonaws.com',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -1594,7 +1594,7 @@ return
             'name' => 'Claude Haiku 3.5',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1611,7 +1611,7 @@ return
             'name' => 'Claude Haiku 3.5 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1628,7 +1628,7 @@ return
             'name' => 'Claude Sonnet 3.5',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1645,7 +1645,7 @@ return
             'name' => 'Claude Sonnet 3.5 v2',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1662,7 +1662,7 @@ return
             'name' => 'Claude Sonnet 3.7',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1679,7 +1679,7 @@ return
             'name' => 'Claude Haiku 3',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1696,7 +1696,7 @@ return
             'name' => 'Claude Opus 3',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1713,7 +1713,7 @@ return
             'name' => 'Claude Sonnet 3',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1730,7 +1730,7 @@ return
             'name' => 'Claude Haiku 4.5 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1747,7 +1747,7 @@ return
             'name' => 'Claude Haiku 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1764,7 +1764,7 @@ return
             'name' => 'Claude Opus 4 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1781,7 +1781,7 @@ return
             'name' => 'Claude Opus 4.1 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1798,7 +1798,7 @@ return
             'name' => 'Claude Opus 4.1',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1815,7 +1815,7 @@ return
             'name' => 'Claude Opus 4',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1832,7 +1832,7 @@ return
             'name' => 'Claude Opus 4.5 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1849,7 +1849,7 @@ return
             'name' => 'Claude Opus 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1866,7 +1866,7 @@ return
             'name' => 'Claude Opus 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1883,7 +1883,7 @@ return
             'name' => 'Claude Opus 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1900,7 +1900,7 @@ return
             'name' => 'Claude Sonnet 4 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1917,7 +1917,7 @@ return
             'name' => 'Claude Sonnet 4',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1934,7 +1934,7 @@ return
             'name' => 'Claude Sonnet 4.5 (latest)',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1951,7 +1951,7 @@ return
             'name' => 'Claude Sonnet 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -1968,7 +1968,7 @@ return
             'name' => 'Claude Sonnet 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'anthropic',
-            'baseUrl' => "'https' => //api.anthropic.com",
+            'baseUrl' => 'https://api.anthropic.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -2686,7 +2686,7 @@ return
             'name' => 'GPT OSS 120B',
             'api' => 'openai-completions',
             'provider' => 'cerebras',
-            'baseUrl' => "'https' => //api.cerebras.ai/v1",
+            'baseUrl' => 'https://api.cerebras.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2703,7 +2703,7 @@ return
             'name' => 'Llama 3.1 8B',
             'api' => 'openai-completions',
             'provider' => 'cerebras',
-            'baseUrl' => "'https' => //api.cerebras.ai/v1",
+            'baseUrl' => 'https://api.cerebras.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -2720,7 +2720,7 @@ return
             'name' => 'Qwen 3 235B Instruct',
             'api' => 'openai-completions',
             'provider' => 'cerebras',
-            'baseUrl' => "'https' => //api.cerebras.ai/v1",
+            'baseUrl' => 'https://api.cerebras.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -2737,7 +2737,7 @@ return
             'name' => 'Z.AI GLM-4.7',
             'api' => 'openai-completions',
             'provider' => 'cerebras',
-            'baseUrl' => "'https' => //api.cerebras.ai/v1",
+            'baseUrl' => 'https://api.cerebras.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -2756,7 +2756,7 @@ return
             'name' => 'DeepSeek V4 Flash',
             'api' => 'openai-completions',
             'provider' => 'deepseek',
-            'baseUrl' => "'https' => //api.deepseek.com",
+            'baseUrl' => 'https://api.deepseek.com',
             'compat' => ['requiresReasoningContentOnAssistantMessages' => true, 'thinkingFormat' => 'deepseek', 'reasoningEffortMap' => ['minimal' => 'high', 'low' => 'high', 'medium' => 'high', 'high' => 'high', 'xhigh' => 'max']],
             'reasoning' => true,
             'input' => ['text'],
@@ -2774,7 +2774,7 @@ return
             'name' => 'DeepSeek V4 Pro',
             'api' => 'openai-completions',
             'provider' => 'deepseek',
-            'baseUrl' => "'https' => //api.deepseek.com",
+            'baseUrl' => 'https://api.deepseek.com',
             'compat' => ['requiresReasoningContentOnAssistantMessages' => true, 'thinkingFormat' => 'deepseek', 'reasoningEffortMap' => ['minimal' => 'high', 'low' => 'high', 'medium' => 'high', 'high' => 'high', 'xhigh' => 'max']],
             'reasoning' => true,
             'input' => ['text'],
@@ -2794,7 +2794,7 @@ return
             'name' => 'DeepSeek V3.1',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2811,7 +2811,7 @@ return
             'name' => 'DeepSeek V3.2',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2828,7 +2828,7 @@ return
             'name' => 'GLM 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2845,7 +2845,7 @@ return
             'name' => 'GLM 4.5 Air',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2862,7 +2862,7 @@ return
             'name' => 'GLM 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2879,7 +2879,7 @@ return
             'name' => 'GLM 5',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2896,7 +2896,7 @@ return
             'name' => 'GLM 5.1',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2913,7 +2913,7 @@ return
             'name' => 'GPT OSS 120B',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2930,7 +2930,7 @@ return
             'name' => 'GPT OSS 20B',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2947,7 +2947,7 @@ return
             'name' => 'Kimi K2 Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -2964,7 +2964,7 @@ return
             'name' => 'Kimi K2 Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -2981,7 +2981,7 @@ return
             'name' => 'Kimi K2.5',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -2998,7 +2998,7 @@ return
             'name' => 'Kimi K2.6',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3015,7 +3015,7 @@ return
             'name' => 'MiniMax-M2.1',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -3032,7 +3032,7 @@ return
             'name' => 'MiniMax-M2.5',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -3049,7 +3049,7 @@ return
             'name' => 'MiniMax-M2.7',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -3066,7 +3066,7 @@ return
             'name' => 'Qwen 3.6 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3083,7 +3083,7 @@ return
             'name' => 'Kimi K2.5 Turbo (firepass)',
             'api' => 'anthropic-messages',
             'provider' => 'fireworks',
-            'baseUrl' => "'https' => //api.fireworks.ai/inference",
+            'baseUrl' => 'https://api.fireworks.ai/inference',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3102,7 +3102,7 @@ return
             'name' => 'Claude Haiku 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsEagerToolInputStreaming' => false],
             'reasoning' => true,
@@ -3121,7 +3121,7 @@ return
             'name' => 'Claude Opus 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3139,7 +3139,7 @@ return
             'name' => 'Claude Opus 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3157,7 +3157,7 @@ return
             'name' => 'Claude Opus 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3175,7 +3175,7 @@ return
             'name' => 'Claude Sonnet 4',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsEagerToolInputStreaming' => false],
             'reasoning' => true,
@@ -3194,7 +3194,7 @@ return
             'name' => 'Claude Sonnet 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsEagerToolInputStreaming' => false],
             'reasoning' => true,
@@ -3213,7 +3213,7 @@ return
             'name' => 'Claude Sonnet 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3231,7 +3231,7 @@ return
             'name' => 'Gemini 2.5 Pro',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => false,
@@ -3250,7 +3250,7 @@ return
             'name' => 'Gemini 3 Flash',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => true,
@@ -3269,7 +3269,7 @@ return
             'name' => 'Gemini 3 Pro Preview',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => true,
@@ -3288,7 +3288,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => true,
@@ -3307,7 +3307,7 @@ return
             'name' => 'GPT-4.1',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => false,
@@ -3326,7 +3326,7 @@ return
             'name' => 'GPT-4o',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => false,
@@ -3345,7 +3345,7 @@ return
             'name' => 'GPT-5',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3363,7 +3363,7 @@ return
             'name' => 'GPT-5-mini',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3381,7 +3381,7 @@ return
             'name' => 'GPT-5.1',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3399,7 +3399,7 @@ return
             'name' => 'GPT-5.1-Codex',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3417,7 +3417,7 @@ return
             'name' => 'GPT-5.1-Codex-max',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3435,7 +3435,7 @@ return
             'name' => 'GPT-5.1-Codex-mini',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3453,7 +3453,7 @@ return
             'name' => 'GPT-5.2',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3471,7 +3471,7 @@ return
             'name' => 'GPT-5.2-Codex',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3489,7 +3489,7 @@ return
             'name' => 'GPT-5.3-Codex',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3507,7 +3507,7 @@ return
             'name' => 'GPT-5.4',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3525,7 +3525,7 @@ return
             'name' => 'GPT-5.4 Mini',
             'api' => 'openai-responses',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -3543,7 +3543,7 @@ return
             'name' => 'Grok Code Fast 1',
             'api' => 'openai-completions',
             'provider' => 'github-copilot',
-            'baseUrl' => "'https' => //api.individual.githubcopilot.com",
+            'baseUrl' => 'https://api.individual.githubcopilot.com',
             'headers' => ['User-Agent' => 'GitHubCopilotChat/0.35.0', 'Editor-Version' => 'vscode/1.107.0', 'Editor-Plugin-Version' => 'copilot-chat/0.35.0', 'Copilot-Integration-Id' => 'vscode-chat'],
             'compat' => ['supportsStore' => false, 'supportsDeveloperRole' => false, 'supportsReasoningEffort' => false],
             'reasoning' => true,
@@ -3564,7 +3564,7 @@ return
             'name' => 'Gemini 1.5 Flash',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3581,7 +3581,7 @@ return
             'name' => 'Gemini 1.5 Flash-8B',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3598,7 +3598,7 @@ return
             'name' => 'Gemini 1.5 Pro',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3615,7 +3615,7 @@ return
             'name' => 'Gemini 2.0 Flash',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3632,7 +3632,7 @@ return
             'name' => 'Gemini 2.0 Flash Lite',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3649,7 +3649,7 @@ return
             'name' => 'Gemini 2.5 Flash',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3666,7 +3666,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3683,7 +3683,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite Preview 06-17',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3700,7 +3700,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite Preview 09-25',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3717,7 +3717,7 @@ return
             'name' => 'Gemini 2.5 Flash Preview 04-17',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3734,7 +3734,7 @@ return
             'name' => 'Gemini 2.5 Flash Preview 05-20',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3751,7 +3751,7 @@ return
             'name' => 'Gemini 2.5 Flash Preview 09-25',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3768,7 +3768,7 @@ return
             'name' => 'Gemini 2.5 Pro',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3785,7 +3785,7 @@ return
             'name' => 'Gemini 2.5 Pro Preview 05-06',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3802,7 +3802,7 @@ return
             'name' => 'Gemini 2.5 Pro Preview 06-05',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3819,7 +3819,7 @@ return
             'name' => 'Gemini 3 Flash Preview',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3836,7 +3836,7 @@ return
             'name' => 'Gemini 3 Pro Preview',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3853,7 +3853,7 @@ return
             'name' => 'Gemini 3.1 Flash Lite Preview',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3870,7 +3870,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3887,7 +3887,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview Custom Tools',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3904,7 +3904,7 @@ return
             'name' => 'Gemini Flash Latest',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3921,7 +3921,7 @@ return
             'name' => 'Gemini Flash-Lite Latest',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3938,7 +3938,7 @@ return
             'name' => 'Gemini Live 2.5 Flash',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3955,7 +3955,7 @@ return
             'name' => 'Gemini Live 2.5 Flash Preview Native Audio',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -3972,7 +3972,7 @@ return
             'name' => 'Gemma 3 27B',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -3989,7 +3989,7 @@ return
             'name' => 'Gemma 4 26B',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4006,7 +4006,7 @@ return
             'name' => 'Gemma 4 31B',
             'api' => 'google-generative-ai',
             'provider' => 'google',
-            'baseUrl' => "'https' => //generativelanguage.googleapis.com/v1beta",
+            'baseUrl' => 'https://generativelanguage.googleapis.com/v1beta',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4025,7 +4025,7 @@ return
             'name' => 'Claude Opus 4.5 Thinking (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4042,7 +4042,7 @@ return
             'name' => 'Claude Opus 4.6 Thinking (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4059,7 +4059,7 @@ return
             'name' => 'Claude Sonnet 4.5 (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4076,7 +4076,7 @@ return
             'name' => 'Claude Sonnet 4.5 Thinking (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4093,7 +4093,7 @@ return
             'name' => 'Claude Sonnet 4.6 (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4110,7 +4110,7 @@ return
             'name' => 'Gemini 3 Flash (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4127,7 +4127,7 @@ return
             'name' => 'Gemini 3.1 Pro High (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4144,7 +4144,7 @@ return
             'name' => 'Gemini 3.1 Pro Low (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4161,7 +4161,7 @@ return
             'name' => 'GPT-OSS 120B Medium (Antigravity)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-antigravity',
-            'baseUrl' => "'https' => //daily-cloudcode-pa.sandbox.googleapis.com",
+            'baseUrl' => 'https://daily-cloudcode-pa.sandbox.googleapis.com',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4180,7 +4180,7 @@ return
             'name' => 'Gemini 2.0 Flash (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4197,7 +4197,7 @@ return
             'name' => 'Gemini 2.5 Flash (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4214,7 +4214,7 @@ return
             'name' => 'Gemini 2.5 Pro (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4231,7 +4231,7 @@ return
             'name' => 'Gemini 3 Flash Preview (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4248,7 +4248,7 @@ return
             'name' => 'Gemini 3 Pro Preview (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4265,7 +4265,7 @@ return
             'name' => 'Gemini 3.1 Flash Lite Preview (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4282,7 +4282,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview (Cloud Code Assist)',
             'api' => 'google-gemini-cli',
             'provider' => 'google-gemini-cli',
-            'baseUrl' => "'https' => //cloudcode-pa.googleapis.com",
+            'baseUrl' => 'https://cloudcode-pa.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4301,7 +4301,7 @@ return
             'name' => 'Gemini 1.5 Flash (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4318,7 +4318,7 @@ return
             'name' => 'Gemini 1.5 Flash-8B (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4335,7 +4335,7 @@ return
             'name' => 'Gemini 1.5 Pro (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4352,7 +4352,7 @@ return
             'name' => 'Gemini 2.0 Flash (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4369,7 +4369,7 @@ return
             'name' => 'Gemini 2.0 Flash Lite (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4386,7 +4386,7 @@ return
             'name' => 'Gemini 2.5 Flash (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4403,7 +4403,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4420,7 +4420,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite Preview 09-25 (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4437,7 +4437,7 @@ return
             'name' => 'Gemini 2.5 Pro (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4454,7 +4454,7 @@ return
             'name' => 'Gemini 3 Flash Preview (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4471,7 +4471,7 @@ return
             'name' => 'Gemini 3 Pro Preview (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4488,7 +4488,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4505,7 +4505,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview Custom Tools (Vertex)',
             'api' => 'google-vertex',
             'provider' => 'google-vertex',
-            'baseUrl' => "'https' => //{location}-aiplatform.googleapis.com",
+            'baseUrl' => 'https://{location}-aiplatform.googleapis.com',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4524,7 +4524,7 @@ return
             'name' => 'DeepSeek R1 Distill Llama 70B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4541,7 +4541,7 @@ return
             'name' => 'Gemma 2 9B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4558,7 +4558,7 @@ return
             'name' => 'Compound',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4575,7 +4575,7 @@ return
             'name' => 'Compound Mini',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4592,7 +4592,7 @@ return
             'name' => 'Llama 3.1 8B Instant',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4609,7 +4609,7 @@ return
             'name' => 'Llama 3.3 70B Versatile',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4626,7 +4626,7 @@ return
             'name' => 'Llama 3 70B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4643,7 +4643,7 @@ return
             'name' => 'Llama 3 8B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4660,7 +4660,7 @@ return
             'name' => 'Llama 4 Maverick 17B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4677,7 +4677,7 @@ return
             'name' => 'Llama 4 Scout 17B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -4694,7 +4694,7 @@ return
             'name' => 'Mistral Saba 24B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4711,7 +4711,7 @@ return
             'name' => 'Kimi K2 Instruct',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4728,7 +4728,7 @@ return
             'name' => 'Kimi K2 Instruct 0905',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -4745,7 +4745,7 @@ return
             'name' => 'GPT OSS 120B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4762,7 +4762,7 @@ return
             'name' => 'GPT OSS 20B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4779,7 +4779,7 @@ return
             'name' => 'Safety GPT OSS 20B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4796,7 +4796,7 @@ return
             'name' => 'Qwen QwQ 32B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4813,7 +4813,7 @@ return
             'name' => 'Qwen3 32B',
             'api' => 'openai-completions',
             'provider' => 'groq',
-            'baseUrl' => "'https' => //api.groq.com/openai/v1",
+            'baseUrl' => 'https://api.groq.com/openai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -4832,7 +4832,7 @@ return
             'name' => 'MiniMax-M2.1',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -4850,7 +4850,7 @@ return
             'name' => 'MiniMax-M2.5',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -4868,7 +4868,7 @@ return
             'name' => 'MiniMax-M2.7',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -4886,7 +4886,7 @@ return
             'name' => 'Qwen3-235B-A22B-Thinking-2507',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -4904,7 +4904,7 @@ return
             'name' => 'Qwen3-Coder-480B-A35B-Instruct',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -4922,7 +4922,7 @@ return
             'name' => 'Qwen3-Coder-Next',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -4940,7 +4940,7 @@ return
             'name' => 'Qwen3-Next-80B-A3B-Instruct',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -4958,7 +4958,7 @@ return
             'name' => 'Qwen3-Next-80B-A3B-Thinking',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -4976,7 +4976,7 @@ return
             'name' => 'Qwen3.5-397B-A17B',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -4994,7 +4994,7 @@ return
             'name' => 'MiMo-V2-Flash',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5012,7 +5012,7 @@ return
             'name' => 'DeepSeek-R1-0528',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5030,7 +5030,7 @@ return
             'name' => 'DeepSeek-V3.2',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5048,7 +5048,7 @@ return
             'name' => 'Kimi-K2-Instruct',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -5066,7 +5066,7 @@ return
             'name' => 'Kimi-K2-Instruct-0905',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => false,
             'input' => ['text'],
@@ -5084,7 +5084,7 @@ return
             'name' => 'Kimi-K2-Thinking',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5102,7 +5102,7 @@ return
             'name' => 'Kimi-K2.5',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -5120,7 +5120,7 @@ return
             'name' => 'Kimi-K2.6',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -5138,7 +5138,7 @@ return
             'name' => 'GLM-4.7',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5156,7 +5156,7 @@ return
             'name' => 'GLM-4.7-Flash',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5174,7 +5174,7 @@ return
             'name' => 'GLM-5',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5192,7 +5192,7 @@ return
             'name' => 'GLM-5.1',
             'api' => 'openai-completions',
             'provider' => 'huggingface',
-            'baseUrl' => "'https' => //router.huggingface.co/v1",
+            'baseUrl' => 'https://router.huggingface.co/v1',
             'compat' => ['supportsDeveloperRole' => false],
             'reasoning' => true,
             'input' => ['text'],
@@ -5212,7 +5212,7 @@ return
             'name' => 'Kimi K2.6',
             'api' => 'anthropic-messages',
             'provider' => 'kimi-coding',
-            'baseUrl' => "'https' => //api.kimi.com/coding",
+            'baseUrl' => 'https://api.kimi.com/coding',
             'headers' => ['User-Agent' => 'KimiCLI/1.5'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -5230,7 +5230,7 @@ return
             'name' => 'Kimi For Coding',
             'api' => 'anthropic-messages',
             'provider' => 'kimi-coding',
-            'baseUrl' => "'https' => //api.kimi.com/coding",
+            'baseUrl' => 'https://api.kimi.com/coding',
             'headers' => ['User-Agent' => 'KimiCLI/1.5'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -5248,7 +5248,7 @@ return
             'name' => 'Kimi K2 Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'kimi-coding',
-            'baseUrl' => "'https' => //api.kimi.com/coding",
+            'baseUrl' => 'https://api.kimi.com/coding',
             'headers' => ['User-Agent' => 'KimiCLI/1.5'],
             'reasoning' => true,
             'input' => ['text'],
@@ -5268,7 +5268,7 @@ return
             'name' => 'MiniMax-M2.7',
             'api' => 'anthropic-messages',
             'provider' => 'minimax',
-            'baseUrl' => "'https' => //api.minimax.io/anthropic",
+            'baseUrl' => 'https://api.minimax.io/anthropic',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5285,7 +5285,7 @@ return
             'name' => 'MiniMax-M2.7-highspeed',
             'api' => 'anthropic-messages',
             'provider' => 'minimax',
-            'baseUrl' => "'https' => //api.minimax.io/anthropic",
+            'baseUrl' => 'https://api.minimax.io/anthropic',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5304,7 +5304,7 @@ return
             'name' => 'MiniMax-M2.7',
             'api' => 'anthropic-messages',
             'provider' => 'minimax-cn',
-            'baseUrl' => "'https' => //api.minimaxi.com/anthropic",
+            'baseUrl' => 'https://api.minimaxi.com/anthropic',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5321,7 +5321,7 @@ return
             'name' => 'MiniMax-M2.7-highspeed',
             'api' => 'anthropic-messages',
             'provider' => 'minimax-cn',
-            'baseUrl' => "'https' => //api.minimaxi.com/anthropic",
+            'baseUrl' => 'https://api.minimaxi.com/anthropic',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5340,7 +5340,7 @@ return
             'name' => 'Codestral (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5357,7 +5357,7 @@ return
             'name' => 'Devstral 2',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5374,7 +5374,7 @@ return
             'name' => 'Devstral Medium',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5391,7 +5391,7 @@ return
             'name' => 'Devstral 2 (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5408,7 +5408,7 @@ return
             'name' => 'Devstral Small 2505',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5425,7 +5425,7 @@ return
             'name' => 'Devstral Small',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5442,7 +5442,7 @@ return
             'name' => 'Devstral Small 2',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5459,7 +5459,7 @@ return
             'name' => 'Magistral Medium (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5476,7 +5476,7 @@ return
             'name' => 'Magistral Small',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -5493,7 +5493,7 @@ return
             'name' => 'Ministral 3B (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5510,7 +5510,7 @@ return
             'name' => 'Ministral 8B (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5527,7 +5527,7 @@ return
             'name' => 'Mistral Large 2.1',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5544,7 +5544,7 @@ return
             'name' => 'Mistral Large 3',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5561,7 +5561,7 @@ return
             'name' => 'Mistral Large (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5578,7 +5578,7 @@ return
             'name' => 'Mistral Medium 3',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5595,7 +5595,7 @@ return
             'name' => 'Mistral Medium 3.1',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5612,7 +5612,7 @@ return
             'name' => 'Mistral Medium (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5629,7 +5629,7 @@ return
             'name' => 'Mistral Nemo',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5646,7 +5646,7 @@ return
             'name' => 'Mistral Small 3.2',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5663,7 +5663,7 @@ return
             'name' => 'Mistral Small 4',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5680,7 +5680,7 @@ return
             'name' => 'Mistral Small (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5697,7 +5697,7 @@ return
             'name' => 'Mistral 7B',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5714,7 +5714,7 @@ return
             'name' => 'Mixtral 8x22B',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5731,7 +5731,7 @@ return
             'name' => 'Mixtral 8x7B',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5748,7 +5748,7 @@ return
             'name' => 'Pixtral 12B',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5765,7 +5765,7 @@ return
             'name' => 'Pixtral Large (latest)',
             'api' => 'mistral-conversations',
             'provider' => 'mistral',
-            'baseUrl' => "'https' => //api.mistral.ai",
+            'baseUrl' => 'https://api.mistral.ai',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5784,7 +5784,7 @@ return
             'name' => 'GPT-4',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -5801,7 +5801,7 @@ return
             'name' => 'GPT-4 Turbo',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5818,7 +5818,7 @@ return
             'name' => 'GPT-4.1',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5835,7 +5835,7 @@ return
             'name' => 'GPT-4.1 mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5852,7 +5852,7 @@ return
             'name' => 'GPT-4.1 nano',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5869,7 +5869,7 @@ return
             'name' => 'GPT-4o',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5886,7 +5886,7 @@ return
             'name' => 'GPT-4o (2024-05-13)',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5903,7 +5903,7 @@ return
             'name' => 'GPT-4o (2024-08-06)',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5920,7 +5920,7 @@ return
             'name' => 'GPT-4o (2024-11-20)',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5937,7 +5937,7 @@ return
             'name' => 'GPT-4o mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5954,7 +5954,7 @@ return
             'name' => 'GPT-5',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5971,7 +5971,7 @@ return
             'name' => 'GPT-5 Chat Latest',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -5988,7 +5988,7 @@ return
             'name' => 'GPT-5-Codex',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6005,7 +6005,7 @@ return
             'name' => 'GPT-5 Mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6022,7 +6022,7 @@ return
             'name' => 'GPT-5 Nano',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6039,7 +6039,7 @@ return
             'name' => 'GPT-5 Pro',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6056,7 +6056,7 @@ return
             'name' => 'GPT-5.1',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6073,7 +6073,7 @@ return
             'name' => 'GPT-5.1 Chat',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6090,7 +6090,7 @@ return
             'name' => 'GPT-5.1 Codex',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6107,7 +6107,7 @@ return
             'name' => 'GPT-5.1 Codex Max',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6124,7 +6124,7 @@ return
             'name' => 'GPT-5.1 Codex mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6141,7 +6141,7 @@ return
             'name' => 'GPT-5.2',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6158,7 +6158,7 @@ return
             'name' => 'GPT-5.2 Chat',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6175,7 +6175,7 @@ return
             'name' => 'GPT-5.2 Codex',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6192,7 +6192,7 @@ return
             'name' => 'GPT-5.2 Pro',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6209,7 +6209,7 @@ return
             'name' => 'GPT-5.3 Chat (latest)',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6226,7 +6226,7 @@ return
             'name' => 'GPT-5.3 Codex',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6243,7 +6243,7 @@ return
             'name' => 'GPT-5.3 Codex Spark',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6260,7 +6260,7 @@ return
             'name' => 'GPT-5.4',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6277,7 +6277,7 @@ return
             'name' => 'GPT-5.4 mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6294,7 +6294,7 @@ return
             'name' => 'GPT-5.4 nano',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6311,7 +6311,7 @@ return
             'name' => 'GPT-5.4 Pro',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6328,7 +6328,7 @@ return
             'name' => 'GPT-5.5',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6345,7 +6345,7 @@ return
             'name' => 'o1',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6362,7 +6362,7 @@ return
             'name' => 'o1-pro',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6379,7 +6379,7 @@ return
             'name' => 'o3',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6396,7 +6396,7 @@ return
             'name' => 'o3-deep-research',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6413,7 +6413,7 @@ return
             'name' => 'o3-mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -6430,7 +6430,7 @@ return
             'name' => 'o3-pro',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6447,7 +6447,7 @@ return
             'name' => 'o4-mini',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6464,7 +6464,7 @@ return
             'name' => 'o4-mini-deep-research',
             'api' => 'openai-responses',
             'provider' => 'openai',
-            'baseUrl' => "'https' => //api.openai.com/v1",
+            'baseUrl' => 'https://api.openai.com/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6483,7 +6483,7 @@ return
             'name' => 'GPT-5.1',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6500,7 +6500,7 @@ return
             'name' => 'GPT-5.1 Codex Max',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6517,7 +6517,7 @@ return
             'name' => 'GPT-5.1 Codex Mini',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6534,7 +6534,7 @@ return
             'name' => 'GPT-5.2',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6551,7 +6551,7 @@ return
             'name' => 'GPT-5.2 Codex',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6568,7 +6568,7 @@ return
             'name' => 'GPT-5.3 Codex',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6585,7 +6585,7 @@ return
             'name' => 'GPT-5.3 Codex Spark',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -6602,7 +6602,7 @@ return
             'name' => 'GPT-5.4',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6619,7 +6619,7 @@ return
             'name' => 'GPT-5.4 Mini',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6636,7 +6636,7 @@ return
             'name' => 'GPT-5.5',
             'api' => 'openai-codex-responses',
             'provider' => 'openai-codex',
-            'baseUrl' => "'https' => //chatgpt.com/backend-api",
+            'baseUrl' => 'https://chatgpt.com/backend-api',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6655,7 +6655,7 @@ return
             'name' => 'Big Pickle',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -6672,7 +6672,7 @@ return
             'name' => 'Claude Haiku 3.5',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6689,7 +6689,7 @@ return
             'name' => 'Claude Haiku 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6706,7 +6706,7 @@ return
             'name' => 'Claude Opus 4.1',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6723,7 +6723,7 @@ return
             'name' => 'Claude Opus 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6740,7 +6740,7 @@ return
             'name' => 'Claude Opus 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6757,7 +6757,7 @@ return
             'name' => 'Claude Opus 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6774,7 +6774,7 @@ return
             'name' => 'Claude Sonnet 4',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6791,7 +6791,7 @@ return
             'name' => 'Claude Sonnet 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6808,7 +6808,7 @@ return
             'name' => 'Claude Sonnet 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6825,7 +6825,7 @@ return
             'name' => 'Gemini 3 Flash',
             'api' => 'google-generative-ai',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6842,7 +6842,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview',
             'api' => 'google-generative-ai',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6859,7 +6859,7 @@ return
             'name' => 'GLM-5',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -6876,7 +6876,7 @@ return
             'name' => 'GLM-5.1',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -6893,7 +6893,7 @@ return
             'name' => 'GPT-5',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6910,7 +6910,7 @@ return
             'name' => 'GPT-5 Codex',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6927,7 +6927,7 @@ return
             'name' => 'GPT-5 Nano',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6944,7 +6944,7 @@ return
             'name' => 'GPT-5.1',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6961,7 +6961,7 @@ return
             'name' => 'GPT-5.1 Codex',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6978,7 +6978,7 @@ return
             'name' => 'GPT-5.1 Codex Max',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -6995,7 +6995,7 @@ return
             'name' => 'GPT-5.1 Codex Mini',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7012,7 +7012,7 @@ return
             'name' => 'GPT-5.2',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7029,7 +7029,7 @@ return
             'name' => 'GPT-5.2 Codex',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7046,7 +7046,7 @@ return
             'name' => 'GPT-5.3 Codex',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7063,7 +7063,7 @@ return
             'name' => 'GPT-5.4',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7080,7 +7080,7 @@ return
             'name' => 'GPT-5.4 Mini',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7097,7 +7097,7 @@ return
             'name' => 'GPT-5.4 Nano',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7114,7 +7114,7 @@ return
             'name' => 'GPT-5.4 Pro',
             'api' => 'openai-responses',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7131,7 +7131,7 @@ return
             'name' => 'Hy3 preview Free',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7148,7 +7148,7 @@ return
             'name' => 'Kimi K2.5',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7165,7 +7165,7 @@ return
             'name' => 'Kimi K2.6',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7182,7 +7182,7 @@ return
             'name' => 'Ling 2.6 Flash Free',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7199,7 +7199,7 @@ return
             'name' => 'MiniMax M2.5',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7216,7 +7216,7 @@ return
             'name' => 'MiniMax M2.5 Free',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7233,7 +7233,7 @@ return
             'name' => 'MiniMax M2.7',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7250,7 +7250,7 @@ return
             'name' => 'Nemotron 3 Super Free',
             'api' => 'openai-completions',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen/v1",
+            'baseUrl' => 'https://opencode.ai/zen/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7267,7 +7267,7 @@ return
             'name' => 'Qwen3.5 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7284,7 +7284,7 @@ return
             'name' => 'Qwen3.6 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'opencode',
-            'baseUrl' => "'https' => //opencode.ai/zen",
+            'baseUrl' => 'https://opencode.ai/zen',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7303,7 +7303,7 @@ return
             'name' => 'GLM-5',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7320,7 +7320,7 @@ return
             'name' => 'GLM-5.1',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7337,7 +7337,7 @@ return
             'name' => 'Kimi K2.5',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7354,7 +7354,7 @@ return
             'name' => 'Kimi K2.6 (3x limits)',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7371,7 +7371,7 @@ return
             'name' => 'MiMo V2 Omni',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7388,7 +7388,7 @@ return
             'name' => 'MiMo V2 Pro',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7405,7 +7405,7 @@ return
             'name' => 'MiMo V2.5',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7422,7 +7422,7 @@ return
             'name' => 'MiMo V2.5 Pro',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7439,7 +7439,7 @@ return
             'name' => 'MiniMax M2.5',
             'api' => 'openai-completions',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go/v1",
+            'baseUrl' => 'https://opencode.ai/zen/go/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7456,7 +7456,7 @@ return
             'name' => 'MiniMax M2.7',
             'api' => 'anthropic-messages',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go",
+            'baseUrl' => 'https://opencode.ai/zen/go',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7473,7 +7473,7 @@ return
             'name' => 'Qwen3.5 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go",
+            'baseUrl' => 'https://opencode.ai/zen/go',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7490,7 +7490,7 @@ return
             'name' => 'Qwen3.6 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'opencode-go',
-            'baseUrl' => "'https' => //opencode.ai/zen/go",
+            'baseUrl' => 'https://opencode.ai/zen/go',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7506,10 +7506,10 @@ return
     'openrouter' => [
         'ai21/jamba-large-1.7' => [
             'id' => 'ai21/jamba-large-1.7',
-            'name' => "'AI21' => Jamba Large 1.7",
+            'name' => 'AI21: Jamba Large 1.7',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7526,7 +7526,7 @@ return
             'name' => 'Tongyi DeepResearch 30B A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7540,10 +7540,10 @@ return
         ],
         'allenai/olmo-3.1-32b-instruct' => [
             'id' => 'allenai/olmo-3.1-32b-instruct',
-            'name' => "'AllenAI' => Olmo 3.1 32B Instruct",
+            'name' => 'AllenAI: Olmo 3.1 32B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7557,10 +7557,10 @@ return
         ],
         'amazon/nova-2-lite-v1' => [
             'id' => 'amazon/nova-2-lite-v1',
-            'name' => "'Amazon' => Nova 2 Lite",
+            'name' => 'Amazon: Nova 2 Lite',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7574,10 +7574,10 @@ return
         ],
         'amazon/nova-lite-v1' => [
             'id' => 'amazon/nova-lite-v1',
-            'name' => "'Amazon' => Nova Lite 1.0",
+            'name' => 'Amazon: Nova Lite 1.0',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7591,10 +7591,10 @@ return
         ],
         'amazon/nova-micro-v1' => [
             'id' => 'amazon/nova-micro-v1',
-            'name' => "'Amazon' => Nova Micro 1.0",
+            'name' => 'Amazon: Nova Micro 1.0',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7608,10 +7608,10 @@ return
         ],
         'amazon/nova-premier-v1' => [
             'id' => 'amazon/nova-premier-v1',
-            'name' => "'Amazon' => Nova Premier 1.0",
+            'name' => 'Amazon: Nova Premier 1.0',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7625,10 +7625,10 @@ return
         ],
         'amazon/nova-pro-v1' => [
             'id' => 'amazon/nova-pro-v1',
-            'name' => "'Amazon' => Nova Pro 1.0",
+            'name' => 'Amazon: Nova Pro 1.0',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7642,10 +7642,10 @@ return
         ],
         'anthropic/claude-3-haiku' => [
             'id' => 'anthropic/claude-3-haiku',
-            'name' => "'Anthropic' => Claude 3 Haiku",
+            'name' => 'Anthropic: Claude 3 Haiku',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7659,10 +7659,10 @@ return
         ],
         'anthropic/claude-3.5-haiku' => [
             'id' => 'anthropic/claude-3.5-haiku',
-            'name' => "'Anthropic' => Claude 3.5 Haiku",
+            'name' => 'Anthropic: Claude 3.5 Haiku',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7676,10 +7676,10 @@ return
         ],
         'anthropic/claude-3.7-sonnet' => [
             'id' => 'anthropic/claude-3.7-sonnet',
-            'name' => "'Anthropic' => Claude 3.7 Sonnet",
+            'name' => 'Anthropic: Claude 3.7 Sonnet',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7691,12 +7691,12 @@ return
             'contextWindow' => 200000,
             'maxTokens' => 128000,
         ],
-        "anthropic/claude-3.7-'sonnet' => thinking" => [
-            'id' => "anthropic/claude-3.7-'sonnet' => thinking",
-            'name' => "'Anthropic' => Claude 3.7 Sonnet (thinking)",
+        'anthropic/claude-3.7-sonnet:thinking' => [
+            'id' => 'anthropic/claude-3.7-sonnet:thinking',
+            'name' => 'Anthropic: Claude 3.7 Sonnet (thinking)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7710,10 +7710,10 @@ return
         ],
         'anthropic/claude-haiku-4.5' => [
             'id' => 'anthropic/claude-haiku-4.5',
-            'name' => "'Anthropic' => Claude Haiku 4.5",
+            'name' => 'Anthropic: Claude Haiku 4.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7727,10 +7727,10 @@ return
         ],
         'anthropic/claude-opus-4' => [
             'id' => 'anthropic/claude-opus-4',
-            'name' => "'Anthropic' => Claude Opus 4",
+            'name' => 'Anthropic: Claude Opus 4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7744,10 +7744,10 @@ return
         ],
         'anthropic/claude-opus-4.1' => [
             'id' => 'anthropic/claude-opus-4.1',
-            'name' => "'Anthropic' => Claude Opus 4.1",
+            'name' => 'Anthropic: Claude Opus 4.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7761,10 +7761,10 @@ return
         ],
         'anthropic/claude-opus-4.5' => [
             'id' => 'anthropic/claude-opus-4.5',
-            'name' => "'Anthropic' => Claude Opus 4.5",
+            'name' => 'Anthropic: Claude Opus 4.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7778,10 +7778,10 @@ return
         ],
         'anthropic/claude-opus-4.6' => [
             'id' => 'anthropic/claude-opus-4.6',
-            'name' => "'Anthropic' => Claude Opus 4.6",
+            'name' => 'Anthropic: Claude Opus 4.6',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7795,10 +7795,10 @@ return
         ],
         'anthropic/claude-opus-4.6-fast' => [
             'id' => 'anthropic/claude-opus-4.6-fast',
-            'name' => "'Anthropic' => Claude Opus 4.6 (Fast)",
+            'name' => 'Anthropic: Claude Opus 4.6 (Fast)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7812,10 +7812,10 @@ return
         ],
         'anthropic/claude-opus-4.7' => [
             'id' => 'anthropic/claude-opus-4.7',
-            'name' => "'Anthropic' => Claude Opus 4.7",
+            'name' => 'Anthropic: Claude Opus 4.7',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7829,10 +7829,10 @@ return
         ],
         'anthropic/claude-sonnet-4' => [
             'id' => 'anthropic/claude-sonnet-4',
-            'name' => "'Anthropic' => Claude Sonnet 4",
+            'name' => 'Anthropic: Claude Sonnet 4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7846,10 +7846,10 @@ return
         ],
         'anthropic/claude-sonnet-4.5' => [
             'id' => 'anthropic/claude-sonnet-4.5',
-            'name' => "'Anthropic' => Claude Sonnet 4.5",
+            'name' => 'Anthropic: Claude Sonnet 4.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7863,10 +7863,10 @@ return
         ],
         'anthropic/claude-sonnet-4.6' => [
             'id' => 'anthropic/claude-sonnet-4.6',
-            'name' => "'Anthropic' => Claude Sonnet 4.6",
+            'name' => 'Anthropic: Claude Sonnet 4.6',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7880,10 +7880,10 @@ return
         ],
         'arcee-ai/trinity-large-preview' => [
             'id' => 'arcee-ai/trinity-large-preview',
-            'name' => "Arcee 'AI' => Trinity Large Preview",
+            'name' => 'Arcee AI: Trinity Large Preview',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7897,10 +7897,10 @@ return
         ],
         'arcee-ai/trinity-large-thinking' => [
             'id' => 'arcee-ai/trinity-large-thinking',
-            'name' => "Arcee 'AI' => Trinity Large Thinking",
+            'name' => 'Arcee AI: Trinity Large Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7914,10 +7914,10 @@ return
         ],
         'arcee-ai/trinity-mini' => [
             'id' => 'arcee-ai/trinity-mini',
-            'name' => "Arcee 'AI' => Trinity Mini",
+            'name' => 'Arcee AI: Trinity Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -7931,10 +7931,10 @@ return
         ],
         'arcee-ai/virtuoso-large' => [
             'id' => 'arcee-ai/virtuoso-large',
-            'name' => "Arcee 'AI' => Virtuoso Large",
+            'name' => 'Arcee AI: Virtuoso Large',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7951,7 +7951,7 @@ return
             'name' => 'Auto',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7965,10 +7965,10 @@ return
         ],
         'baidu/ernie-4.5-21b-a3b' => [
             'id' => 'baidu/ernie-4.5-21b-a3b',
-            'name' => "'Baidu' => ERNIE 4.5 21B A3B",
+            'name' => 'Baidu: ERNIE 4.5 21B A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -7982,10 +7982,10 @@ return
         ],
         'baidu/ernie-4.5-vl-28b-a3b' => [
             'id' => 'baidu/ernie-4.5-vl-28b-a3b',
-            'name' => "'Baidu' => ERNIE 4.5 VL 28B A3B",
+            'name' => 'Baidu: ERNIE 4.5 VL 28B A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -7999,10 +7999,10 @@ return
         ],
         'bytedance-seed/seed-1.6' => [
             'id' => 'bytedance-seed/seed-1.6',
-            'name' => "ByteDance 'Seed' => Seed 1.6",
+            'name' => 'ByteDance Seed: Seed 1.6',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8016,10 +8016,10 @@ return
         ],
         'bytedance-seed/seed-1.6-flash' => [
             'id' => 'bytedance-seed/seed-1.6-flash',
-            'name' => "ByteDance 'Seed' => Seed 1.6 Flash",
+            'name' => 'ByteDance Seed: Seed 1.6 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8033,10 +8033,10 @@ return
         ],
         'bytedance-seed/seed-2.0-lite' => [
             'id' => 'bytedance-seed/seed-2.0-lite',
-            'name' => "ByteDance 'Seed' => Seed-2.0-Lite",
+            'name' => 'ByteDance Seed: Seed-2.0-Lite',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8050,10 +8050,10 @@ return
         ],
         'bytedance-seed/seed-2.0-mini' => [
             'id' => 'bytedance-seed/seed-2.0-mini',
-            'name' => "ByteDance 'Seed' => Seed-2.0-Mini",
+            'name' => 'ByteDance Seed: Seed-2.0-Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8067,10 +8067,10 @@ return
         ],
         'cohere/command-r-08-2024' => [
             'id' => 'cohere/command-r-08-2024',
-            'name' => "'Cohere' => Command R (08-2024)",
+            'name' => 'Cohere: Command R (08-2024)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8084,10 +8084,10 @@ return
         ],
         'cohere/command-r-plus-08-2024' => [
             'id' => 'cohere/command-r-plus-08-2024',
-            'name' => "'Cohere' => Command R+ (08-2024)",
+            'name' => 'Cohere: Command R+ (08-2024)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8101,10 +8101,10 @@ return
         ],
         'deepseek/deepseek-chat' => [
             'id' => 'deepseek/deepseek-chat',
-            'name' => "'DeepSeek' => DeepSeek V3",
+            'name' => 'DeepSeek: DeepSeek V3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8118,10 +8118,10 @@ return
         ],
         'deepseek/deepseek-chat-v3-0324' => [
             'id' => 'deepseek/deepseek-chat-v3-0324',
-            'name' => "'DeepSeek' => DeepSeek V3 0324",
+            'name' => 'DeepSeek: DeepSeek V3 0324',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8135,10 +8135,10 @@ return
         ],
         'deepseek/deepseek-chat-v3.1' => [
             'id' => 'deepseek/deepseek-chat-v3.1',
-            'name' => "'DeepSeek' => DeepSeek V3.1",
+            'name' => 'DeepSeek: DeepSeek V3.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8152,10 +8152,10 @@ return
         ],
         'deepseek/deepseek-r1' => [
             'id' => 'deepseek/deepseek-r1',
-            'name' => "'DeepSeek' => R1",
+            'name' => 'DeepSeek: R1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8169,10 +8169,10 @@ return
         ],
         'deepseek/deepseek-r1-0528' => [
             'id' => 'deepseek/deepseek-r1-0528',
-            'name' => "'DeepSeek' => R1 0528",
+            'name' => 'DeepSeek: R1 0528',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8186,10 +8186,10 @@ return
         ],
         'deepseek/deepseek-v3.1-terminus' => [
             'id' => 'deepseek/deepseek-v3.1-terminus',
-            'name' => "'DeepSeek' => DeepSeek V3.1 Terminus",
+            'name' => 'DeepSeek: DeepSeek V3.1 Terminus',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8203,10 +8203,10 @@ return
         ],
         'deepseek/deepseek-v3.2' => [
             'id' => 'deepseek/deepseek-v3.2',
-            'name' => "'DeepSeek' => DeepSeek V3.2",
+            'name' => 'DeepSeek: DeepSeek V3.2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8220,10 +8220,10 @@ return
         ],
         'deepseek/deepseek-v3.2-exp' => [
             'id' => 'deepseek/deepseek-v3.2-exp',
-            'name' => "'DeepSeek' => DeepSeek V3.2 Exp",
+            'name' => 'DeepSeek: DeepSeek V3.2 Exp',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8237,10 +8237,10 @@ return
         ],
         'deepseek/deepseek-v4-flash' => [
             'id' => 'deepseek/deepseek-v4-flash',
-            'name' => "'DeepSeek' => DeepSeek V4 Flash",
+            'name' => 'DeepSeek: DeepSeek V4 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'compat' => ['requiresReasoningContentOnAssistantMessages' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -8255,10 +8255,10 @@ return
         ],
         'deepseek/deepseek-v4-pro' => [
             'id' => 'deepseek/deepseek-v4-pro',
-            'name' => "'DeepSeek' => DeepSeek V4 Pro",
+            'name' => 'DeepSeek: DeepSeek V4 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'compat' => ['requiresReasoningContentOnAssistantMessages' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -8273,10 +8273,10 @@ return
         ],
         'essentialai/rnj-1-instruct' => [
             'id' => 'essentialai/rnj-1-instruct',
-            'name' => "'EssentialAI' => Rnj 1 Instruct",
+            'name' => 'EssentialAI: Rnj 1 Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8290,10 +8290,10 @@ return
         ],
         'google/gemini-2.0-flash-001' => [
             'id' => 'google/gemini-2.0-flash-001',
-            'name' => "'Google' => Gemini 2.0 Flash",
+            'name' => 'Google: Gemini 2.0 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8307,10 +8307,10 @@ return
         ],
         'google/gemini-2.0-flash-lite-001' => [
             'id' => 'google/gemini-2.0-flash-lite-001',
-            'name' => "'Google' => Gemini 2.0 Flash Lite",
+            'name' => 'Google: Gemini 2.0 Flash Lite',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8324,10 +8324,10 @@ return
         ],
         'google/gemini-2.5-flash' => [
             'id' => 'google/gemini-2.5-flash',
-            'name' => "'Google' => Gemini 2.5 Flash",
+            'name' => 'Google: Gemini 2.5 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8341,10 +8341,10 @@ return
         ],
         'google/gemini-2.5-flash-lite' => [
             'id' => 'google/gemini-2.5-flash-lite',
-            'name' => "'Google' => Gemini 2.5 Flash Lite",
+            'name' => 'Google: Gemini 2.5 Flash Lite',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8358,10 +8358,10 @@ return
         ],
         'google/gemini-2.5-flash-lite-preview-09-2025' => [
             'id' => 'google/gemini-2.5-flash-lite-preview-09-2025',
-            'name' => "'Google' => Gemini 2.5 Flash Lite Preview 09-2025",
+            'name' => 'Google: Gemini 2.5 Flash Lite Preview 09-2025',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8375,10 +8375,10 @@ return
         ],
         'google/gemini-2.5-pro' => [
             'id' => 'google/gemini-2.5-pro',
-            'name' => "'Google' => Gemini 2.5 Pro",
+            'name' => 'Google: Gemini 2.5 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8392,10 +8392,10 @@ return
         ],
         'google/gemini-2.5-pro-preview' => [
             'id' => 'google/gemini-2.5-pro-preview',
-            'name' => "'Google' => Gemini 2.5 Pro Preview 06-05",
+            'name' => 'Google: Gemini 2.5 Pro Preview 06-05',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8409,10 +8409,10 @@ return
         ],
         'google/gemini-2.5-pro-preview-05-06' => [
             'id' => 'google/gemini-2.5-pro-preview-05-06',
-            'name' => "'Google' => Gemini 2.5 Pro Preview 05-06",
+            'name' => 'Google: Gemini 2.5 Pro Preview 05-06',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8426,10 +8426,10 @@ return
         ],
         'google/gemini-3-flash-preview' => [
             'id' => 'google/gemini-3-flash-preview',
-            'name' => "'Google' => Gemini 3 Flash Preview",
+            'name' => 'Google: Gemini 3 Flash Preview',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8443,10 +8443,10 @@ return
         ],
         'google/gemini-3.1-flash-lite-preview' => [
             'id' => 'google/gemini-3.1-flash-lite-preview',
-            'name' => "'Google' => Gemini 3.1 Flash Lite Preview",
+            'name' => 'Google: Gemini 3.1 Flash Lite Preview',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8460,10 +8460,10 @@ return
         ],
         'google/gemini-3.1-pro-preview' => [
             'id' => 'google/gemini-3.1-pro-preview',
-            'name' => "'Google' => Gemini 3.1 Pro Preview",
+            'name' => 'Google: Gemini 3.1 Pro Preview',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8477,10 +8477,10 @@ return
         ],
         'google/gemini-3.1-pro-preview-customtools' => [
             'id' => 'google/gemini-3.1-pro-preview-customtools',
-            'name' => "'Google' => Gemini 3.1 Pro Preview Custom Tools",
+            'name' => 'Google: Gemini 3.1 Pro Preview Custom Tools',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8494,10 +8494,10 @@ return
         ],
         'google/gemma-4-26b-a4b-it' => [
             'id' => 'google/gemma-4-26b-a4b-it',
-            'name' => "'Google' => Gemma 4 26B A4B ",
+            'name' => 'Google: Gemma 4 26B A4B ',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8509,12 +8509,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 4096,
         ],
-        "google/gemma-4-26b-a4b-'it' => free" => [
-            'id' => "google/gemma-4-26b-a4b-'it' => free",
-            'name' => "'Google' => Gemma 4 26B A4B  (free)",
+        'google/gemma-4-26b-a4b-it:free' => [
+            'id' => 'google/gemma-4-26b-a4b-it:free',
+            'name' => 'Google: Gemma 4 26B A4B  (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8528,10 +8528,10 @@ return
         ],
         'google/gemma-4-31b-it' => [
             'id' => 'google/gemma-4-31b-it',
-            'name' => "'Google' => Gemma 4 31B",
+            'name' => 'Google: Gemma 4 31B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8543,12 +8543,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 4096,
         ],
-        "google/gemma-4-31b-'it' => free" => [
-            'id' => "google/gemma-4-31b-'it' => free",
-            'name' => "'Google' => Gemma 4 31B (free)",
+        'google/gemma-4-31b-it:free' => [
+            'id' => 'google/gemma-4-31b-it:free',
+            'name' => 'Google: Gemma 4 31B (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8562,10 +8562,10 @@ return
         ],
         'inception/mercury-2' => [
             'id' => 'inception/mercury-2',
-            'name' => "'Inception' => Mercury 2",
+            'name' => 'Inception: Mercury 2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8579,10 +8579,10 @@ return
         ],
         'inclusionai/ling-2.6-1t:free' => [
             'id' => 'inclusionai/ling-2.6-1t:free',
-            'name' => "'inclusionAI' => Ling-2.6-1T (free)",
+            'name' => 'inclusionAI: Ling-2.6-1T (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8594,12 +8594,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 32768,
         ],
-        "inclusionai/ling-2.6-'flash' => free" => [
-            'id' => "inclusionai/ling-2.6-'flash' => free",
-            'name' => "'inclusionAI' => Ling-2.6-flash (free)",
+        'inclusionai/ling-2.6-flash:free' => [
+            'id' => 'inclusionai/ling-2.6-flash:free',
+            'name' => 'inclusionAI: Ling-2.6-flash (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8613,10 +8613,10 @@ return
         ],
         'kwaipilot/kat-coder-pro-v2' => [
             'id' => 'kwaipilot/kat-coder-pro-v2',
-            'name' => "'Kwaipilot' => KAT-Coder-Pro V2",
+            'name' => 'Kwaipilot: KAT-Coder-Pro V2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8630,10 +8630,10 @@ return
         ],
         'meta-llama/llama-3-8b-instruct' => [
             'id' => 'meta-llama/llama-3-8b-instruct',
-            'name' => "'Meta' => Llama 3 8B Instruct",
+            'name' => 'Meta: Llama 3 8B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8647,10 +8647,10 @@ return
         ],
         'meta-llama/llama-3.1-70b-instruct' => [
             'id' => 'meta-llama/llama-3.1-70b-instruct',
-            'name' => "'Meta' => Llama 3.1 70B Instruct",
+            'name' => 'Meta: Llama 3.1 70B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8664,10 +8664,10 @@ return
         ],
         'meta-llama/llama-3.1-8b-instruct' => [
             'id' => 'meta-llama/llama-3.1-8b-instruct',
-            'name' => "'Meta' => Llama 3.1 8B Instruct",
+            'name' => 'Meta: Llama 3.1 8B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8681,10 +8681,10 @@ return
         ],
         'meta-llama/llama-3.3-70b-instruct' => [
             'id' => 'meta-llama/llama-3.3-70b-instruct',
-            'name' => "'Meta' => Llama 3.3 70B Instruct",
+            'name' => 'Meta: Llama 3.3 70B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8696,12 +8696,12 @@ return
             'contextWindow' => 131072,
             'maxTokens' => 16384,
         ],
-        "meta-llama/llama-3.3-70b-'instruct' => free" => [
-            'id' => "meta-llama/llama-3.3-70b-'instruct' => free",
-            'name' => "'Meta' => Llama 3.3 70B Instruct (free)",
+        'meta-llama/llama-3.3-70b-instruct:free' => [
+            'id' => 'meta-llama/llama-3.3-70b-instruct:free',
+            'name' => 'Meta: Llama 3.3 70B Instruct (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8715,10 +8715,10 @@ return
         ],
         'meta-llama/llama-4-scout' => [
             'id' => 'meta-llama/llama-4-scout',
-            'name' => "'Meta' => Llama 4 Scout",
+            'name' => 'Meta: Llama 4 Scout',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8732,10 +8732,10 @@ return
         ],
         'minimax/minimax-m1' => [
             'id' => 'minimax/minimax-m1',
-            'name' => "'MiniMax' => MiniMax M1",
+            'name' => 'MiniMax: MiniMax M1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8749,10 +8749,10 @@ return
         ],
         'minimax/minimax-m2' => [
             'id' => 'minimax/minimax-m2',
-            'name' => "'MiniMax' => MiniMax M2",
+            'name' => 'MiniMax: MiniMax M2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8766,10 +8766,10 @@ return
         ],
         'minimax/minimax-m2.1' => [
             'id' => 'minimax/minimax-m2.1',
-            'name' => "'MiniMax' => MiniMax M2.1",
+            'name' => 'MiniMax: MiniMax M2.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8783,10 +8783,10 @@ return
         ],
         'minimax/minimax-m2.5' => [
             'id' => 'minimax/minimax-m2.5',
-            'name' => "'MiniMax' => MiniMax M2.5",
+            'name' => 'MiniMax: MiniMax M2.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8800,10 +8800,10 @@ return
         ],
         'minimax/minimax-m2.5:free' => [
             'id' => 'minimax/minimax-m2.5:free',
-            'name' => "'MiniMax' => MiniMax M2.5 (free)",
+            'name' => 'MiniMax: MiniMax M2.5 (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8817,10 +8817,10 @@ return
         ],
         'minimax/minimax-m2.7' => [
             'id' => 'minimax/minimax-m2.7',
-            'name' => "'MiniMax' => MiniMax M2.7",
+            'name' => 'MiniMax: MiniMax M2.7',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -8834,10 +8834,10 @@ return
         ],
         'mistralai/codestral-2508' => [
             'id' => 'mistralai/codestral-2508',
-            'name' => "'Mistral' => Codestral 2508",
+            'name' => 'Mistral: Codestral 2508',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8851,10 +8851,10 @@ return
         ],
         'mistralai/devstral-2512' => [
             'id' => 'mistralai/devstral-2512',
-            'name' => "'Mistral' => Devstral 2 2512",
+            'name' => 'Mistral: Devstral 2 2512',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8868,10 +8868,10 @@ return
         ],
         'mistralai/devstral-medium' => [
             'id' => 'mistralai/devstral-medium',
-            'name' => "'Mistral' => Devstral Medium",
+            'name' => 'Mistral: Devstral Medium',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8885,10 +8885,10 @@ return
         ],
         'mistralai/devstral-small' => [
             'id' => 'mistralai/devstral-small',
-            'name' => "'Mistral' => Devstral Small 1.1",
+            'name' => 'Mistral: Devstral Small 1.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8902,10 +8902,10 @@ return
         ],
         'mistralai/ministral-14b-2512' => [
             'id' => 'mistralai/ministral-14b-2512',
-            'name' => "'Mistral' => Ministral 3 14B 2512",
+            'name' => 'Mistral: Ministral 3 14B 2512',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8919,10 +8919,10 @@ return
         ],
         'mistralai/ministral-3b-2512' => [
             'id' => 'mistralai/ministral-3b-2512',
-            'name' => "'Mistral' => Ministral 3 3B 2512",
+            'name' => 'Mistral: Ministral 3 3B 2512',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8936,10 +8936,10 @@ return
         ],
         'mistralai/ministral-8b-2512' => [
             'id' => 'mistralai/ministral-8b-2512',
-            'name' => "'Mistral' => Ministral 3 8B 2512",
+            'name' => 'Mistral: Ministral 3 8B 2512',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -8956,7 +8956,7 @@ return
             'name' => 'Mistral Large',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8973,7 +8973,7 @@ return
             'name' => 'Mistral Large 2407',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -8990,7 +8990,7 @@ return
             'name' => 'Mistral Large 2411',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9004,10 +9004,10 @@ return
         ],
         'mistralai/mistral-large-2512' => [
             'id' => 'mistralai/mistral-large-2512',
-            'name' => "'Mistral' => Mistral Large 3 2512",
+            'name' => 'Mistral: Mistral Large 3 2512',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9021,10 +9021,10 @@ return
         ],
         'mistralai/mistral-medium-3' => [
             'id' => 'mistralai/mistral-medium-3',
-            'name' => "'Mistral' => Mistral Medium 3",
+            'name' => 'Mistral: Mistral Medium 3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9038,10 +9038,10 @@ return
         ],
         'mistralai/mistral-medium-3.1' => [
             'id' => 'mistralai/mistral-medium-3.1',
-            'name' => "'Mistral' => Mistral Medium 3.1",
+            'name' => 'Mistral: Mistral Medium 3.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9055,10 +9055,10 @@ return
         ],
         'mistralai/mistral-nemo' => [
             'id' => 'mistralai/mistral-nemo',
-            'name' => "'Mistral' => Mistral Nemo",
+            'name' => 'Mistral: Mistral Nemo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9072,10 +9072,10 @@ return
         ],
         'mistralai/mistral-saba' => [
             'id' => 'mistralai/mistral-saba',
-            'name' => "'Mistral' => Saba",
+            'name' => 'Mistral: Saba',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9089,10 +9089,10 @@ return
         ],
         'mistralai/mistral-small-2603' => [
             'id' => 'mistralai/mistral-small-2603',
-            'name' => "'Mistral' => Mistral Small 4",
+            'name' => 'Mistral: Mistral Small 4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9106,10 +9106,10 @@ return
         ],
         'mistralai/mistral-small-3.2-24b-instruct' => [
             'id' => 'mistralai/mistral-small-3.2-24b-instruct',
-            'name' => "'Mistral' => Mistral Small 3.2 24B",
+            'name' => 'Mistral: Mistral Small 3.2 24B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9123,10 +9123,10 @@ return
         ],
         'mistralai/mistral-small-creative' => [
             'id' => 'mistralai/mistral-small-creative',
-            'name' => "'Mistral' => Mistral Small Creative",
+            'name' => 'Mistral: Mistral Small Creative',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9140,10 +9140,10 @@ return
         ],
         'mistralai/mixtral-8x22b-instruct' => [
             'id' => 'mistralai/mixtral-8x22b-instruct',
-            'name' => "'Mistral' => Mixtral 8x22B Instruct",
+            'name' => 'Mistral: Mixtral 8x22B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9157,10 +9157,10 @@ return
         ],
         'mistralai/mixtral-8x7b-instruct' => [
             'id' => 'mistralai/mixtral-8x7b-instruct',
-            'name' => "'Mistral' => Mixtral 8x7B Instruct",
+            'name' => 'Mistral: Mixtral 8x7B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9174,10 +9174,10 @@ return
         ],
         'mistralai/pixtral-large-2411' => [
             'id' => 'mistralai/pixtral-large-2411',
-            'name' => "'Mistral' => Pixtral Large 2411",
+            'name' => 'Mistral: Pixtral Large 2411',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9191,10 +9191,10 @@ return
         ],
         'mistralai/voxtral-small-24b-2507' => [
             'id' => 'mistralai/voxtral-small-24b-2507',
-            'name' => "'Mistral' => Voxtral Small 24B 2507",
+            'name' => 'Mistral: Voxtral Small 24B 2507',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9208,10 +9208,10 @@ return
         ],
         'moonshotai/kimi-k2' => [
             'id' => 'moonshotai/kimi-k2',
-            'name' => "'MoonshotAI' => Kimi K2 0711",
+            'name' => 'MoonshotAI: Kimi K2 0711',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9225,10 +9225,10 @@ return
         ],
         'moonshotai/kimi-k2-0905' => [
             'id' => 'moonshotai/kimi-k2-0905',
-            'name' => "'MoonshotAI' => Kimi K2 0905",
+            'name' => 'MoonshotAI: Kimi K2 0905',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9242,10 +9242,10 @@ return
         ],
         'moonshotai/kimi-k2-thinking' => [
             'id' => 'moonshotai/kimi-k2-thinking',
-            'name' => "'MoonshotAI' => Kimi K2 Thinking",
+            'name' => 'MoonshotAI: Kimi K2 Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9259,10 +9259,10 @@ return
         ],
         'moonshotai/kimi-k2.5' => [
             'id' => 'moonshotai/kimi-k2.5',
-            'name' => "'MoonshotAI' => Kimi K2.5",
+            'name' => 'MoonshotAI: Kimi K2.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9276,10 +9276,10 @@ return
         ],
         'moonshotai/kimi-k2.6' => [
             'id' => 'moonshotai/kimi-k2.6',
-            'name' => "'MoonshotAI' => Kimi K2.6",
+            'name' => 'MoonshotAI: Kimi K2.6',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9293,10 +9293,10 @@ return
         ],
         'nex-agi/deepseek-v3.1-nex-n1' => [
             'id' => 'nex-agi/deepseek-v3.1-nex-n1',
-            'name' => "Nex 'AGI' => DeepSeek V3.1 Nex N1",
+            'name' => 'Nex AGI: DeepSeek V3.1 Nex N1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9310,10 +9310,10 @@ return
         ],
         'nvidia/llama-3.1-nemotron-70b-instruct' => [
             'id' => 'nvidia/llama-3.1-nemotron-70b-instruct',
-            'name' => "'NVIDIA' => Llama 3.1 Nemotron 70B Instruct",
+            'name' => 'NVIDIA: Llama 3.1 Nemotron 70B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9327,10 +9327,10 @@ return
         ],
         'nvidia/llama-3.3-nemotron-super-49b-v1.5' => [
             'id' => 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-            'name' => "'NVIDIA' => Llama 3.3 Nemotron Super 49B V1.5",
+            'name' => 'NVIDIA: Llama 3.3 Nemotron Super 49B V1.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9344,10 +9344,10 @@ return
         ],
         'nvidia/nemotron-3-nano-30b-a3b' => [
             'id' => 'nvidia/nemotron-3-nano-30b-a3b',
-            'name' => "'NVIDIA' => Nemotron 3 Nano 30B A3B",
+            'name' => 'NVIDIA: Nemotron 3 Nano 30B A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9359,12 +9359,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 4096,
         ],
-        "nvidia/nemotron-3-nano-30b-'a3b' => free" => [
-            'id' => "nvidia/nemotron-3-nano-30b-'a3b' => free",
-            'name' => "'NVIDIA' => Nemotron 3 Nano 30B A3B (free)",
+        'nvidia/nemotron-3-nano-30b-a3b:free' => [
+            'id' => 'nvidia/nemotron-3-nano-30b-a3b:free',
+            'name' => 'NVIDIA: Nemotron 3 Nano 30B A3B (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9378,10 +9378,10 @@ return
         ],
         'nvidia/nemotron-3-super-120b-a12b' => [
             'id' => 'nvidia/nemotron-3-super-120b-a12b',
-            'name' => "'NVIDIA' => Nemotron 3 Super",
+            'name' => 'NVIDIA: Nemotron 3 Super',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9393,12 +9393,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 4096,
         ],
-        "nvidia/nemotron-3-super-120b-'a12b' => free" => [
-            'id' => "nvidia/nemotron-3-super-120b-'a12b' => free",
-            'name' => "'NVIDIA' => Nemotron 3 Super (free)",
+        'nvidia/nemotron-3-super-120b-a12b:free' => [
+            'id' => 'nvidia/nemotron-3-super-120b-a12b:free',
+            'name' => 'NVIDIA: Nemotron 3 Super (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9410,12 +9410,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 262144,
         ],
-        "nvidia/nemotron-nano-12b-v2-'vl' => free" => [
-            'id' => "nvidia/nemotron-nano-12b-v2-'vl' => free",
-            'name' => "'NVIDIA' => Nemotron Nano 12B 2 VL (free)",
+        'nvidia/nemotron-nano-12b-v2-vl:free' => [
+            'id' => 'nvidia/nemotron-nano-12b-v2-vl:free',
+            'name' => 'NVIDIA: Nemotron Nano 12B 2 VL (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9429,10 +9429,10 @@ return
         ],
         'nvidia/nemotron-nano-9b-v2' => [
             'id' => 'nvidia/nemotron-nano-9b-v2',
-            'name' => "'NVIDIA' => Nemotron Nano 9B V2",
+            'name' => 'NVIDIA: Nemotron Nano 9B V2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9444,12 +9444,12 @@ return
             'contextWindow' => 131072,
             'maxTokens' => 4096,
         ],
-        "nvidia/nemotron-nano-9b-'v2' => free" => [
-            'id' => "nvidia/nemotron-nano-9b-'v2' => free",
-            'name' => "'NVIDIA' => Nemotron Nano 9B V2 (free)",
+        'nvidia/nemotron-nano-9b-v2:free' => [
+            'id' => 'nvidia/nemotron-nano-9b-v2:free',
+            'name' => 'NVIDIA: Nemotron Nano 9B V2 (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -9463,10 +9463,10 @@ return
         ],
         'openai/gpt-3.5-turbo' => [
             'id' => 'openai/gpt-3.5-turbo',
-            'name' => "'OpenAI' => GPT-3.5 Turbo",
+            'name' => 'OpenAI: GPT-3.5 Turbo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9480,10 +9480,10 @@ return
         ],
         'openai/gpt-3.5-turbo-0613' => [
             'id' => 'openai/gpt-3.5-turbo-0613',
-            'name' => "'OpenAI' => GPT-3.5 Turbo (older v0613)",
+            'name' => 'OpenAI: GPT-3.5 Turbo (older v0613)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9497,10 +9497,10 @@ return
         ],
         'openai/gpt-3.5-turbo-16k' => [
             'id' => 'openai/gpt-3.5-turbo-16k',
-            'name' => "'OpenAI' => GPT-3.5 Turbo 16k",
+            'name' => 'OpenAI: GPT-3.5 Turbo 16k',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9514,10 +9514,10 @@ return
         ],
         'openai/gpt-4' => [
             'id' => 'openai/gpt-4',
-            'name' => "'OpenAI' => GPT-4",
+            'name' => 'OpenAI: GPT-4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9531,10 +9531,10 @@ return
         ],
         'openai/gpt-4-0314' => [
             'id' => 'openai/gpt-4-0314',
-            'name' => "'OpenAI' => GPT-4 (older v0314)",
+            'name' => 'OpenAI: GPT-4 (older v0314)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9548,10 +9548,10 @@ return
         ],
         'openai/gpt-4-1106-preview' => [
             'id' => 'openai/gpt-4-1106-preview',
-            'name' => "'OpenAI' => GPT-4 Turbo (older v1106)",
+            'name' => 'OpenAI: GPT-4 Turbo (older v1106)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9565,10 +9565,10 @@ return
         ],
         'openai/gpt-4-turbo' => [
             'id' => 'openai/gpt-4-turbo',
-            'name' => "'OpenAI' => GPT-4 Turbo",
+            'name' => 'OpenAI: GPT-4 Turbo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9582,10 +9582,10 @@ return
         ],
         'openai/gpt-4-turbo-preview' => [
             'id' => 'openai/gpt-4-turbo-preview',
-            'name' => "'OpenAI' => GPT-4 Turbo Preview",
+            'name' => 'OpenAI: GPT-4 Turbo Preview',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9599,10 +9599,10 @@ return
         ],
         'openai/gpt-4.1' => [
             'id' => 'openai/gpt-4.1',
-            'name' => "'OpenAI' => GPT-4.1",
+            'name' => 'OpenAI: GPT-4.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9616,10 +9616,10 @@ return
         ],
         'openai/gpt-4.1-mini' => [
             'id' => 'openai/gpt-4.1-mini',
-            'name' => "'OpenAI' => GPT-4.1 Mini",
+            'name' => 'OpenAI: GPT-4.1 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9633,10 +9633,10 @@ return
         ],
         'openai/gpt-4.1-nano' => [
             'id' => 'openai/gpt-4.1-nano',
-            'name' => "'OpenAI' => GPT-4.1 Nano",
+            'name' => 'OpenAI: GPT-4.1 Nano',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9650,10 +9650,10 @@ return
         ],
         'openai/gpt-4o' => [
             'id' => 'openai/gpt-4o',
-            'name' => "'OpenAI' => GPT-4o",
+            'name' => 'OpenAI: GPT-4o',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9667,10 +9667,10 @@ return
         ],
         'openai/gpt-4o-2024-05-13' => [
             'id' => 'openai/gpt-4o-2024-05-13',
-            'name' => "'OpenAI' => GPT-4o (2024-05-13)",
+            'name' => 'OpenAI: GPT-4o (2024-05-13)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9684,10 +9684,10 @@ return
         ],
         'openai/gpt-4o-2024-08-06' => [
             'id' => 'openai/gpt-4o-2024-08-06',
-            'name' => "'OpenAI' => GPT-4o (2024-08-06)",
+            'name' => 'OpenAI: GPT-4o (2024-08-06)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9701,10 +9701,10 @@ return
         ],
         'openai/gpt-4o-2024-11-20' => [
             'id' => 'openai/gpt-4o-2024-11-20',
-            'name' => "'OpenAI' => GPT-4o (2024-11-20)",
+            'name' => 'OpenAI: GPT-4o (2024-11-20)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9718,10 +9718,10 @@ return
         ],
         'openai/gpt-4o-audio-preview' => [
             'id' => 'openai/gpt-4o-audio-preview',
-            'name' => "'OpenAI' => GPT-4o Audio",
+            'name' => 'OpenAI: GPT-4o Audio',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -9735,10 +9735,10 @@ return
         ],
         'openai/gpt-4o-mini' => [
             'id' => 'openai/gpt-4o-mini',
-            'name' => "'OpenAI' => GPT-4o-mini",
+            'name' => 'OpenAI: GPT-4o-mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9752,10 +9752,10 @@ return
         ],
         'openai/gpt-4o-mini-2024-07-18' => [
             'id' => 'openai/gpt-4o-mini-2024-07-18',
-            'name' => "'OpenAI' => GPT-4o-mini (2024-07-18)",
+            'name' => 'OpenAI: GPT-4o-mini (2024-07-18)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9769,10 +9769,10 @@ return
         ],
         'openai/gpt-5' => [
             'id' => 'openai/gpt-5',
-            'name' => "'OpenAI' => GPT-5",
+            'name' => 'OpenAI: GPT-5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9786,10 +9786,10 @@ return
         ],
         'openai/gpt-5-codex' => [
             'id' => 'openai/gpt-5-codex',
-            'name' => "'OpenAI' => GPT-5 Codex",
+            'name' => 'OpenAI: GPT-5 Codex',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9803,10 +9803,10 @@ return
         ],
         'openai/gpt-5-mini' => [
             'id' => 'openai/gpt-5-mini',
-            'name' => "'OpenAI' => GPT-5 Mini",
+            'name' => 'OpenAI: GPT-5 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9820,10 +9820,10 @@ return
         ],
         'openai/gpt-5-nano' => [
             'id' => 'openai/gpt-5-nano',
-            'name' => "'OpenAI' => GPT-5 Nano",
+            'name' => 'OpenAI: GPT-5 Nano',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9837,10 +9837,10 @@ return
         ],
         'openai/gpt-5-pro' => [
             'id' => 'openai/gpt-5-pro',
-            'name' => "'OpenAI' => GPT-5 Pro",
+            'name' => 'OpenAI: GPT-5 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9854,10 +9854,10 @@ return
         ],
         'openai/gpt-5.1' => [
             'id' => 'openai/gpt-5.1',
-            'name' => "'OpenAI' => GPT-5.1",
+            'name' => 'OpenAI: GPT-5.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9871,10 +9871,10 @@ return
         ],
         'openai/gpt-5.1-chat' => [
             'id' => 'openai/gpt-5.1-chat',
-            'name' => "'OpenAI' => GPT-5.1 Chat",
+            'name' => 'OpenAI: GPT-5.1 Chat',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9888,10 +9888,10 @@ return
         ],
         'openai/gpt-5.1-codex' => [
             'id' => 'openai/gpt-5.1-codex',
-            'name' => "'OpenAI' => GPT-5.1-Codex",
+            'name' => 'OpenAI: GPT-5.1-Codex',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9905,10 +9905,10 @@ return
         ],
         'openai/gpt-5.1-codex-max' => [
             'id' => 'openai/gpt-5.1-codex-max',
-            'name' => "'OpenAI' => GPT-5.1-Codex-Max",
+            'name' => 'OpenAI: GPT-5.1-Codex-Max',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9922,10 +9922,10 @@ return
         ],
         'openai/gpt-5.1-codex-mini' => [
             'id' => 'openai/gpt-5.1-codex-mini',
-            'name' => "'OpenAI' => GPT-5.1-Codex-Mini",
+            'name' => 'OpenAI: GPT-5.1-Codex-Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9939,10 +9939,10 @@ return
         ],
         'openai/gpt-5.2' => [
             'id' => 'openai/gpt-5.2',
-            'name' => "'OpenAI' => GPT-5.2",
+            'name' => 'OpenAI: GPT-5.2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9956,10 +9956,10 @@ return
         ],
         'openai/gpt-5.2-chat' => [
             'id' => 'openai/gpt-5.2-chat',
-            'name' => "'OpenAI' => GPT-5.2 Chat",
+            'name' => 'OpenAI: GPT-5.2 Chat',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9973,10 +9973,10 @@ return
         ],
         'openai/gpt-5.2-codex' => [
             'id' => 'openai/gpt-5.2-codex',
-            'name' => "'OpenAI' => GPT-5.2-Codex",
+            'name' => 'OpenAI: GPT-5.2-Codex',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -9990,10 +9990,10 @@ return
         ],
         'openai/gpt-5.2-pro' => [
             'id' => 'openai/gpt-5.2-pro',
-            'name' => "'OpenAI' => GPT-5.2 Pro",
+            'name' => 'OpenAI: GPT-5.2 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10007,10 +10007,10 @@ return
         ],
         'openai/gpt-5.3-chat' => [
             'id' => 'openai/gpt-5.3-chat',
-            'name' => "'OpenAI' => GPT-5.3 Chat",
+            'name' => 'OpenAI: GPT-5.3 Chat',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10024,10 +10024,10 @@ return
         ],
         'openai/gpt-5.3-codex' => [
             'id' => 'openai/gpt-5.3-codex',
-            'name' => "'OpenAI' => GPT-5.3-Codex",
+            'name' => 'OpenAI: GPT-5.3-Codex',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10041,10 +10041,10 @@ return
         ],
         'openai/gpt-5.4' => [
             'id' => 'openai/gpt-5.4',
-            'name' => "'OpenAI' => GPT-5.4",
+            'name' => 'OpenAI: GPT-5.4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10058,10 +10058,10 @@ return
         ],
         'openai/gpt-5.4-mini' => [
             'id' => 'openai/gpt-5.4-mini',
-            'name' => "'OpenAI' => GPT-5.4 Mini",
+            'name' => 'OpenAI: GPT-5.4 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10075,10 +10075,10 @@ return
         ],
         'openai/gpt-5.4-nano' => [
             'id' => 'openai/gpt-5.4-nano',
-            'name' => "'OpenAI' => GPT-5.4 Nano",
+            'name' => 'OpenAI: GPT-5.4 Nano',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10092,10 +10092,10 @@ return
         ],
         'openai/gpt-5.4-pro' => [
             'id' => 'openai/gpt-5.4-pro',
-            'name' => "'OpenAI' => GPT-5.4 Pro",
+            'name' => 'OpenAI: GPT-5.4 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10109,10 +10109,10 @@ return
         ],
         'openai/gpt-audio' => [
             'id' => 'openai/gpt-audio',
-            'name' => "'OpenAI' => GPT Audio",
+            'name' => 'OpenAI: GPT Audio',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10126,10 +10126,10 @@ return
         ],
         'openai/gpt-audio-mini' => [
             'id' => 'openai/gpt-audio-mini',
-            'name' => "'OpenAI' => GPT Audio Mini",
+            'name' => 'OpenAI: GPT Audio Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10143,10 +10143,10 @@ return
         ],
         'openai/gpt-oss-120b' => [
             'id' => 'openai/gpt-oss-120b',
-            'name' => "'OpenAI' => gpt-oss-120b",
+            'name' => 'OpenAI: gpt-oss-120b',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10160,10 +10160,10 @@ return
         ],
         'openai/gpt-oss-120b:free' => [
             'id' => 'openai/gpt-oss-120b:free',
-            'name' => "'OpenAI' => gpt-oss-120b (free)",
+            'name' => 'OpenAI: gpt-oss-120b (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10177,10 +10177,10 @@ return
         ],
         'openai/gpt-oss-20b' => [
             'id' => 'openai/gpt-oss-20b',
-            'name' => "'OpenAI' => gpt-oss-20b",
+            'name' => 'OpenAI: gpt-oss-20b',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10194,10 +10194,10 @@ return
         ],
         'openai/gpt-oss-20b:free' => [
             'id' => 'openai/gpt-oss-20b:free',
-            'name' => "'OpenAI' => gpt-oss-20b (free)",
+            'name' => 'OpenAI: gpt-oss-20b (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10211,10 +10211,10 @@ return
         ],
         'openai/gpt-oss-safeguard-20b' => [
             'id' => 'openai/gpt-oss-safeguard-20b',
-            'name' => "'OpenAI' => gpt-oss-safeguard-20b",
+            'name' => 'OpenAI: gpt-oss-safeguard-20b',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10228,10 +10228,10 @@ return
         ],
         'openai/o1' => [
             'id' => 'openai/o1',
-            'name' => "'OpenAI' => o1",
+            'name' => 'OpenAI: o1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10245,10 +10245,10 @@ return
         ],
         'openai/o3' => [
             'id' => 'openai/o3',
-            'name' => "'OpenAI' => o3",
+            'name' => 'OpenAI: o3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10262,10 +10262,10 @@ return
         ],
         'openai/o3-deep-research' => [
             'id' => 'openai/o3-deep-research',
-            'name' => "'OpenAI' => o3 Deep Research",
+            'name' => 'OpenAI: o3 Deep Research',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10279,10 +10279,10 @@ return
         ],
         'openai/o3-mini' => [
             'id' => 'openai/o3-mini',
-            'name' => "'OpenAI' => o3 Mini",
+            'name' => 'OpenAI: o3 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10296,10 +10296,10 @@ return
         ],
         'openai/o3-mini-high' => [
             'id' => 'openai/o3-mini-high',
-            'name' => "'OpenAI' => o3 Mini High",
+            'name' => 'OpenAI: o3 Mini High',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10313,10 +10313,10 @@ return
         ],
         'openai/o3-pro' => [
             'id' => 'openai/o3-pro',
-            'name' => "'OpenAI' => o3 Pro",
+            'name' => 'OpenAI: o3 Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10330,10 +10330,10 @@ return
         ],
         'openai/o4-mini' => [
             'id' => 'openai/o4-mini',
-            'name' => "'OpenAI' => o4 Mini",
+            'name' => 'OpenAI: o4 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10347,10 +10347,10 @@ return
         ],
         'openai/o4-mini-deep-research' => [
             'id' => 'openai/o4-mini-deep-research',
-            'name' => "'OpenAI' => o4 Mini Deep Research",
+            'name' => 'OpenAI: o4 Mini Deep Research',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10364,10 +10364,10 @@ return
         ],
         'openai/o4-mini-high' => [
             'id' => 'openai/o4-mini-high',
-            'name' => "'OpenAI' => o4 Mini High",
+            'name' => 'OpenAI: o4 Mini High',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10384,7 +10384,7 @@ return
             'name' => 'Auto Router',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10401,7 +10401,7 @@ return
             'name' => 'Free Models Router',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10415,10 +10415,10 @@ return
         ],
         'prime-intellect/intellect-3' => [
             'id' => 'prime-intellect/intellect-3',
-            'name' => "Prime 'Intellect' => INTELLECT-3",
+            'name' => 'Prime Intellect: INTELLECT-3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10435,7 +10435,7 @@ return
             'name' => 'Qwen2.5 72B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10449,10 +10449,10 @@ return
         ],
         'qwen/qwen-2.5-7b-instruct' => [
             'id' => 'qwen/qwen-2.5-7b-instruct',
-            'name' => "'Qwen' => Qwen2.5 7B Instruct",
+            'name' => 'Qwen: Qwen2.5 7B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10466,10 +10466,10 @@ return
         ],
         'qwen/qwen-max' => [
             'id' => 'qwen/qwen-max',
-            'name' => "'Qwen' => Qwen-Max ",
+            'name' => 'Qwen: Qwen-Max ',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10483,10 +10483,10 @@ return
         ],
         'qwen/qwen-plus' => [
             'id' => 'qwen/qwen-plus',
-            'name' => "'Qwen' => Qwen-Plus",
+            'name' => 'Qwen: Qwen-Plus',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10500,10 +10500,10 @@ return
         ],
         'qwen/qwen-plus-2025-07-28' => [
             'id' => 'qwen/qwen-plus-2025-07-28',
-            'name' => "'Qwen' => Qwen Plus 0728",
+            'name' => 'Qwen: Qwen Plus 0728',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10517,10 +10517,10 @@ return
         ],
         'qwen/qwen-plus-2025-07-28:thinking' => [
             'id' => 'qwen/qwen-plus-2025-07-28:thinking',
-            'name' => "'Qwen' => Qwen Plus 0728 (thinking)",
+            'name' => 'Qwen: Qwen Plus 0728 (thinking)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10534,10 +10534,10 @@ return
         ],
         'qwen/qwen-turbo' => [
             'id' => 'qwen/qwen-turbo',
-            'name' => "'Qwen' => Qwen-Turbo",
+            'name' => 'Qwen: Qwen-Turbo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10551,10 +10551,10 @@ return
         ],
         'qwen/qwen-vl-max' => [
             'id' => 'qwen/qwen-vl-max',
-            'name' => "'Qwen' => Qwen VL Max",
+            'name' => 'Qwen: Qwen VL Max',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10568,10 +10568,10 @@ return
         ],
         'qwen/qwen3-14b' => [
             'id' => 'qwen/qwen3-14b',
-            'name' => "'Qwen' => Qwen3 14B",
+            'name' => 'Qwen: Qwen3 14B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10585,10 +10585,10 @@ return
         ],
         'qwen/qwen3-235b-a22b' => [
             'id' => 'qwen/qwen3-235b-a22b',
-            'name' => "'Qwen' => Qwen3 235B A22B",
+            'name' => 'Qwen: Qwen3 235B A22B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10602,10 +10602,10 @@ return
         ],
         'qwen/qwen3-235b-a22b-2507' => [
             'id' => 'qwen/qwen3-235b-a22b-2507',
-            'name' => "'Qwen' => Qwen3 235B A22B Instruct 2507",
+            'name' => 'Qwen: Qwen3 235B A22B Instruct 2507',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10619,10 +10619,10 @@ return
         ],
         'qwen/qwen3-235b-a22b-thinking-2507' => [
             'id' => 'qwen/qwen3-235b-a22b-thinking-2507',
-            'name' => "'Qwen' => Qwen3 235B A22B Thinking 2507",
+            'name' => 'Qwen: Qwen3 235B A22B Thinking 2507',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10636,10 +10636,10 @@ return
         ],
         'qwen/qwen3-30b-a3b' => [
             'id' => 'qwen/qwen3-30b-a3b',
-            'name' => "'Qwen' => Qwen3 30B A3B",
+            'name' => 'Qwen: Qwen3 30B A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10653,10 +10653,10 @@ return
         ],
         'qwen/qwen3-30b-a3b-instruct-2507' => [
             'id' => 'qwen/qwen3-30b-a3b-instruct-2507',
-            'name' => "'Qwen' => Qwen3 30B A3B Instruct 2507",
+            'name' => 'Qwen: Qwen3 30B A3B Instruct 2507',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10670,10 +10670,10 @@ return
         ],
         'qwen/qwen3-30b-a3b-thinking-2507' => [
             'id' => 'qwen/qwen3-30b-a3b-thinking-2507',
-            'name' => "'Qwen' => Qwen3 30B A3B Thinking 2507",
+            'name' => 'Qwen: Qwen3 30B A3B Thinking 2507',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10687,10 +10687,10 @@ return
         ],
         'qwen/qwen3-32b' => [
             'id' => 'qwen/qwen3-32b',
-            'name' => "'Qwen' => Qwen3 32B",
+            'name' => 'Qwen: Qwen3 32B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10704,10 +10704,10 @@ return
         ],
         'qwen/qwen3-8b' => [
             'id' => 'qwen/qwen3-8b',
-            'name' => "'Qwen' => Qwen3 8B",
+            'name' => 'Qwen: Qwen3 8B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10721,10 +10721,10 @@ return
         ],
         'qwen/qwen3-coder' => [
             'id' => 'qwen/qwen3-coder',
-            'name' => "'Qwen' => Qwen3 Coder 480B A35B",
+            'name' => 'Qwen: Qwen3 Coder 480B A35B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10738,10 +10738,10 @@ return
         ],
         'qwen/qwen3-coder-30b-a3b-instruct' => [
             'id' => 'qwen/qwen3-coder-30b-a3b-instruct',
-            'name' => "'Qwen' => Qwen3 Coder 30B A3B Instruct",
+            'name' => 'Qwen: Qwen3 Coder 30B A3B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10755,10 +10755,10 @@ return
         ],
         'qwen/qwen3-coder-flash' => [
             'id' => 'qwen/qwen3-coder-flash',
-            'name' => "'Qwen' => Qwen3 Coder Flash",
+            'name' => 'Qwen: Qwen3 Coder Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10772,10 +10772,10 @@ return
         ],
         'qwen/qwen3-coder-next' => [
             'id' => 'qwen/qwen3-coder-next',
-            'name' => "'Qwen' => Qwen3 Coder Next",
+            'name' => 'Qwen: Qwen3 Coder Next',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10789,10 +10789,10 @@ return
         ],
         'qwen/qwen3-coder-plus' => [
             'id' => 'qwen/qwen3-coder-plus',
-            'name' => "'Qwen' => Qwen3 Coder Plus",
+            'name' => 'Qwen: Qwen3 Coder Plus',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10804,12 +10804,12 @@ return
             'contextWindow' => 1000000,
             'maxTokens' => 65536,
         ],
-        "qwen/qwen3-'coder' => free" => [
-            'id' => "qwen/qwen3-'coder' => free",
-            'name' => "'Qwen' => Qwen3 Coder 480B A35B (free)",
+        'qwen/qwen3-coder:free' => [
+            'id' => 'qwen/qwen3-coder:free',
+            'name' => 'Qwen: Qwen3 Coder 480B A35B (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10823,10 +10823,10 @@ return
         ],
         'qwen/qwen3-max' => [
             'id' => 'qwen/qwen3-max',
-            'name' => "'Qwen' => Qwen3 Max",
+            'name' => 'Qwen: Qwen3 Max',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10840,10 +10840,10 @@ return
         ],
         'qwen/qwen3-max-thinking' => [
             'id' => 'qwen/qwen3-max-thinking',
-            'name' => "'Qwen' => Qwen3 Max Thinking",
+            'name' => 'Qwen: Qwen3 Max Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10857,10 +10857,10 @@ return
         ],
         'qwen/qwen3-next-80b-a3b-instruct' => [
             'id' => 'qwen/qwen3-next-80b-a3b-instruct',
-            'name' => "'Qwen' => Qwen3 Next 80B A3B Instruct",
+            'name' => 'Qwen: Qwen3 Next 80B A3B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10872,12 +10872,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 4096,
         ],
-        "qwen/qwen3-next-80b-a3b-'instruct' => free" => [
-            'id' => "qwen/qwen3-next-80b-a3b-'instruct' => free",
-            'name' => "'Qwen' => Qwen3 Next 80B A3B Instruct (free)",
+        'qwen/qwen3-next-80b-a3b-instruct:free' => [
+            'id' => 'qwen/qwen3-next-80b-a3b-instruct:free',
+            'name' => 'Qwen: Qwen3 Next 80B A3B Instruct (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -10891,10 +10891,10 @@ return
         ],
         'qwen/qwen3-next-80b-a3b-thinking' => [
             'id' => 'qwen/qwen3-next-80b-a3b-thinking',
-            'name' => "'Qwen' => Qwen3 Next 80B A3B Thinking",
+            'name' => 'Qwen: Qwen3 Next 80B A3B Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -10908,10 +10908,10 @@ return
         ],
         'qwen/qwen3-vl-235b-a22b-instruct' => [
             'id' => 'qwen/qwen3-vl-235b-a22b-instruct',
-            'name' => "'Qwen' => Qwen3 VL 235B A22B Instruct",
+            'name' => 'Qwen: Qwen3 VL 235B A22B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10925,10 +10925,10 @@ return
         ],
         'qwen/qwen3-vl-235b-a22b-thinking' => [
             'id' => 'qwen/qwen3-vl-235b-a22b-thinking',
-            'name' => "'Qwen' => Qwen3 VL 235B A22B Thinking",
+            'name' => 'Qwen: Qwen3 VL 235B A22B Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10942,10 +10942,10 @@ return
         ],
         'qwen/qwen3-vl-30b-a3b-instruct' => [
             'id' => 'qwen/qwen3-vl-30b-a3b-instruct',
-            'name' => "'Qwen' => Qwen3 VL 30B A3B Instruct",
+            'name' => 'Qwen: Qwen3 VL 30B A3B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10959,10 +10959,10 @@ return
         ],
         'qwen/qwen3-vl-30b-a3b-thinking' => [
             'id' => 'qwen/qwen3-vl-30b-a3b-thinking',
-            'name' => "'Qwen' => Qwen3 VL 30B A3B Thinking",
+            'name' => 'Qwen: Qwen3 VL 30B A3B Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10976,10 +10976,10 @@ return
         ],
         'qwen/qwen3-vl-32b-instruct' => [
             'id' => 'qwen/qwen3-vl-32b-instruct',
-            'name' => "'Qwen' => Qwen3 VL 32B Instruct",
+            'name' => 'Qwen: Qwen3 VL 32B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -10993,10 +10993,10 @@ return
         ],
         'qwen/qwen3-vl-8b-instruct' => [
             'id' => 'qwen/qwen3-vl-8b-instruct',
-            'name' => "'Qwen' => Qwen3 VL 8B Instruct",
+            'name' => 'Qwen: Qwen3 VL 8B Instruct',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11010,10 +11010,10 @@ return
         ],
         'qwen/qwen3-vl-8b-thinking' => [
             'id' => 'qwen/qwen3-vl-8b-thinking',
-            'name' => "'Qwen' => Qwen3 VL 8B Thinking",
+            'name' => 'Qwen: Qwen3 VL 8B Thinking',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11027,10 +11027,10 @@ return
         ],
         'qwen/qwen3.5-122b-a10b' => [
             'id' => 'qwen/qwen3.5-122b-a10b',
-            'name' => "'Qwen' => Qwen3.5-122B-A10B",
+            'name' => 'Qwen: Qwen3.5-122B-A10B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11044,10 +11044,10 @@ return
         ],
         'qwen/qwen3.5-27b' => [
             'id' => 'qwen/qwen3.5-27b',
-            'name' => "'Qwen' => Qwen3.5-27B",
+            'name' => 'Qwen: Qwen3.5-27B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11061,10 +11061,10 @@ return
         ],
         'qwen/qwen3.5-35b-a3b' => [
             'id' => 'qwen/qwen3.5-35b-a3b',
-            'name' => "'Qwen' => Qwen3.5-35B-A3B",
+            'name' => 'Qwen: Qwen3.5-35B-A3B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11078,10 +11078,10 @@ return
         ],
         'qwen/qwen3.5-397b-a17b' => [
             'id' => 'qwen/qwen3.5-397b-a17b',
-            'name' => "'Qwen' => Qwen3.5 397B A17B",
+            'name' => 'Qwen: Qwen3.5 397B A17B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11095,10 +11095,10 @@ return
         ],
         'qwen/qwen3.5-9b' => [
             'id' => 'qwen/qwen3.5-9b',
-            'name' => "'Qwen' => Qwen3.5-9B",
+            'name' => 'Qwen: Qwen3.5-9B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11112,10 +11112,10 @@ return
         ],
         'qwen/qwen3.5-flash-02-23' => [
             'id' => 'qwen/qwen3.5-flash-02-23',
-            'name' => "'Qwen' => Qwen3.5-Flash",
+            'name' => 'Qwen: Qwen3.5-Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11129,10 +11129,10 @@ return
         ],
         'qwen/qwen3.5-plus-02-15' => [
             'id' => 'qwen/qwen3.5-plus-02-15',
-            'name' => "'Qwen' => Qwen3.5 Plus 2026-02-15",
+            'name' => 'Qwen: Qwen3.5 Plus 2026-02-15',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11146,10 +11146,10 @@ return
         ],
         'qwen/qwen3.6-plus' => [
             'id' => 'qwen/qwen3.6-plus',
-            'name' => "'Qwen' => Qwen3.6 Plus",
+            'name' => 'Qwen: Qwen3.6 Plus',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11163,10 +11163,10 @@ return
         ],
         'qwen/qwq-32b' => [
             'id' => 'qwen/qwq-32b',
-            'name' => "'Qwen' => QwQ 32B",
+            'name' => 'Qwen: QwQ 32B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11183,7 +11183,7 @@ return
             'name' => 'Reka Edge',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11197,10 +11197,10 @@ return
         ],
         'relace/relace-search' => [
             'id' => 'relace/relace-search',
-            'name' => "'Relace' => Relace Search",
+            'name' => 'Relace: Relace Search',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11214,10 +11214,10 @@ return
         ],
         'sao10k/l3-euryale-70b' => [
             'id' => 'sao10k/l3-euryale-70b',
-            'name' => "'Sao10k' => Llama 3 Euryale 70B v2.1",
+            'name' => 'Sao10k: Llama 3 Euryale 70B v2.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11231,10 +11231,10 @@ return
         ],
         'sao10k/l3.1-euryale-70b' => [
             'id' => 'sao10k/l3.1-euryale-70b',
-            'name' => "'Sao10K' => Llama 3.1 Euryale 70B v2.2",
+            'name' => 'Sao10K: Llama 3.1 Euryale 70B v2.2',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11248,10 +11248,10 @@ return
         ],
         'stepfun/step-3.5-flash' => [
             'id' => 'stepfun/step-3.5-flash',
-            'name' => "'StepFun' => Step 3.5 Flash",
+            'name' => 'StepFun: Step 3.5 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11263,12 +11263,12 @@ return
             'contextWindow' => 262144,
             'maxTokens' => 65536,
         ],
-        "tencent/hy3-'preview' => free" => [
-            'id' => "tencent/hy3-'preview' => free",
-            'name' => "'Tencent' => Hy3 preview (free)",
+        'tencent/hy3-preview:free' => [
+            'id' => 'tencent/hy3-preview:free',
+            'name' => 'Tencent: Hy3 preview (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11282,10 +11282,10 @@ return
         ],
         'thedrummer/rocinante-12b' => [
             'id' => 'thedrummer/rocinante-12b',
-            'name' => "'TheDrummer' => Rocinante 12B",
+            'name' => 'TheDrummer: Rocinante 12B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11299,10 +11299,10 @@ return
         ],
         'thedrummer/unslopnemo-12b' => [
             'id' => 'thedrummer/unslopnemo-12b',
-            'name' => "'TheDrummer' => UnslopNemo 12B",
+            'name' => 'TheDrummer: UnslopNemo 12B',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11316,10 +11316,10 @@ return
         ],
         'tngtech/deepseek-r1t2-chimera' => [
             'id' => 'tngtech/deepseek-r1t2-chimera',
-            'name' => "'TNG' => DeepSeek R1T2 Chimera",
+            'name' => 'TNG: DeepSeek R1T2 Chimera',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11333,10 +11333,10 @@ return
         ],
         'upstage/solar-pro-3' => [
             'id' => 'upstage/solar-pro-3',
-            'name' => "'Upstage' => Solar Pro 3",
+            'name' => 'Upstage: Solar Pro 3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11350,10 +11350,10 @@ return
         ],
         'x-ai/grok-3' => [
             'id' => 'x-ai/grok-3',
-            'name' => "'xAI' => Grok 3",
+            'name' => 'xAI: Grok 3',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11367,10 +11367,10 @@ return
         ],
         'x-ai/grok-3-beta' => [
             'id' => 'x-ai/grok-3-beta',
-            'name' => "'xAI' => Grok 3 Beta",
+            'name' => 'xAI: Grok 3 Beta',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11384,10 +11384,10 @@ return
         ],
         'x-ai/grok-3-mini' => [
             'id' => 'x-ai/grok-3-mini',
-            'name' => "'xAI' => Grok 3 Mini",
+            'name' => 'xAI: Grok 3 Mini',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11401,10 +11401,10 @@ return
         ],
         'x-ai/grok-3-mini-beta' => [
             'id' => 'x-ai/grok-3-mini-beta',
-            'name' => "'xAI' => Grok 3 Mini Beta",
+            'name' => 'xAI: Grok 3 Mini Beta',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11418,10 +11418,10 @@ return
         ],
         'x-ai/grok-4' => [
             'id' => 'x-ai/grok-4',
-            'name' => "'xAI' => Grok 4",
+            'name' => 'xAI: Grok 4',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11435,10 +11435,10 @@ return
         ],
         'x-ai/grok-4-fast' => [
             'id' => 'x-ai/grok-4-fast',
-            'name' => "'xAI' => Grok 4 Fast",
+            'name' => 'xAI: Grok 4 Fast',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11452,10 +11452,10 @@ return
         ],
         'x-ai/grok-4.1-fast' => [
             'id' => 'x-ai/grok-4.1-fast',
-            'name' => "'xAI' => Grok 4.1 Fast",
+            'name' => 'xAI: Grok 4.1 Fast',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11469,10 +11469,10 @@ return
         ],
         'x-ai/grok-4.20' => [
             'id' => 'x-ai/grok-4.20',
-            'name' => "'xAI' => Grok 4.20",
+            'name' => 'xAI: Grok 4.20',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11486,10 +11486,10 @@ return
         ],
         'x-ai/grok-code-fast-1' => [
             'id' => 'x-ai/grok-code-fast-1',
-            'name' => "'xAI' => Grok Code Fast 1",
+            'name' => 'xAI: Grok Code Fast 1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11503,10 +11503,10 @@ return
         ],
         'xiaomi/mimo-v2-flash' => [
             'id' => 'xiaomi/mimo-v2-flash',
-            'name' => "'Xiaomi' => MiMo-V2-Flash",
+            'name' => 'Xiaomi: MiMo-V2-Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11520,10 +11520,10 @@ return
         ],
         'xiaomi/mimo-v2-omni' => [
             'id' => 'xiaomi/mimo-v2-omni',
-            'name' => "'Xiaomi' => MiMo-V2-Omni",
+            'name' => 'Xiaomi: MiMo-V2-Omni',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11537,10 +11537,10 @@ return
         ],
         'xiaomi/mimo-v2-pro' => [
             'id' => 'xiaomi/mimo-v2-pro',
-            'name' => "'Xiaomi' => MiMo-V2-Pro",
+            'name' => 'Xiaomi: MiMo-V2-Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11554,10 +11554,10 @@ return
         ],
         'xiaomi/mimo-v2.5' => [
             'id' => 'xiaomi/mimo-v2.5',
-            'name' => "'Xiaomi' => MiMo-V2.5",
+            'name' => 'Xiaomi: MiMo-V2.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11571,10 +11571,10 @@ return
         ],
         'xiaomi/mimo-v2.5-pro' => [
             'id' => 'xiaomi/mimo-v2.5-pro',
-            'name' => "'Xiaomi' => MiMo-V2.5-Pro",
+            'name' => 'Xiaomi: MiMo-V2.5-Pro',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11588,10 +11588,10 @@ return
         ],
         'z-ai/glm-4-32b' => [
             'id' => 'z-ai/glm-4-32b',
-            'name' => "Z.'ai' => GLM 4 32B ",
+            'name' => 'Z.ai: GLM 4 32B ',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11605,10 +11605,10 @@ return
         ],
         'z-ai/glm-4.5' => [
             'id' => 'z-ai/glm-4.5',
-            'name' => "Z.'ai' => GLM 4.5",
+            'name' => 'Z.ai: GLM 4.5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11622,10 +11622,10 @@ return
         ],
         'z-ai/glm-4.5-air' => [
             'id' => 'z-ai/glm-4.5-air',
-            'name' => "Z.'ai' => GLM 4.5 Air",
+            'name' => 'Z.ai: GLM 4.5 Air',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11637,12 +11637,12 @@ return
             'contextWindow' => 131072,
             'maxTokens' => 98304,
         ],
-        "z-ai/glm-4.5-'air' => free" => [
-            'id' => "z-ai/glm-4.5-'air' => free",
-            'name' => "Z.'ai' => GLM 4.5 Air (free)",
+        'z-ai/glm-4.5-air:free' => [
+            'id' => 'z-ai/glm-4.5-air:free',
+            'name' => 'Z.ai: GLM 4.5 Air (free)',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11656,10 +11656,10 @@ return
         ],
         'z-ai/glm-4.5v' => [
             'id' => 'z-ai/glm-4.5v',
-            'name' => "Z.'ai' => GLM 4.5V",
+            'name' => 'Z.ai: GLM 4.5V',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11673,10 +11673,10 @@ return
         ],
         'z-ai/glm-4.6' => [
             'id' => 'z-ai/glm-4.6',
-            'name' => "Z.'ai' => GLM 4.6",
+            'name' => 'Z.ai: GLM 4.6',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11690,10 +11690,10 @@ return
         ],
         'z-ai/glm-4.6v' => [
             'id' => 'z-ai/glm-4.6v',
-            'name' => "Z.'ai' => GLM 4.6V",
+            'name' => 'Z.ai: GLM 4.6V',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11707,10 +11707,10 @@ return
         ],
         'z-ai/glm-4.7' => [
             'id' => 'z-ai/glm-4.7',
-            'name' => "Z.'ai' => GLM 4.7",
+            'name' => 'Z.ai: GLM 4.7',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11724,10 +11724,10 @@ return
         ],
         'z-ai/glm-4.7-flash' => [
             'id' => 'z-ai/glm-4.7-flash',
-            'name' => "Z.'ai' => GLM 4.7 Flash",
+            'name' => 'Z.ai: GLM 4.7 Flash',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11741,10 +11741,10 @@ return
         ],
         'z-ai/glm-5' => [
             'id' => 'z-ai/glm-5',
-            'name' => "Z.'ai' => GLM 5",
+            'name' => 'Z.ai: GLM 5',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11758,10 +11758,10 @@ return
         ],
         'z-ai/glm-5-turbo' => [
             'id' => 'z-ai/glm-5-turbo',
-            'name' => "Z.'ai' => GLM 5 Turbo",
+            'name' => 'Z.ai: GLM 5 Turbo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11775,10 +11775,10 @@ return
         ],
         'z-ai/glm-5.1' => [
             'id' => 'z-ai/glm-5.1',
-            'name' => "Z.'ai' => GLM 5.1",
+            'name' => 'Z.ai: GLM 5.1',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11792,10 +11792,10 @@ return
         ],
         'z-ai/glm-5v-turbo' => [
             'id' => 'z-ai/glm-5v-turbo',
-            'name' => "Z.'ai' => GLM 5V Turbo",
+            'name' => 'Z.ai: GLM 5V Turbo',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11809,10 +11809,10 @@ return
         ],
         '~anthropic/claude-opus-latest' => [
             'id' => '~anthropic/claude-opus-latest',
-            'name' => "'Anthropic' => Claude Opus Latest",
+            'name' => 'Anthropic: Claude Opus Latest',
             'api' => 'openai-completions',
             'provider' => 'openrouter',
-            'baseUrl' => "'https' => //openrouter.ai/api/v1",
+            'baseUrl' => 'https://openrouter.ai/api/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11831,7 +11831,7 @@ return
             'name' => 'Qwen3-14B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11848,7 +11848,7 @@ return
             'name' => 'Qwen3 235B A22b Instruct 2507',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11865,7 +11865,7 @@ return
             'name' => 'Qwen3-30B-A3B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11882,7 +11882,7 @@ return
             'name' => 'Qwen 3 32B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11899,7 +11899,7 @@ return
             'name' => 'Qwen 3.6 Max Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11916,7 +11916,7 @@ return
             'name' => 'Qwen3 235B A22B Thinking 2507',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -11933,7 +11933,7 @@ return
             'name' => 'Qwen3 Coder 480B A35B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11950,7 +11950,7 @@ return
             'name' => 'Qwen 3 Coder 30B A3B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -11967,7 +11967,7 @@ return
             'name' => 'Qwen3 Coder Next',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -11984,7 +11984,7 @@ return
             'name' => 'Qwen3 Coder Plus',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12001,7 +12001,7 @@ return
             'name' => 'Qwen3 Max',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12018,7 +12018,7 @@ return
             'name' => 'Qwen3 Max Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12035,7 +12035,7 @@ return
             'name' => 'Qwen 3 Max Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12052,7 +12052,7 @@ return
             'name' => 'Qwen3 VL 235B A22B Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12069,7 +12069,7 @@ return
             'name' => 'Qwen 3.5 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12086,7 +12086,7 @@ return
             'name' => 'Qwen 3.5 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12103,7 +12103,7 @@ return
             'name' => 'Qwen 3.6 Plus',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12120,7 +12120,7 @@ return
             'name' => 'Claude 3 Haiku',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12137,7 +12137,7 @@ return
             'name' => 'Claude 3.5 Haiku',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12154,7 +12154,7 @@ return
             'name' => 'Claude 3.7 Sonnet',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12171,7 +12171,7 @@ return
             'name' => 'Claude Haiku 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12188,7 +12188,7 @@ return
             'name' => 'Claude Opus 4',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12205,7 +12205,7 @@ return
             'name' => 'Claude Opus 4.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12222,7 +12222,7 @@ return
             'name' => 'Claude Opus 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12239,7 +12239,7 @@ return
             'name' => 'Claude Opus 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12256,7 +12256,7 @@ return
             'name' => 'Claude Opus 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12273,7 +12273,7 @@ return
             'name' => 'Claude Sonnet 4',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12290,7 +12290,7 @@ return
             'name' => 'Claude Sonnet 4.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12307,7 +12307,7 @@ return
             'name' => 'Claude Sonnet 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12324,7 +12324,7 @@ return
             'name' => 'Trinity Large Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12341,7 +12341,7 @@ return
             'name' => 'Trinity Large Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12358,7 +12358,7 @@ return
             'name' => 'Seed 1.6',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12375,7 +12375,7 @@ return
             'name' => 'Command A',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12392,7 +12392,7 @@ return
             'name' => 'DeepSeek-R1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12409,7 +12409,7 @@ return
             'name' => 'DeepSeek V3 0324',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12426,7 +12426,7 @@ return
             'name' => 'DeepSeek-V3.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12443,7 +12443,7 @@ return
             'name' => 'DeepSeek V3.1 Terminus',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12460,7 +12460,7 @@ return
             'name' => 'DeepSeek V3.2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12477,7 +12477,7 @@ return
             'name' => 'DeepSeek V3.2 Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12494,7 +12494,7 @@ return
             'name' => 'DeepSeek V4 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12511,7 +12511,7 @@ return
             'name' => 'DeepSeek V4 Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12528,7 +12528,7 @@ return
             'name' => 'Gemini 2.0 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12545,7 +12545,7 @@ return
             'name' => 'Gemini 2.0 Flash Lite',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12562,7 +12562,7 @@ return
             'name' => 'Gemini 2.5 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12579,7 +12579,7 @@ return
             'name' => 'Gemini 2.5 Flash Lite',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12596,7 +12596,7 @@ return
             'name' => 'Gemini 2.5 Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12613,7 +12613,7 @@ return
             'name' => 'Gemini 3 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12630,7 +12630,7 @@ return
             'name' => 'Gemini 3 Pro Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12647,7 +12647,7 @@ return
             'name' => 'Gemini 3.1 Flash Lite Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12664,7 +12664,7 @@ return
             'name' => 'Gemini 3.1 Pro Preview',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12681,7 +12681,7 @@ return
             'name' => 'Gemma 4 26B A4B IT',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12698,7 +12698,7 @@ return
             'name' => 'Gemma 4 31B IT',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12715,7 +12715,7 @@ return
             'name' => 'Mercury 2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12732,7 +12732,7 @@ return
             'name' => 'Mercury Coder Small Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12749,7 +12749,7 @@ return
             'name' => 'Kat Coder Pro V2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12766,7 +12766,7 @@ return
             'name' => 'LongCat Flash Chat',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12783,7 +12783,7 @@ return
             'name' => 'Llama 3.1 70B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12800,7 +12800,7 @@ return
             'name' => 'Llama 3.1 8B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12817,7 +12817,7 @@ return
             'name' => 'Llama 3.2 11B Vision Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12834,7 +12834,7 @@ return
             'name' => 'Llama 3.2 90B Vision Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12851,7 +12851,7 @@ return
             'name' => 'Llama 3.3 70B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -12868,7 +12868,7 @@ return
             'name' => 'Llama 4 Maverick 17B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12885,7 +12885,7 @@ return
             'name' => 'Llama 4 Scout 17B Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -12902,7 +12902,7 @@ return
             'name' => 'MiniMax M2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12919,7 +12919,7 @@ return
             'name' => 'MiniMax M2.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12936,7 +12936,7 @@ return
             'name' => 'MiniMax M2.1 Lightning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12953,7 +12953,7 @@ return
             'name' => 'MiniMax M2.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12970,7 +12970,7 @@ return
             'name' => 'MiniMax M2.5 High Speed',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -12987,7 +12987,7 @@ return
             'name' => 'Minimax M2.7',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13004,7 +13004,7 @@ return
             'name' => 'MiniMax M2.7 High Speed',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13021,7 +13021,7 @@ return
             'name' => 'Mistral Codestral',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13038,7 +13038,7 @@ return
             'name' => 'Devstral 2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13055,7 +13055,7 @@ return
             'name' => 'Devstral Small 1.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13072,7 +13072,7 @@ return
             'name' => 'Devstral Small 2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13089,7 +13089,7 @@ return
             'name' => 'Ministral 3B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13106,7 +13106,7 @@ return
             'name' => 'Ministral 8B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13123,7 +13123,7 @@ return
             'name' => 'Mistral Medium 3.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13140,7 +13140,7 @@ return
             'name' => 'Mistral Small',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13157,7 +13157,7 @@ return
             'name' => 'Pixtral 12B 2409',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13174,7 +13174,7 @@ return
             'name' => 'Pixtral Large',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13191,7 +13191,7 @@ return
             'name' => 'Kimi K2 Instruct',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13208,7 +13208,7 @@ return
             'name' => 'Kimi K2 0905',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13225,7 +13225,7 @@ return
             'name' => 'Kimi K2 Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13242,7 +13242,7 @@ return
             'name' => 'Kimi K2 Thinking Turbo',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13259,7 +13259,7 @@ return
             'name' => 'Kimi K2 Turbo',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -13276,7 +13276,7 @@ return
             'name' => 'Kimi K2.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13293,7 +13293,7 @@ return
             'name' => 'Kimi K2.6',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13310,7 +13310,7 @@ return
             'name' => 'Nvidia Nemotron Nano 12B V2 VL',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13327,7 +13327,7 @@ return
             'name' => 'Nvidia Nemotron Nano 9B V2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13344,7 +13344,7 @@ return
             'name' => 'GPT-4 Turbo',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13361,7 +13361,7 @@ return
             'name' => 'GPT-4.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13378,7 +13378,7 @@ return
             'name' => 'GPT-4.1 mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13395,7 +13395,7 @@ return
             'name' => 'GPT-4.1 nano',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13412,7 +13412,7 @@ return
             'name' => 'GPT-4o',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13429,7 +13429,7 @@ return
             'name' => 'GPT-4o mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13446,7 +13446,7 @@ return
             'name' => 'GPT-5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13463,7 +13463,7 @@ return
             'name' => 'GPT 5 Chat',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13480,7 +13480,7 @@ return
             'name' => 'GPT-5-Codex',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13497,7 +13497,7 @@ return
             'name' => 'GPT-5 mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13514,7 +13514,7 @@ return
             'name' => 'GPT-5 nano',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13531,7 +13531,7 @@ return
             'name' => 'GPT-5 pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13548,7 +13548,7 @@ return
             'name' => 'GPT-5.1-Codex',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13565,7 +13565,7 @@ return
             'name' => 'GPT 5.1 Codex Max',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13582,7 +13582,7 @@ return
             'name' => 'GPT 5.1 Codex Mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13599,7 +13599,7 @@ return
             'name' => 'GPT-5.1 Instant',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13616,7 +13616,7 @@ return
             'name' => 'GPT 5.1 Thinking',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13633,7 +13633,7 @@ return
             'name' => 'GPT 5.2',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13650,7 +13650,7 @@ return
             'name' => 'GPT 5.2 Chat',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13667,7 +13667,7 @@ return
             'name' => 'GPT 5.2 Codex',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13684,7 +13684,7 @@ return
             'name' => 'GPT 5.2 ',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13701,7 +13701,7 @@ return
             'name' => 'GPT-5.3 Chat',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13718,7 +13718,7 @@ return
             'name' => 'GPT 5.3 Codex',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13735,7 +13735,7 @@ return
             'name' => 'GPT 5.4',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13752,7 +13752,7 @@ return
             'name' => 'GPT 5.4 Mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13769,7 +13769,7 @@ return
             'name' => 'GPT 5.4 Nano',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13786,7 +13786,7 @@ return
             'name' => 'GPT 5.4 Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13803,7 +13803,7 @@ return
             'name' => 'GPT OSS 120B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13820,7 +13820,7 @@ return
             'name' => 'GPT OSS Safeguard 20B',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13837,7 +13837,7 @@ return
             'name' => 'o1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13854,7 +13854,7 @@ return
             'name' => 'o3',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13871,7 +13871,7 @@ return
             'name' => 'o3-deep-research',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13888,7 +13888,7 @@ return
             'name' => 'o3-mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13905,7 +13905,7 @@ return
             'name' => 'o3 Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13922,7 +13922,7 @@ return
             'name' => 'o4-mini',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13939,7 +13939,7 @@ return
             'name' => 'Sonar',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13956,7 +13956,7 @@ return
             'name' => 'Sonar Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -13973,7 +13973,7 @@ return
             'name' => 'INTELLECT 3',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -13990,7 +13990,7 @@ return
             'name' => 'Grok 3 Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14007,7 +14007,7 @@ return
             'name' => 'Grok 3 Fast Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14024,7 +14024,7 @@ return
             'name' => 'Grok 3 Mini Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14041,7 +14041,7 @@ return
             'name' => 'Grok 3 Mini Fast Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14058,7 +14058,7 @@ return
             'name' => 'Grok 4',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14075,7 +14075,7 @@ return
             'name' => 'Grok 4 Fast Non-Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14092,7 +14092,7 @@ return
             'name' => 'Grok 4 Fast Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14109,7 +14109,7 @@ return
             'name' => 'Grok 4.1 Fast Non-Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14126,7 +14126,7 @@ return
             'name' => 'Grok 4.1 Fast Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14143,7 +14143,7 @@ return
             'name' => 'Grok 4.20 Multi-Agent',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14160,7 +14160,7 @@ return
             'name' => 'Grok 4.20 Multi Agent Beta',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14177,7 +14177,7 @@ return
             'name' => 'Grok 4.20 Non-Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14194,7 +14194,7 @@ return
             'name' => 'Grok 4.20 Beta Non-Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14211,7 +14211,7 @@ return
             'name' => 'Grok 4.20 Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14228,7 +14228,7 @@ return
             'name' => 'Grok 4.20 Beta Reasoning',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14245,7 +14245,7 @@ return
             'name' => 'Grok Code Fast 1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14262,7 +14262,7 @@ return
             'name' => 'MiMo V2 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14279,7 +14279,7 @@ return
             'name' => 'MiMo V2 Pro',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14296,7 +14296,7 @@ return
             'name' => 'GLM-4.5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14313,7 +14313,7 @@ return
             'name' => 'GLM 4.5 Air',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14330,7 +14330,7 @@ return
             'name' => 'GLM 4.5V',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14347,7 +14347,7 @@ return
             'name' => 'GLM 4.6',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14364,7 +14364,7 @@ return
             'name' => 'GLM-4.6V',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14381,7 +14381,7 @@ return
             'name' => 'GLM-4.6V-Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14398,7 +14398,7 @@ return
             'name' => 'GLM 4.7',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14415,7 +14415,7 @@ return
             'name' => 'GLM 4.7 Flash',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14432,7 +14432,7 @@ return
             'name' => 'GLM 4.7 FlashX',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14449,7 +14449,7 @@ return
             'name' => 'GLM 5',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14466,7 +14466,7 @@ return
             'name' => 'GLM 5 Turbo',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14483,7 +14483,7 @@ return
             'name' => 'GLM 5.1',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14500,7 +14500,7 @@ return
             'name' => 'GLM 5V Turbo',
             'api' => 'anthropic-messages',
             'provider' => 'vercel-ai-gateway',
-            'baseUrl' => "'https' => //ai-gateway.vercel.sh",
+            'baseUrl' => 'https://ai-gateway.vercel.sh',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14519,7 +14519,7 @@ return
             'name' => 'Grok 2',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14536,7 +14536,7 @@ return
             'name' => 'Grok 2 (1212)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14553,7 +14553,7 @@ return
             'name' => 'Grok 2 Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14570,7 +14570,7 @@ return
             'name' => 'Grok 2 Vision',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14587,7 +14587,7 @@ return
             'name' => 'Grok 2 Vision (1212)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14604,7 +14604,7 @@ return
             'name' => 'Grok 2 Vision Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14621,7 +14621,7 @@ return
             'name' => 'Grok 3',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14638,7 +14638,7 @@ return
             'name' => 'Grok 3 Fast',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14655,7 +14655,7 @@ return
             'name' => 'Grok 3 Fast Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14672,7 +14672,7 @@ return
             'name' => 'Grok 3 Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14689,7 +14689,7 @@ return
             'name' => 'Grok 3 Mini',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14706,7 +14706,7 @@ return
             'name' => 'Grok 3 Mini Fast',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14723,7 +14723,7 @@ return
             'name' => 'Grok 3 Mini Fast Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14740,7 +14740,7 @@ return
             'name' => 'Grok 3 Mini Latest',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14757,7 +14757,7 @@ return
             'name' => 'Grok 4',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14774,7 +14774,7 @@ return
             'name' => 'Grok 4.1 Fast',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14791,7 +14791,7 @@ return
             'name' => 'Grok 4.1 Fast (Non-Reasoning)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14808,7 +14808,7 @@ return
             'name' => 'Grok 4 Fast',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14825,7 +14825,7 @@ return
             'name' => 'Grok 4 Fast (Non-Reasoning)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14842,7 +14842,7 @@ return
             'name' => 'Grok 4.20 (Non-Reasoning)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14859,7 +14859,7 @@ return
             'name' => 'Grok 4.20 (Reasoning)',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14876,7 +14876,7 @@ return
             'name' => 'Grok Beta',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text'],
             'cost' => [
@@ -14893,7 +14893,7 @@ return
             'name' => 'Grok Code Fast 1',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => true,
             'input' => ['text'],
             'cost' => [
@@ -14910,7 +14910,7 @@ return
             'name' => 'Grok Vision Beta',
             'api' => 'openai-completions',
             'provider' => 'xai',
-            'baseUrl' => "'https' => //api.x.ai/v1",
+            'baseUrl' => 'https://api.x.ai/v1',
             'reasoning' => false,
             'input' => ['text', 'image'],
             'cost' => [
@@ -14929,7 +14929,7 @@ return
             'name' => 'GLM-4.5',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai'],
             'reasoning' => true,
             'input' => ['text'],
@@ -14947,7 +14947,7 @@ return
             'name' => 'GLM-4.5-Air',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai'],
             'reasoning' => true,
             'input' => ['text'],
@@ -14965,7 +14965,7 @@ return
             'name' => 'GLM-4.5-Flash',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai'],
             'reasoning' => true,
             'input' => ['text'],
@@ -14983,7 +14983,7 @@ return
             'name' => 'GLM-4.5V',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai'],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -15001,7 +15001,7 @@ return
             'name' => 'GLM-4.6',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15019,7 +15019,7 @@ return
             'name' => 'GLM-4.6V',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text', 'image'],
@@ -15037,7 +15037,7 @@ return
             'name' => 'GLM-4.7',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15055,7 +15055,7 @@ return
             'name' => 'GLM-4.7-Flash',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15073,7 +15073,7 @@ return
             'name' => 'GLM-4.7-FlashX',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15091,7 +15091,7 @@ return
             'name' => 'GLM-5',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15109,7 +15109,7 @@ return
             'name' => 'GLM-5-Turbo',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15127,7 +15127,7 @@ return
             'name' => 'GLM-5.1',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text'],
@@ -15145,7 +15145,7 @@ return
             'name' => 'glm-5v-turbo',
             'api' => 'openai-completions',
             'provider' => 'zai',
-            'baseUrl' => "'https' => //api.z.ai/api/coding/paas/v4",
+            'baseUrl' => 'https://api.z.ai/api/coding/paas/v4',
             'compat' => ['supportsDeveloperRole' => false, 'thinkingFormat' => 'zai', 'zaiToolStream' => true],
             'reasoning' => true,
             'input' => ['text', 'image'],

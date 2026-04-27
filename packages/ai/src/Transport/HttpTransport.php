@@ -188,11 +188,15 @@ final class HttpTransport
             $requestHeaders[$name] = $value;
         }
 
-        return array_map(
-            static fn (string $name, string $value): string => sprintf('%s: %s', $name, $value),
-            array_keys($requestHeaders),
-            array_values($requestHeaders),
-        );
+        $result = [];
+        foreach ($requestHeaders as $name => $value) {
+            if (preg_match('/[\r\n]/', $name) === 1 || preg_match('/[\r\n]/', $value) === 1) {
+                throw new ProviderError('Invalid header: contains newline character');
+            }
+            $result[] = sprintf('%s: %s', $name, $value);
+        }
+
+        return $result;
     }
 
     private function initCurl(string $method, string $url, array $requestHeaders, ?array $body): \CurlHandle
@@ -287,6 +291,7 @@ final class HttpTransport
             }
         }
 
-        throw new ProviderError($message, $status, $type, $code, $body);
+        $rawBody = strlen($body) > 4096 ? substr($body, 0, 4096).'... [truncated]' : ($body !== '' ? $body : null);
+        throw new ProviderError($message, $status, $type, $code, $rawBody);
     }
 }

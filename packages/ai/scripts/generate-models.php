@@ -96,12 +96,21 @@ function convertTsToPhp(string $input): string
             continue;
         }
 
+        if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*/', substr($input, $i), $matches) === 1) {
+            $key = $matches[0];
+            $afterKey = $i + strlen($key);
+            if ($afterKey < $len && $input[$afterKey] === ':') {
+                $out .= "'{$key}' => ";
+                $i = $afterKey + 1;
+                continue;
+            }
+        }
+
         $out .= $ch;
         $i++;
     }
 
     $out = preg_replace('/"([^"]+)"\s*:\s*/', '"$1" => ', $out);
-    $out = preg_replace('/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*/', "'$1' => ", $out);
 
     return $out;
 }
