@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pi\AI;
 
+use Pi\AI\Anthropic\AnthropicProvider;
+use Pi\AI\Azure\AzureOpenAIResponsesProvider;
+use Pi\AI\OpenAI\Completions\OpenAICompletionsProvider;
 use Pi\AI\OpenAI\OpenAIResponsesProvider;
 
 final class RegisterBuiltins
@@ -18,8 +21,17 @@ final class RegisterBuiltins
             return;
         }
 
-        if (ApiRegistry::getProvider(new Api(Api::OPENAI_RESPONSES)) === null) {
-            ApiRegistry::registerProvider(new OpenAIResponsesProvider, self::SOURCE_ID);
+        $providers = [
+            new OpenAIResponsesProvider,
+            new OpenAICompletionsProvider,
+            new AnthropicProvider,
+            new AzureOpenAIResponsesProvider,
+        ];
+
+        foreach ($providers as $provider) {
+            if (ApiRegistry::getProvider($provider->getApi()) === null) {
+                ApiRegistry::registerProvider($provider, self::SOURCE_ID);
+            }
         }
 
         self::$registered = true;
