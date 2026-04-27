@@ -26,6 +26,7 @@ use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentTool;
 use Pi\AI\Model;
 use Pi\AI\SimpleStreamOptions;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\ThinkingLevel as AiThinkingLevel;
 use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
@@ -315,6 +316,10 @@ final class CodingAgentSession
             }
         }
 
+        if ($this->authStorage !== null) {
+            return $this->authStorage->modifyModels($models);
+        }
+
         return $models;
     }
 
@@ -426,18 +431,21 @@ final class CodingAgentSession
                     throw new \RuntimeException('No model configured for coding agent runtime');
                 }
 
-                return streamSimple(
-                    $this->model,
-                    AiAdapter::toAiContext($context),
-                    new SimpleStreamOptions(
-                        apiKey: $this->resolveApiKey(),
-                        signal: AiAdapter::toAiCancellation($signal),
-                        reasoning: $this->toAiThinkingLevel($this->thinkingLevel),
-                        sessionId: $this->sessionManager->getSessionId(),
-                    ),
-                );
+                return PromiseHelper::resolve($this->resolveApiKey())
+                    ->then(function (?string $apiKey) use ($context, $signal) {
+                        return streamSimple(
+                            $this->model,
+                            AiAdapter::toAiContext($context),
+                            new SimpleStreamOptions(
+                                apiKey: $apiKey,
+                                signal: AiAdapter::toAiCancellation($signal),
+                                reasoning: $this->toAiThinkingLevel($this->thinkingLevel),
+                                sessionId: $this->sessionManager->getSessionId(),
+                            ),
+                        );
+                    });
             },
-            getApiKey: function (string $provider): ?string {
+            getApiKey: function (string $provider): mixed {
                 if ($this->getApiKey !== null) {
                     return ($this->getApiKey)($provider);
                 }
@@ -477,7 +485,7 @@ final class CodingAgentSession
         }
     }
 
-    private function resolveApiKey(): ?string
+    private function resolveApiKey(): mixed
     {
         if ($this->model === null) {
             return null;

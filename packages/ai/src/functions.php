@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Pi\AI;
 
 use Pi\AI\Message\AssistantMessage;
+use Pi\AI\OAuth\OAuthCredentials;
+use Pi\AI\OAuth\OAuthProviderInterface;
+use Pi\AI\OAuth\OAuthProviderRegistry;
 use Pi\AI\Support\JsonParse;
 use Pi\AI\Support\Overflow;
 use Pi\AI\Support\SanitizeUnicode;
@@ -193,4 +196,41 @@ function fauxAssistantMessage(string|Content\TextContent|Content\ThinkingContent
 function registerFauxProvider(array $options = []): FauxProviderRegistration
 {
     return Faux::registerProvider($options);
+}
+
+function getOAuthProvider(string $id): ?OAuthProviderInterface
+{
+    return OAuthProviderRegistry::get($id);
+}
+
+/**
+ * @return array<OAuthProviderInterface>
+ */
+function getOAuthProviders(): array
+{
+    return OAuthProviderRegistry::all();
+}
+
+function registerOAuthProvider(OAuthProviderInterface $provider): void
+{
+    OAuthProviderRegistry::register($provider);
+}
+
+function unregisterOAuthProvider(string $id): void
+{
+    OAuthProviderRegistry::unregister($id);
+}
+
+function resetOAuthProviders(): void
+{
+    OAuthProviderRegistry::reset();
+}
+
+/**
+ * @param  array<string, OAuthCredentials|array<string, mixed>>  $credentials
+ * @return PromiseInterface<array{newCredentials: OAuthCredentials, apiKey: string}|null>
+ */
+function getOAuthApiKey(string $providerId, array $credentials): PromiseInterface
+{
+    return OAuthProviderRegistry::getApiKey($providerId, $credentials);
 }

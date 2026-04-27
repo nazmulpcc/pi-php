@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Auth;
 
+use Pi\AI\Model;
+use Pi\AI\OAuth\OAuthCredentials;
+use Pi\AI\OAuth\OAuthLoginCallbacks;
+use Pi\AI\OAuth\OAuthProviderInterface;
+use Pi\AI\Support\PromiseHelper;
 use Pi\CodingAgent\Config;
+use React\Promise\PromiseInterface;
 
 use function Pi\AI\getEnvApiKey;
+use function Pi\AI\getOAuthApiKey;
+use function Pi\AI\getOAuthProvider;
+use function Pi\AI\getOAuthProviders;
+use function React\Promise\resolve;
 
 final class AuthStorage
 {
@@ -126,35 +136,37 @@ final class AuthStorage
         return isset($this->data[$provider]) && is_array($this->data[$provider]) ? $this->data[$provider] : null;
     }
 
-    public function getApiKey(string $provider): ?string
+    /**
+     * @return PromiseInterface<?string>
+     */
+    public function getApiKey(string $provider, array $options = []): PromiseInterface
     {
         if (isset($this->runtimeOverrides[$provider]) && $this->runtimeOverrides[$provider] !== '') {
-            return $this->runtimeOverrides[$provider];
+            return resolve($this->runtimeOverrides[$provider]);
         }
 
         $stored = $this->get($provider);
         if (is_array($stored)) {
             if (($stored['type'] ?? null) === 'api_key' && is_string($stored['key'] ?? null) && $stored['key'] !== '') {
-                return $stored['key'];
+                return resolve($stored['key']);
             }
 
-            if (($stored['type'] ?? null) === 'oauth' && is_string($stored['accessToken'] ?? null) && $stored['accessToken'] !== '') {
-                return $stored['accessToken'];
+            if (($stored['type'] ?? null) === 'oauth') {
+                return $this->refreshOAuthTokenWithLock($provider);
             }
         }
 
         $envKey = getEnvApiKey($provider);
         if ($envKey !== null && $envKey !== '') {
-            return $envKey;
+            return resolve($envKey);
         }
 
-        if ($this->fallbackResolver !== null) {
-            $resolved = ($this->fallbackResolver)($provider);
-
-            return is_string($resolved) && $resolved !== '' ? $resolved : null;
+        if (($options['includeFallback'] ?? true) && $this->fallbackResolver !== null) {
+            return PromiseHelper::resolve(($this->fallbackResolver)($provider))
+                ->then(static fn (mixed $resolved): ?string => is_string($resolved) && $resolved !== '' ? $resolved : null);
         }
 
-        return null;
+        return resolve(null);
     }
 
     /**
@@ -182,10 +194,7 @@ final class AuthStorage
         }
 
         if ($this->fallbackResolver !== null) {
-            $resolved = ($this->fallbackResolver)($provider);
-            if (is_string($resolved) && $resolved !== '') {
-                return ['configured' => true, 'source' => 'fallback', 'label' => 'Fallback resolver'];
-            }
+            return ['configured' => false, 'source' => 'fallback', 'label' => 'Fallback resolver'];
         }
 
         return ['configured' => false];
@@ -200,6 +209,111 @@ final class AuthStorage
         sort($providers);
 
         return $providers;
+    }
+
+    /**
+     * @return array<OAuthProviderInterface>
+     */
+    public function getOAuthProviders(): array
+    {
+        return getOAuthProviders();
+    }
+
+    /**
+     * @return PromiseInterface<void>
+     */
+    public function login(string $providerId, OAuthLoginCallbacks $callbacks): PromiseInterface
+    {
+        $provider = getOAuthProvider($providerId);
+        if ($provider === null) {
+            return PromiseHelper::reject(new \RuntimeException(sprintf('Unknown OAuth provider: %s', $providerId)));
+        }
+
+        return $provider->login($callbacks)
+            ->then(function (OAuthCredentials $credentials) use ($providerId): void {
+                $this->set($providerId, [
+                    'type' => 'oauth',
+                    ...$credentials->toArray(),
+                ]);
+            });
+    }
+
+    public function logout(string $provider): void
+    {
+        $this->set($provider, null);
+    }
+
+    /**
+     * @param  array<Model>  $models
+     * @return array<Model>
+     */
+    public function modifyModels(array $models): array
+    {
+        $modified = $models;
+
+        foreach ($this->getOAuthProviders() as $provider) {
+            $credential = $this->get($provider->getId());
+            if (! is_array($credential) || ($credential['type'] ?? null) !== 'oauth') {
+                continue;
+            }
+
+            $modified = $provider->modifyModels($modified, OAuthCredentials::fromArray($credential));
+        }
+
+        return $modified;
+    }
+
+    /**
+     * @return PromiseInterface<?string>
+     */
+    private function refreshOAuthTokenWithLock(string $provider): PromiseInterface
+    {
+        return $this->storage->withLockAsync(function (?string $current) use ($provider) {
+            $data = $this->decode($current);
+            $credential = $data[$provider] ?? null;
+            if (! is_array($credential) || ($credential['type'] ?? null) !== 'oauth') {
+                return resolve(['result' => null]);
+            }
+
+            if ((int) ($credential['expires'] ?? 0) > (time() * 1000)) {
+                $oauthCredentials = OAuthCredentials::fromArray($credential);
+
+                return resolve(['result' => $oauthCredentials->access]);
+            }
+
+            return getOAuthApiKey($provider, [
+                $provider => OAuthCredentials::fromArray($credential),
+            ])->then(function (?array $result) use ($data, $provider): array {
+                if ($result === null) {
+                    return ['result' => null];
+                }
+
+                $merged = [
+                    ...$data,
+                    $provider => [
+                        'type' => 'oauth',
+                        ...$result['newCredentials']->toArray(),
+                    ],
+                ];
+
+                return [
+                    'result' => $result['apiKey'],
+                    'next' => json_encode($merged, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
+                ];
+            });
+        })->then(function (?string $apiKey): ?string {
+            $this->reload();
+
+            return $apiKey;
+        }, function (mixed $error) use ($provider): PromiseInterface {
+            $this->reload();
+            $updatedCredential = $this->data[$provider] ?? null;
+            if (is_array($updatedCredential) && ($updatedCredential['type'] ?? null) === 'oauth' && (int) ($updatedCredential['expires'] ?? 0) > (time() * 1000)) {
+                return resolve(is_string($updatedCredential['access'] ?? null) ? $updatedCredential['access'] : null);
+            }
+
+            return PromiseHelper::reject(PromiseHelper::normalizeThrowable($error));
+        });
     }
 
     /**

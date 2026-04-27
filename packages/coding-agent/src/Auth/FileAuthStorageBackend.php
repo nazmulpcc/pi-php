@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Auth;
 
+use Pi\AI\Support\PromiseHelper;
+use React\Promise\PromiseInterface;
+
 final class FileAuthStorageBackend implements AuthStorageBackend
 {
     public function __construct(
@@ -46,6 +49,57 @@ final class FileAuthStorageBackend implements AuthStorageBackend
             flock($handle, LOCK_UN);
             fclose($handle);
         }
+    }
+
+    public function withLockAsync(callable $fn): PromiseInterface
+    {
+        $this->ensureParentDir();
+        $this->ensureFileExists();
+
+        $handle = fopen($this->authPath, 'c+');
+        if (! is_resource($handle)) {
+            throw new \RuntimeException(sprintf('Unable to open auth storage: %s', $this->authPath));
+        }
+
+        if (! flock($handle, LOCK_EX)) {
+            fclose($handle);
+            throw new \RuntimeException(sprintf('Unable to lock auth storage: %s', $this->authPath));
+        }
+
+        $contents = stream_get_contents($handle);
+        $current = is_string($contents) && $contents !== '' ? $contents : null;
+        rewind($handle);
+
+        return PromiseHelper::resolve($fn($current))
+            ->then(
+                function (array $result) use ($handle): mixed {
+                    try {
+                        if (array_key_exists('next', $result)) {
+                            ftruncate($handle, 0);
+                            rewind($handle);
+                            $next = $result['next'];
+                            if (is_string($next) && $next !== '') {
+                                fwrite($handle, $next);
+                            }
+                            fflush($handle);
+                            @chmod($this->authPath, 0600);
+                        }
+
+                        return $result['result'];
+                    } finally {
+                        flock($handle, LOCK_UN);
+                        fclose($handle);
+                    }
+                },
+                static function (mixed $error) use ($handle): never {
+                    try {
+                        throw PromiseHelper::normalizeThrowable($error);
+                    } finally {
+                        flock($handle, LOCK_UN);
+                        fclose($handle);
+                    }
+                },
+            );
     }
 
     private function ensureParentDir(): void
