@@ -20,7 +20,8 @@
   "autoload": {
     "psr-4": {
       "Pi\\Agent\\": "packages/agent/src/",
-      "Pi\\AI\\": "packages/ai/src/"
+      "Pi\\AI\\": "packages/ai/src/",
+      "Pi\\CodingAgent\\": "packages/coding-agent/src/"
     },
     "files": [
       "packages/ai/src/functions.php"
@@ -29,18 +30,19 @@
   "autoload-dev": {
     "psr-4": {
       "Pi\\Agent\\Tests\\": "packages/agent/tests/",
-      "Pi\\AI\\Tests\\": "packages/ai/tests/"
+      "Pi\\AI\\Tests\\": "packages/ai/tests/",
+      "Pi\\CodingAgent\\Tests\\": "packages/coding-agent/tests/"
     },
     "files": [
     ]
   },
   "scripts": {
-    "lint": "vendor/bin/pint packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests",
-    "lint:check": "vendor/bin/pint --test packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests",
+    "lint": "vendor/bin/pint packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests packages/coding-agent/src packages/coding-agent/tests",
+    "lint:check": "vendor/bin/pint --test packages/agent/src packages/agent/tests packages/ai/src packages/ai/tests packages/coding-agent/src packages/coding-agent/tests",
     "test": [
       "Composer\\Config::disableProcessTimeout",
       "@lint",
-      "vendor/bin/pest packages/agent/tests packages/ai/tests"
+      "vendor/bin/pest packages/agent/tests packages/ai/tests packages/coding-agent/tests"
     ]
   },
   "config": {
