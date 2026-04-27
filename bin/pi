@@ -5,5 +5,5 @@ declare(strict_types=1);
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
-$application = new \Pi\CodingAgent\Cli\Application;
+$application = new \Pi\Console\Application;
 exit($application->run(array_slice($argv, 1)));

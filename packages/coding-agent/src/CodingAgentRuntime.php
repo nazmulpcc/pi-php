@@ -15,6 +15,7 @@ use Pi\CodingAgent\Resource\Skill;
 use Pi\CodingAgent\Session\SessionManager;
 use Pi\CodingAgent\Session\SessionStore;
 use Pi\CodingAgent\Settings\SettingsManager;
+use Pi\CodingAgent\Support\PromiseBlocker;
 use React\Promise\PromiseInterface;
 
 final class CodingAgentRuntime
@@ -112,7 +113,7 @@ final class CodingAgentRuntime
     public function newSession(?string $parentSession = null): array
     {
         if ($this->session->getState()->isStreaming) {
-            \Pi\CodingAgent\Cli\block($this->session->abort());
+            PromiseBlocker::block($this->session->abort());
         }
 
         $previous = $this->session->getState()->sessionPath;
@@ -125,7 +126,7 @@ final class CodingAgentRuntime
     public function switchSession(string $sessionIdOrPath): array
     {
         if ($this->session->getState()->isStreaming) {
-            \Pi\CodingAgent\Cli\block($this->session->abort());
+            PromiseBlocker::block($this->session->abort());
         }
 
         $manager = $this->sessionStore->openManager($sessionIdOrPath, $this->session->getState()->cwd);
