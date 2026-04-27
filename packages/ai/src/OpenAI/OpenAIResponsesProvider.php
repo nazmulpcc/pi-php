@@ -64,7 +64,7 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
                 $params = $this->buildParams($model, $context, $providerOptions);
 
                 return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
-                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params, $stream) {
                         if (is_array($nextParams)) {
                             $params = $nextParams;
                         }
