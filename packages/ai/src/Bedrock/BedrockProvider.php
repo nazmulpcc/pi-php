@@ -37,6 +37,7 @@ use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\JsonParse;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Support\SanitizeUnicode;
 use Pi\AI\Support\SimpleOptions;
 use Pi\AI\Support\TransformMessages;
@@ -46,11 +47,12 @@ use Pi\AI\Transport\HttpResponse;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
+use React\Promise\PromiseInterface;
 
 final readonly class BedrockProvider implements ApiProviderInterface
 {
     /**
-     * @param  null|callable(Model, Context, BedrockOptions, array<string, mixed>): iterable<array<string, mixed>>  $transport
+     * @param  null|callable(Model, Context, BedrockOptions, array<string, mixed>): PromiseInterface<iterable<array<string, mixed>>>|iterable<array<string, mixed>>  $transport
      */
     public function __construct(
         private ?\Closure $transport = null,
@@ -73,18 +75,25 @@ final readonly class BedrockProvider implements ApiProviderInterface
         $output = $this->createOutput($model);
         $started = false;
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream, &$blocks, &$blockStates, &$output, &$started) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            $events = $this->transport !== null
-                ? ($this->transport)($model, $context, $providerOptions, $params)
-                : self::parseResponseEvents($this->request($model, $providerOptions, $params)->body);
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            foreach ($events as $event) {
+                        if ($this->transport !== null) {
+                            return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                        }
+
+                        return $this->request($model, $providerOptions, $params)
+                            ->then(static fn (HttpResponse $response): array => self::parseResponseEvents($response->body));
+                    })
+                    ->then(function ($events) use ($model, $providerOptions, $stream, &$blocks, &$blockStates, &$output, &$started) {
+                        foreach ($events as $event) {
                 if (! is_array($event)) {
                     continue;
                 }
@@ -143,38 +152,43 @@ final readonly class BedrockProvider implements ApiProviderInterface
                         throw new ProviderError(self::extractErrorMessage($event[$key], $key));
                     }
                 }
-            }
+                        }
 
-            if ($providerOptions->signal?->isCancelled()) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($providerOptions->signal?->isCancelled()) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($output->stopReason === StopReason::Aborted) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($output->stopReason === StopReason::Aborted) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($output->stopReason === StopReason::Error) {
-                throw new ProviderError($output->errorMessage ?: 'An unknown error occurred');
-            }
+                        if ($output->stopReason === StopReason::Error) {
+                            throw new ProviderError($output->errorMessage ?: 'An unknown error occurred');
+                        }
 
-            if (! $started) {
-                $stream->push(new StartEvent($output));
-            }
+                        if (! $started) {
+                            $stream->push(new StartEvent($output));
+                        }
 
-            $stream->push(new DoneEvent($output->stopReason, $output));
-            $stream->end();
-        } catch (\Throwable $error) {
-            $output = $this->snapshot(
-                $model,
-                $blocks,
-                $output->usage,
-                $options?->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
-                $output->responseId,
-                $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent($output->stopReason, $output));
-            $stream->end($output);
-        }
+                        $stream->push(new DoneEvent($output->stopReason, $output));
+                        $stream->end();
+
+                        return null;
+                    });
+            },
+            function (\Throwable $error) use ($model, $providerOptions, $stream, &$blocks, &$output): void {
+                $output = $this->snapshot(
+                    $model,
+                    $blocks,
+                    $output->usage,
+                    $providerOptions->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
+                    $output->responseId,
+                    $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent($output->stopReason, $output));
+                $stream->end($output);
+            },
+        );
 
         return $stream;
     }
@@ -257,7 +271,7 @@ final readonly class BedrockProvider implements ApiProviderInterface
         return $params;
     }
 
-    private function request(Model $model, BedrockOptions $options, array $params): HttpResponse
+    private function request(Model $model, BedrockOptions $options, array $params): PromiseInterface
     {
         $url = rtrim($model->baseUrl, '/').'/model/'.rawurlencode($model->id).'/converse-stream';
         $headers = array_merge($model->headers, $options->headers, $this->buildAuthHeaders($options));

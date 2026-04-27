@@ -33,6 +33,7 @@ use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\JsonParse;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
@@ -58,229 +59,234 @@ final readonly class OpenAICompletionsProvider implements ApiProviderInterface
             ? $options
             : self::mapToProviderOptions($options);
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            if ($this->transport !== null) {
-                $events = ($this->transport)($model, $context, $providerOptions, $params);
-            } else {
-                $apiKey = $providerOptions->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
-                if ($apiKey === null || $apiKey === '') {
-                    throw new \RuntimeException(sprintf('No API key for provider: %s', $model->provider->value));
-                }
-                $url = rtrim($model->baseUrl, '/').'/chat/completions';
-                $headers = array_merge($model->headers, $providerOptions->headers);
-
-                $onResponse = $providerOptions->onResponse !== null
-                    ? static function (array $response) use ($providerOptions, $model): void {
-                        $providerOptions->onResponse->__invoke([
-                            'status' => $response['status'],
-                            'headers' => $response['headers'],
-                        ], $model);
-                    }
-                : null;
-
-                $transport = new HttpTransport(
-                    signal: $providerOptions->signal,
-                    timeoutMs: $providerOptions->timeoutMs,
-                    maxRetries: $providerOptions->maxRetries,
-                    maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
-                );
-
-                $events = $transport->stream('POST', $url, [
-                    'headers' => $headers,
-                    'body' => $params,
-                    'apiKey' => $apiKey,
-                    'onResponse' => $onResponse,
-                ]);
-            }
-
-            $output = $this->createOutput($model);
-            $stream->push(new StartEvent($output));
-
-            $currentBlock = null;
-            $blocks = [];
-            $scratch = ['partialArgs' => '', 'streamIndex' => null];
-            $responseId = null;
-            $usage = Usage::zero();
-            $stopReason = StopReason::Stop;
-            $errorMessage = null;
-
-            foreach ($events as $event) {
-                if (! is_array($event)) {
-                    continue;
-                }
-
-                $responseId ??= $event['id'] ?? null;
-
-                if (isset($event['usage']) && is_array($event['usage'])) {
-                    $usage = OpenAICompletionsShared::parseChunkUsage($event['usage'], $model);
-                }
-
-                $choice = isset($event['choices']) && is_array($event['choices']) ? ($event['choices'][0] ?? null) : null;
-                if (! is_array($choice)) {
-                    continue;
-                }
-
-                if (! isset($event['usage']) && isset($choice['usage']) && is_array($choice['usage'])) {
-                    $usage = OpenAICompletionsShared::parseChunkUsage($choice['usage'], $model);
-                }
-
-                if (isset($choice['finish_reason'])) {
-                    $finishResult = OpenAICompletionsShared::mapStopReason($choice['finish_reason']);
-                    $stopReason = $finishResult['stopReason'];
-                    if (isset($finishResult['errorMessage'])) {
-                        $errorMessage = $finishResult['errorMessage'];
-                    }
-                }
-
-                $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-
-                if (! isset($choice['delta']) || ! is_array($choice['delta'])) {
-                    continue;
-                }
-
-                $delta = $choice['delta'];
-
-                if (isset($delta['content']) && $delta['content'] !== null && $delta['content'] !== '') {
-                    if ($currentBlock === null || ! $currentBlock instanceof TextContent) {
-                        $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
-                        $currentBlock = new TextContent('');
-                        $blocks[] = $currentBlock;
-                        $stream->push(new TextStartEvent(array_key_last($blocks), $output));
-                    }
-                    $currentBlock = new TextContent($currentBlock->text.$delta['content']);
-                    $blocks[array_key_last($blocks)] = $currentBlock;
-                    $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                    $stream->push(new TextDeltaEvent(array_key_last($blocks), $delta['content'], $output));
-                }
-
-                $reasoningFields = ['reasoning_content', 'reasoning', 'reasoning_text'];
-                $foundReasoningField = null;
-                foreach ($reasoningFields as $field) {
-                    if (isset($delta[$field]) && $delta[$field] !== null && $delta[$field] !== '') {
-                        $foundReasoningField = $field;
-                        break;
-                    }
-                }
-
-                if ($foundReasoningField !== null) {
-                    if ($currentBlock === null || ! $currentBlock instanceof ThinkingContent) {
-                        $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
-                        $currentBlock = new ThinkingContent('', $foundReasoningField);
-                        $blocks[] = $currentBlock;
-                        $stream->push(new ThinkingStartEvent(array_key_last($blocks), $output));
-                    }
-                    $currentBlock = new ThinkingContent($currentBlock->thinking.$delta[$foundReasoningField], $foundReasoningField);
-                    $blocks[array_key_last($blocks)] = $currentBlock;
-                    $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                    $stream->push(new ThinkingDeltaEvent(array_key_last($blocks), $delta[$foundReasoningField], $output));
-                }
-
-                if (isset($delta['tool_calls']) && is_array($delta['tool_calls'])) {
-                    foreach ($delta['tool_calls'] as $toolCall) {
-                        if (! is_array($toolCall)) {
-                            continue;
-                        }
-                        $streamIndex = isset($toolCall['index']) && is_int($toolCall['index']) ? $toolCall['index'] : null;
-                        $toolCallId = isset($toolCall['id']) && is_string($toolCall['id']) ? $toolCall['id'] : '';
-                        $toolCallName = isset($toolCall['function']['name']) && is_string($toolCall['function']['name'])
-                            ? $toolCall['function']['name']
-                            : '';
-
-                        $sameToolCall = $currentBlock instanceof ToolCall
-                            && (($streamIndex !== null && $scratch['streamIndex'] === $streamIndex)
-                                || ($streamIndex === null && $toolCallId !== '' && $currentBlock->id === $toolCallId));
-
-                        if (! $sameToolCall) {
-                            $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
-                            $scratch = ['partialArgs' => '', 'streamIndex' => $streamIndex];
-                            $currentBlock = new ToolCall($toolCallId, $toolCallName, []);
-                            $blocks[] = $currentBlock;
-                            $stream->push(new ToolCallStartEvent(array_key_last($blocks), $output));
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
                         }
 
-                        if ($currentBlock instanceof ToolCall) {
-                            if ($currentBlock->id === '' && $toolCallId !== '') {
-                                $currentBlock = new ToolCall($toolCallId, $currentBlock->name, $currentBlock->arguments, $currentBlock->thoughtSignature);
-                                $blocks[array_key_last($blocks)] = $currentBlock;
+                        if ($this->transport !== null) {
+                            return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                        }
+
+                        $apiKey = $providerOptions->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
+                        if ($apiKey === null || $apiKey === '') {
+                            throw new \RuntimeException(sprintf('No API key for provider: %s', $model->provider->value));
+                        }
+                        $url = rtrim($model->baseUrl, '/').'/chat/completions';
+                        $headers = array_merge($model->headers, $providerOptions->headers);
+
+                        $transport = new HttpTransport(
+                            signal: $providerOptions->signal,
+                            timeoutMs: $providerOptions->timeoutMs,
+                            maxRetries: $providerOptions->maxRetries,
+                            maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
+                        );
+
+                        return $transport->stream('POST', $url, [
+                            'headers' => $headers,
+                            'body' => $params,
+                            'apiKey' => $apiKey,
+                            'onResponse' => $providerOptions->onResponse !== null
+                                ? static function (array $response) use ($providerOptions, $model): mixed {
+                                    return $providerOptions->onResponse?->__invoke([
+                                        'status' => $response['status'],
+                                        'headers' => $response['headers'],
+                                    ], $model);
+                                }
+                                : null,
+                        ]);
+                    })
+                    ->then(function ($events) use ($model, $providerOptions, $stream) {
+                        $output = $this->createOutput($model);
+                        $stream->push(new StartEvent($output));
+
+                        $currentBlock = null;
+                        $blocks = [];
+                        $scratch = ['partialArgs' => '', 'streamIndex' => null];
+                        $responseId = null;
+                        $usage = Usage::zero();
+                        $stopReason = StopReason::Stop;
+                        $errorMessage = null;
+
+                        foreach ($events as $event) {
+                            if (! is_array($event)) {
+                                continue;
                             }
-                            if ($currentBlock->name === '' && $toolCallName !== '') {
-                                $currentBlock = new ToolCall($currentBlock->id, $toolCallName, $currentBlock->arguments, $currentBlock->thoughtSignature);
-                                $blocks[array_key_last($blocks)] = $currentBlock;
+
+                            $responseId ??= $event['id'] ?? null;
+
+                            if (isset($event['usage']) && is_array($event['usage'])) {
+                                $usage = OpenAICompletionsShared::parseChunkUsage($event['usage'], $model);
                             }
-                            if ($scratch['streamIndex'] === null && $streamIndex !== null) {
-                                $scratch['streamIndex'] = $streamIndex;
+
+                            $choice = isset($event['choices']) && is_array($event['choices']) ? ($event['choices'][0] ?? null) : null;
+                            if (! is_array($choice)) {
+                                continue;
                             }
-                            if (isset($toolCall['function']['arguments']) && is_string($toolCall['function']['arguments'])) {
-                                $scratch['partialArgs'] .= $toolCall['function']['arguments'];
-                                $currentBlock = new ToolCall(
-                                    $currentBlock->id,
-                                    $currentBlock->name,
-                                    JsonParse::parseStreamingJson($scratch['partialArgs']),
-                                    $currentBlock->thoughtSignature,
-                                );
+
+                            if (! isset($event['usage']) && isset($choice['usage']) && is_array($choice['usage'])) {
+                                $usage = OpenAICompletionsShared::parseChunkUsage($choice['usage'], $model);
+                            }
+
+                            if (isset($choice['finish_reason'])) {
+                                $finishResult = OpenAICompletionsShared::mapStopReason($choice['finish_reason']);
+                                $stopReason = $finishResult['stopReason'];
+                                if (isset($finishResult['errorMessage'])) {
+                                    $errorMessage = $finishResult['errorMessage'];
+                                }
+                            }
+
+                            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+
+                            if (! isset($choice['delta']) || ! is_array($choice['delta'])) {
+                                continue;
+                            }
+
+                            $delta = $choice['delta'];
+
+                            if (isset($delta['content']) && $delta['content'] !== null && $delta['content'] !== '') {
+                                if ($currentBlock === null || ! $currentBlock instanceof TextContent) {
+                                    $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
+                                    $currentBlock = new TextContent('');
+                                    $blocks[] = $currentBlock;
+                                    $stream->push(new TextStartEvent(array_key_last($blocks), $output));
+                                }
+                                $currentBlock = new TextContent($currentBlock->text.$delta['content']);
                                 $blocks[array_key_last($blocks)] = $currentBlock;
                                 $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-                                $stream->push(new ToolCallDeltaEvent(array_key_last($blocks), $toolCall['function']['arguments'], $output));
+                                $stream->push(new TextDeltaEvent(array_key_last($blocks), $delta['content'], $output));
+                            }
+
+                            $reasoningFields = ['reasoning_content', 'reasoning', 'reasoning_text'];
+                            $foundReasoningField = null;
+                            foreach ($reasoningFields as $field) {
+                                if (isset($delta[$field]) && $delta[$field] !== null && $delta[$field] !== '') {
+                                    $foundReasoningField = $field;
+                                    break;
+                                }
+                            }
+
+                            if ($foundReasoningField !== null) {
+                                if ($currentBlock === null || ! $currentBlock instanceof ThinkingContent) {
+                                    $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
+                                    $currentBlock = new ThinkingContent('', $foundReasoningField);
+                                    $blocks[] = $currentBlock;
+                                    $stream->push(new ThinkingStartEvent(array_key_last($blocks), $output));
+                                }
+                                $currentBlock = new ThinkingContent($currentBlock->thinking.$delta[$foundReasoningField], $foundReasoningField);
+                                $blocks[array_key_last($blocks)] = $currentBlock;
+                                $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                $stream->push(new ThinkingDeltaEvent(array_key_last($blocks), $delta[$foundReasoningField], $output));
+                            }
+
+                            if (isset($delta['tool_calls']) && is_array($delta['tool_calls'])) {
+                                foreach ($delta['tool_calls'] as $toolCall) {
+                                    if (! is_array($toolCall)) {
+                                        continue;
+                                    }
+                                    $streamIndex = isset($toolCall['index']) && is_int($toolCall['index']) ? $toolCall['index'] : null;
+                                    $toolCallId = isset($toolCall['id']) && is_string($toolCall['id']) ? $toolCall['id'] : '';
+                                    $toolCallName = isset($toolCall['function']['name']) && is_string($toolCall['function']['name'])
+                                        ? $toolCall['function']['name']
+                                        : '';
+
+                                    $sameToolCall = $currentBlock instanceof ToolCall
+                                        && (($streamIndex !== null && $scratch['streamIndex'] === $streamIndex)
+                                            || ($streamIndex === null && $toolCallId !== '' && $currentBlock->id === $toolCallId));
+
+                                    if (! $sameToolCall) {
+                                        $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
+                                        $scratch = ['partialArgs' => '', 'streamIndex' => $streamIndex];
+                                        $currentBlock = new ToolCall($toolCallId, $toolCallName, []);
+                                        $blocks[] = $currentBlock;
+                                        $stream->push(new ToolCallStartEvent(array_key_last($blocks), $output));
+                                    }
+
+                                    if ($currentBlock instanceof ToolCall) {
+                                        if ($currentBlock->id === '' && $toolCallId !== '') {
+                                            $currentBlock = new ToolCall($toolCallId, $currentBlock->name, $currentBlock->arguments, $currentBlock->thoughtSignature);
+                                            $blocks[array_key_last($blocks)] = $currentBlock;
+                                        }
+                                        if ($currentBlock->name === '' && $toolCallName !== '') {
+                                            $currentBlock = new ToolCall($currentBlock->id, $toolCallName, $currentBlock->arguments, $currentBlock->thoughtSignature);
+                                            $blocks[array_key_last($blocks)] = $currentBlock;
+                                        }
+                                        if ($scratch['streamIndex'] === null && $streamIndex !== null) {
+                                            $scratch['streamIndex'] = $streamIndex;
+                                        }
+                                        if (isset($toolCall['function']['arguments']) && is_string($toolCall['function']['arguments'])) {
+                                            $scratch['partialArgs'] .= $toolCall['function']['arguments'];
+                                            $currentBlock = new ToolCall(
+                                                $currentBlock->id,
+                                                $currentBlock->name,
+                                                JsonParse::parseStreamingJson($scratch['partialArgs']),
+                                                $currentBlock->thoughtSignature,
+                                            );
+                                            $blocks[array_key_last($blocks)] = $currentBlock;
+                                            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                                            $stream->push(new ToolCallDeltaEvent(array_key_last($blocks), $toolCall['function']['arguments'], $output));
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isset($delta['reasoning_details']) && is_array($delta['reasoning_details'])) {
+                                foreach ($delta['reasoning_details'] as $detail) {
+                                    if (! is_array($detail) || ($detail['type'] ?? null) !== 'reasoning.encrypted') {
+                                        continue;
+                                    }
+                                    $detailId = $detail['id'] ?? null;
+                                    if ($detailId === null) {
+                                        continue;
+                                    }
+                                    foreach ($blocks as $idx => $block) {
+                                        if ($block instanceof ToolCall && $block->id === $detailId) {
+                                            $blocks[$idx] = new ToolCall($block->id, $block->name, $block->arguments, json_encode($detail, JSON_THROW_ON_ERROR));
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                }
 
-                if (isset($delta['reasoning_details']) && is_array($delta['reasoning_details'])) {
-                    foreach ($delta['reasoning_details'] as $detail) {
-                        if (! is_array($detail) || ($detail['type'] ?? null) !== 'reasoning.encrypted') {
-                            continue;
+                        $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                        $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
+
+                        if ($providerOptions->signal?->isCancelled()) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
                         }
-                        $detailId = $detail['id'] ?? null;
-                        if ($detailId === null) {
-                            continue;
+
+                        if ($stopReason === StopReason::Aborted) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
                         }
-                        foreach ($blocks as $idx => $block) {
-                            if ($block instanceof ToolCall && $block->id === $detailId) {
-                                $blocks[$idx] = new ToolCall($block->id, $block->name, $block->arguments, json_encode($detail, JSON_THROW_ON_ERROR));
-                            }
+                        if ($stopReason === StopReason::Error) {
+                            throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason');
                         }
-                    }
-                }
-            }
 
-            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-            $this->finishCurrentBlock($currentBlock, $blocks, $stream, $output);
-
-            if ($providerOptions->signal?->isCancelled()) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
-
-            if ($stopReason === StopReason::Aborted) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
-            if ($stopReason === StopReason::Error) {
-                throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason');
-            }
-
-            $stream->push(new DoneEvent($stopReason, $output));
-            $stream->end();
-        } catch (\Throwable $error) {
-            $output = $this->createOutput($model);
-            $output = new AssistantMessage(
-                content: $output->content,
-                api: $output->api,
-                provider: $output->provider,
-                model: $output->model,
-                usage: $output->usage,
-                stopReason: $options?->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
-                timestamp: $output->timestamp,
-                errorMessage: $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent($output->stopReason, $output));
-            $stream->end($output);
-        }
+                        $stream->push(new DoneEvent($stopReason, $output));
+                        $stream->end();
+                    });
+            },
+            function (\Throwable $error) use ($stream, $options, $model): void {
+                $output = $this->createOutput($model);
+                $output = new AssistantMessage(
+                    content: $output->content,
+                    api: $output->api,
+                    provider: $output->provider,
+                    model: $output->model,
+                    usage: $output->usage,
+                    stopReason: $options?->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
+                    timestamp: $output->timestamp,
+                    errorMessage: $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent($output->stopReason, $output));
+                $stream->end($output);
+            },
+        );
 
         return $stream;
     }

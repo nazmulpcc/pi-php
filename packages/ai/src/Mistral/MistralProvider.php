@@ -38,6 +38,7 @@ use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\JsonParse;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Support\SanitizeUnicode;
 use Pi\AI\Support\SimpleOptions;
 use Pi\AI\Support\TransformMessages;
@@ -46,11 +47,12 @@ use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
 use Pi\AI\UsageCost;
+use React\Promise\PromiseInterface;
 
 final readonly class MistralProvider implements ApiProviderInterface
 {
     /**
-     * @param  null|callable(Model, Context, MistralOptions, array<string, mixed>): iterable<mixed>|array{events: iterable<mixed>, status?: int, headers?: array<string, string>}  $transport
+     * @param  null|callable(Model, Context, MistralOptions, array<string, mixed>): PromiseInterface<iterable<mixed>|array{events: iterable<mixed>, status?: int, headers?: array<string, string>}>|iterable<mixed>|array{events: iterable<mixed>, status?: int, headers?: array<string, string>}  $transport
      */
     public function __construct(
         private ?Closure $transport = null,
@@ -68,103 +70,112 @@ final readonly class MistralProvider implements ApiProviderInterface
             ? $options
             : self::mapToProviderOptions($options);
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            $status = 200;
-            $headers = [];
-            $shouldInvokeOnResponse = false;
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            if ($this->transport !== null) {
-                $result = ($this->transport)($model, $context, $providerOptions, $params);
-                $shouldInvokeOnResponse = true;
-                if (is_array($result) && array_key_exists('events', $result)) {
-                    $events = $result['events'];
-                    if (isset($result['status']) && is_int($result['status'])) {
-                        $status = $result['status'];
-                    }
-                    if (isset($result['headers']) && is_array($result['headers'])) {
-                        $headers = $result['headers'];
-                    }
-                } else {
-                    $events = $result;
-                }
-            } else {
-                $apiKey = $providerOptions->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
-                if ($apiKey === null || $apiKey === '') {
-                    throw new \RuntimeException(sprintf('No API key for provider: %s', $model->provider->value));
-                }
+                        if ($this->transport !== null) {
+                            return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                        }
 
-                $url = rtrim($model->baseUrl, '/').'/chat/completions';
-                $headers = $this->buildHeaders($model, $providerOptions);
+                        return $this->runDefaultTransport($model, $providerOptions, $params);
+                    })
+                    ->then(function ($result) use ($model, $providerOptions, $stream) {
+                        $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
+                        $status = is_array($result) && isset($result['status']) && is_int($result['status']) ? $result['status'] : 200;
+                        $headers = is_array($result) && isset($result['headers']) && is_array($result['headers']) ? $result['headers'] : [];
 
-                $onResponse = $providerOptions->onResponse !== null
-                    ? static function (array $response) use ($providerOptions, $model): void {
-                        $providerOptions->onResponse->__invoke([
-                            'status' => $response['status'],
-                            'headers' => $response['headers'],
-                        ], $model);
-                    }
-                : null;
+                        $output = $this->createOutput($model);
+                        $stream->push(new StartEvent($output));
+                        $output = $this->consumeEvents($model, $output, $stream, $events);
 
-                $transport = new HttpTransport(
-                    signal: $providerOptions->signal,
-                    timeoutMs: $providerOptions->timeoutMs,
-                    maxRetries: $providerOptions->maxRetries,
-                    maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
+                        $responsePromise = null;
+                        if ($this->transport !== null && $providerOptions->onResponse !== null) {
+                            $responsePromise = PromiseHelper::resolve($providerOptions->onResponse->__invoke([
+                                'status' => $status,
+                                'headers' => $headers,
+                            ], $model));
+                        }
+
+                        return PromiseHelper::resolve($responsePromise)->then(function () use ($providerOptions, $stream, $output) {
+                            if ($providerOptions->signal?->isCancelled()) {
+                                throw new ProviderError('Request was aborted', 0, 'aborted');
+                            }
+
+                            if ($output->stopReason === StopReason::Aborted || $output->stopReason === StopReason::Error) {
+                                throw new \RuntimeException($output->errorMessage ?? 'An unknown error occurred');
+                            }
+
+                            $stream->push(new DoneEvent($output->stopReason, $output));
+                            $stream->end();
+                        });
+                    });
+            },
+            function (\Throwable $error) use ($model, $providerOptions, $stream): void {
+                $output = $this->createOutput($model);
+                $output = new AssistantMessage(
+                    content: $output->content,
+                    api: $output->api,
+                    provider: $output->provider,
+                    model: $output->model,
+                    usage: $output->usage,
+                    stopReason: $this->isAbortError($error, $providerOptions) ? StopReason::Aborted : StopReason::Error,
+                    timestamp: $output->timestamp,
+                    errorMessage: $this->formatMistralError($error),
                 );
-
-                $events = $transport->stream('POST', $url, [
-                    'headers' => $headers,
-                    'body' => $params,
-                    'apiKey' => $apiKey,
-                    'onResponse' => $onResponse,
-                ]);
-            }
-
-            $output = $this->createOutput($model);
-            $stream->push(new StartEvent($output));
-
-            $output = $this->consumeEvents($model, $output, $stream, $events);
-
-            if ($shouldInvokeOnResponse && $providerOptions->onResponse !== null) {
-                $providerOptions->onResponse->__invoke([
-                    'status' => $status,
-                    'headers' => $headers,
-                ], $model);
-            }
-
-            if ($providerOptions->signal?->isCancelled()) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
-
-            if ($output->stopReason === StopReason::Aborted || $output->stopReason === StopReason::Error) {
-                throw new \RuntimeException($output->errorMessage ?? 'An unknown error occurred');
-            }
-
-            $stream->push(new DoneEvent($output->stopReason, $output));
-            $stream->end();
-        } catch (\Throwable $error) {
-            $output = $this->createOutput($model);
-            $output = new AssistantMessage(
-                content: $output->content,
-                api: $output->api,
-                provider: $output->provider,
-                model: $output->model,
-                usage: $output->usage,
-                stopReason: $this->isAbortError($error, $providerOptions) ? StopReason::Aborted : StopReason::Error,
-                timestamp: $output->timestamp,
-                errorMessage: $this->formatMistralError($error),
-            );
-            $stream->push(new ErrorEvent($output->stopReason, $output));
-            $stream->end($output);
-        }
+                $stream->push(new ErrorEvent($output->stopReason, $output));
+                $stream->end($output);
+            },
+        );
 
         return $stream;
+    }
+
+    /**
+     * @return PromiseInterface<array{events: iterable<mixed>, status: int, headers: array<string, string>}>
+     */
+    private function runDefaultTransport(Model $model, MistralOptions $providerOptions, array $params): PromiseInterface
+    {
+        $apiKey = $providerOptions->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
+        if ($apiKey === null || $apiKey === '') {
+            throw new \RuntimeException(sprintf('No API key for provider: %s', $model->provider->value));
+        }
+
+        $url = rtrim($model->baseUrl, '/').'/chat/completions';
+        $headers = $this->buildHeaders($model, $providerOptions);
+
+        $transport = new HttpTransport(
+            signal: $providerOptions->signal,
+            timeoutMs: $providerOptions->timeoutMs,
+            maxRetries: $providerOptions->maxRetries,
+            maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
+        );
+
+        return $transport->stream('POST', $url, [
+            'headers' => $headers,
+            'body' => $params,
+            'apiKey' => $apiKey,
+            'onResponse' => $providerOptions->onResponse !== null
+                ? static function (array $response) use ($providerOptions, $model): mixed {
+                    return $providerOptions->onResponse->__invoke([
+                        'status' => $response['status'],
+                        'headers' => $response['headers'],
+                    ], $model);
+                }
+                : null,
+        ])->then(
+            static fn ($events): array => [
+                'events' => $events,
+                'status' => 200,
+                'headers' => [],
+            ],
+        );
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream

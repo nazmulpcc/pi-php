@@ -33,17 +33,19 @@ use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\JsonParse;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Support\SanitizeUnicode;
 use Pi\AI\Support\SimpleOptions;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
 use Pi\AI\UsageCost;
+use React\Promise\PromiseInterface;
 
 final readonly class GoogleProvider implements ApiProviderInterface
 {
     /**
-     * @param  null|callable(Model, Context, GoogleOptions, array<string, mixed>): iterable<array<string, mixed>>  $transport
+     * @param  null|callable(Model, Context, GoogleOptions, array<string, mixed>): PromiseInterface<iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}>|iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}  $transport
      */
     public function __construct(
         private ?Closure $transport = null,
@@ -61,36 +63,40 @@ final readonly class GoogleProvider implements ApiProviderInterface
             ? $options
             : self::mapToProviderOptions($options);
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            if ($this->transport !== null) {
-                $result = ($this->transport)($model, $context, $providerOptions, $params);
-            } else {
-                $result = $this->runDefaultTransport($model, $providerOptions, $params);
-            }
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
-            $status = is_array($result) && array_key_exists('status', $result) ? (int) $result['status'] : 200;
-            $headers = is_array($result) && array_key_exists('headers', $result) && is_array($result['headers']) ? $result['headers'] : [];
+                        if ($this->transport !== null) {
+                            return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                        }
 
-            $output = $this->createOutput($model);
-            $stream->push(new StartEvent($output));
+                        return $this->runDefaultTransport($model, $providerOptions, $params);
+                    })
+                    ->then(function ($result) use ($model, $providerOptions, $stream) {
+                        $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
+                        $status = is_array($result) && array_key_exists('status', $result) ? (int) $result['status'] : 200;
+                        $headers = is_array($result) && array_key_exists('headers', $result) && is_array($result['headers']) ? $result['headers'] : [];
 
-            $blocks = [];
-            $currentBlock = null;
-            $currentBlockIndex = null;
-            $usage = $output->usage;
-            $stopReason = StopReason::Stop;
-            $responseId = null;
-            $errorMessage = null;
-            $toolCallSeen = false;
+                        $output = $this->createOutput($model);
+                        $stream->push(new StartEvent($output));
 
-            foreach ($events as $event) {
+                        $blocks = [];
+                        $currentBlock = null;
+                        $currentBlockIndex = null;
+                        $usage = $output->usage;
+                        $stopReason = StopReason::Stop;
+                        $responseId = null;
+                        $errorMessage = null;
+                        $toolCallSeen = false;
+
+                        foreach ($events as $event) {
                 if (! is_array($event)) {
                     continue;
                 }
@@ -194,46 +200,53 @@ final readonly class GoogleProvider implements ApiProviderInterface
                 }
 
                 $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-            }
+                        }
 
-            $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
+                        $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
 
-            if ($providerOptions->signal?->isCancelled()) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($providerOptions->signal?->isCancelled()) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($stopReason === StopReason::Aborted) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($stopReason === StopReason::Aborted) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($stopReason === StopReason::Error) {
-                throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason', $status);
-            }
+                        if ($stopReason === StopReason::Error) {
+                            throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason', $status);
+                        }
 
-            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-            $stream->push(new DoneEvent($stopReason, $output));
-            $stream->end();
+                        $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                        $stream->push(new DoneEvent($stopReason, $output));
+                        $stream->end();
 
-            $providerOptions->onResponse?->__invoke([
-                'status' => $status,
-                'headers' => $headers,
-            ], $model);
-        } catch (\Throwable $error) {
-            $output = $this->createOutput($model);
-            $output = new AssistantMessage(
-                content: $output->content,
-                api: $output->api,
-                provider: $output->provider,
-                model: $output->model,
-                usage: $output->usage,
-                stopReason: $options?->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
-                timestamp: $output->timestamp,
-                responseId: $output->responseId,
-                errorMessage: $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent($output->stopReason, $output));
-            $stream->end($output);
-        }
+                        if ($this->transport !== null && $providerOptions->onResponse !== null) {
+                            return PromiseHelper::resolve($providerOptions->onResponse->__invoke([
+                                'status' => $status,
+                                'headers' => $headers,
+                            ], $model));
+                        }
+
+                        return null;
+                    });
+            },
+            function (\Throwable $error) use ($stream, $providerOptions, $model): void {
+                $output = $this->createOutput($model);
+                $output = new AssistantMessage(
+                    content: $output->content,
+                    api: $output->api,
+                    provider: $output->provider,
+                    model: $output->model,
+                    usage: $output->usage,
+                    stopReason: $providerOptions->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
+                    timestamp: $output->timestamp,
+                    responseId: $output->responseId,
+                    errorMessage: $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent($output->stopReason, $output));
+                $stream->end($output);
+            },
+        );
 
         return $stream;
     }
@@ -435,9 +448,9 @@ final readonly class GoogleProvider implements ApiProviderInterface
     }
 
     /**
-     * @return array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}
+     * @return PromiseInterface<array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, GoogleOptions $options, array $params): array
+    private function runDefaultTransport(Model $model, GoogleOptions $options, array $params): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey($model->provider->value) ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -466,16 +479,18 @@ final readonly class GoogleProvider implements ApiProviderInterface
             }
         : null;
 
-        return [
-            'events' => $transport->stream('POST', $url, [
-                'headers' => $headers,
-                'body' => $params,
-                'apiKey' => null,
-                'onResponse' => $onResponse,
-            ]),
-            'status' => 200,
-            'headers' => [],
-        ];
+        return $transport->stream('POST', $url, [
+            'headers' => $headers,
+            'body' => $params,
+            'apiKey' => null,
+            'onResponse' => $onResponse,
+        ])->then(
+            static fn ($events): array => [
+                'events' => $events,
+                'status' => 200,
+                'headers' => [],
+            ],
+        );
     }
 
     private static function mapToProviderOptions(?StreamOptions $options): GoogleOptions

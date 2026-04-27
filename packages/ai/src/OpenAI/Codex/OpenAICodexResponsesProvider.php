@@ -19,14 +19,16 @@ use Pi\AI\OpenAI\OpenAIResponsesShared;
 use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\ThinkingLevel;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Usage;
+use React\Promise\PromiseInterface;
 
 final readonly class OpenAICodexResponsesProvider implements ApiProviderInterface
 {
     /**
-     * @param  null|callable(Model, Context, OpenAICodexResponsesOptions, array<string, mixed>): iterable<array<string, mixed>>  $transport
+     * @param  null|callable(Model, Context, OpenAICodexResponsesOptions, array<string, mixed>): PromiseInterface<iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}>|iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}  $transport
      */
     public function __construct(
         private ?Closure $transport = null,
@@ -42,42 +44,53 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
         $stream = new AssistantMessageEventStream;
         $providerOptions = $options instanceof OpenAICodexResponsesOptions ? $options : $this->mapToProviderOptions($options);
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            if (! is_callable($this->transport)) {
-                $result = $this->runDefaultTransport($model, $providerOptions, $params);
-            } else {
-                $result = ($this->transport)($model, $context, $providerOptions, $params);
-            }
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
-            OpenAIResponsesShared::processStream($events, $stream, $model);
-            $providerOptions->onResponse?->__invoke([
-                'status' => is_array($result) && array_key_exists('status', $result) ? $result['status'] : 200,
-                'headers' => is_array($result) && array_key_exists('headers', $result) ? $result['headers'] : [],
-            ], $model);
+                        if (! is_callable($this->transport)) {
+                            return $this->runDefaultTransport($model, $providerOptions, $params);
+                        }
 
-            return $stream;
-        } catch (\Throwable $error) {
-            $message = new AssistantMessage(
-                content: [],
-                api: $model->api,
-                provider: $model->provider,
-                model: $model->id,
-                usage: Usage::zero(),
-                stopReason: StopReason::Error,
-                timestamp: time(),
-                errorMessage: $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent(StopReason::Error, $message));
+                        return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                    })
+                    ->then(function ($result) use ($providerOptions, $stream, $model) {
+                        $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
+                        OpenAIResponsesShared::processStream($events, $stream, $model);
 
-            return $stream;
-        }
+                        if ($this->transport !== null && $providerOptions->onResponse !== null) {
+                            return PromiseHelper::resolve($providerOptions->onResponse->__invoke([
+                                'status' => is_array($result) && array_key_exists('status', $result) ? $result['status'] : 200,
+                                'headers' => is_array($result) && array_key_exists('headers', $result) ? $result['headers'] : [],
+                            ], $model));
+                        }
+
+                        return null;
+                    });
+            },
+            function (\Throwable $error) use ($stream, $model): void {
+                $message = new AssistantMessage(
+                    content: [],
+                    api: $model->api,
+                    provider: $model->provider,
+                    model: $model->id,
+                    usage: Usage::zero(),
+                    stopReason: StopReason::Error,
+                    timestamp: time(),
+                    errorMessage: $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent(StopReason::Error, $message));
+                $stream->end($message);
+            },
+        );
+
+        return $stream;
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream
@@ -169,9 +182,9 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
     }
 
     /**
-     * @return array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}
+     * @return PromiseInterface<array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, OpenAICodexResponsesOptions $options, array $params): array
+    private function runDefaultTransport(Model $model, OpenAICodexResponsesOptions $options, array $params): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai-codex') ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -204,18 +217,18 @@ final readonly class OpenAICodexResponsesProvider implements ApiProviderInterfac
             maxRetryDelayMs: $options->maxRetryDelayMs,
         );
 
-        $events = $transport->stream('POST', $url, [
+        return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
             'apiKey' => $apiKey,
             'onResponse' => $onResponse,
-        ]);
-
-        return [
-            'events' => $events,
-            'status' => $responseStatus,
-            'headers' => $responseHeaders,
-        ];
+        ])->then(
+            static fn ($events): array => [
+                'events' => $events,
+                'status' => $responseStatus,
+                'headers' => $responseHeaders,
+            ],
+        );
     }
 
     private static function resolveCodexUrl(?string $baseUrl): string

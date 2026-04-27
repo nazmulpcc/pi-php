@@ -17,7 +17,7 @@ use Pi\AI\OpenAI\OpenAIResponsesProvider;
 use Pi\AI\OpenAI\SimpleOptions;
 use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StreamOptions;
-use Pi\AI\Transport\SseParser;
+use Pi\AI\Transport\HttpTransport;
 
 final readonly class AzureOpenAIResponsesProvider implements ApiProviderInterface
 {
@@ -54,67 +54,26 @@ final readonly class AzureOpenAIResponsesProvider implements ApiProviderInterfac
         $headers['api-key'] = $apiKey;
 
         $innerProvider = new OpenAIResponsesProvider(
-            transport: function (Model $m, Context $c, $opts, array $params) use ($url, $headers, $providerOptions): array {
-                $events = [];
-                $status = 0;
-                $responseHeaders = [];
+            transport: function (Model $m, Context $c, $opts, array $params) use ($url, $headers, $providerOptions) {
+                $transport = new HttpTransport(
+                    signal: $providerOptions->signal,
+                    timeoutMs: $providerOptions->timeoutMs,
+                    maxRetries: $providerOptions->maxRetries,
+                    maxRetryDelayMs: $providerOptions->maxRetryDelayMs,
+                );
 
-                $curl = curl_init($url);
-                if ($curl === false) {
-                    throw new \RuntimeException('Unable to initialize cURL for Azure OpenAI Responses transport.');
-                }
-
-                $requestHeaders = ['Content-Type: application/json'];
-                foreach ($headers as $name => $value) {
-                    $requestHeaders[] = sprintf('%s: %s', $name, $value);
-                }
-
-                curl_setopt_array($curl, [
-                    CURLOPT_POST => true,
-                    CURLOPT_HTTPHEADER => $requestHeaders,
-                    CURLOPT_POSTFIELDS => json_encode($params, JSON_THROW_ON_ERROR),
-                    CURLOPT_RETURNTRANSFER => false,
-                    CURLOPT_HEADER => false,
-                    CURLOPT_TIMEOUT_MS => $providerOptions->timeoutMs ?? 0,
-                    CURLOPT_WRITEFUNCTION => static function ($handle, string $chunk) use (&$events): int {
-                        static $buffer = '';
-                        $buffer .= $chunk;
-                        while (($separator = strpos($buffer, "\n\n")) !== false) {
-                            $frame = substr($buffer, 0, $separator);
-                            $buffer = substr($buffer, $separator + 2);
-                            $event = SseParser::parseFrame($frame);
-                            if ($event !== null) {
-                                $events[] = $event;
-                            }
+                return $transport->stream('POST', $url, [
+                    'headers' => $headers,
+                    'body' => $params,
+                    'onResponse' => $providerOptions->onResponse !== null
+                        ? static function (array $response) use ($providerOptions, $m): mixed {
+                            return $providerOptions->onResponse?->__invoke([
+                                'status' => $response['status'],
+                                'headers' => $response['headers'],
+                            ], $m);
                         }
-
-                        return strlen($chunk);
-                    },
-                    CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$status, &$responseHeaders): int {
-                        if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $line, $matches) === 1) {
-                            $status = (int) $matches[1];
-                        } elseif (str_contains($line, ':')) {
-                            [$name, $value] = explode(':', $line, 2);
-                            $responseHeaders[strtolower(trim($name))] = trim($value);
-                        }
-
-                        return strlen($line);
-                    },
+                        : null,
                 ]);
-
-                $success = curl_exec($curl);
-                $error = curl_error($curl);
-                curl_close($curl);
-
-                if ($success === false && $error !== '') {
-                    throw new \RuntimeException($error !== '' ? $error : 'Unknown cURL error while calling Azure OpenAI Responses API.');
-                }
-
-                return [
-                    'events' => $events,
-                    'status' => $status,
-                    'headers' => $responseHeaders,
-                ];
             },
         );
 

@@ -19,8 +19,10 @@ use Pi\AI\OpenAI\SimpleOptions as ProviderSimpleOptions;
 use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Usage;
+use React\Promise\PromiseInterface;
 
 final readonly class OpenAIResponsesProvider implements ApiProviderInterface
 {
@@ -56,42 +58,45 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
             metadata: $options?->metadata ?? [],
         );
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            if (! is_callable($this->transport)) {
-                $result = $this->runDefaultTransport($model, $context, $providerOptions, $params);
-            } else {
-                $result = ($this->transport)($model, $context, $providerOptions, $params);
-            }
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
-            $message = OpenAIResponsesShared::processStream($events, $stream, $model);
-            $providerOptions->onResponse?->__invoke([
-                'status' => is_array($result) && array_key_exists('status', $result) ? $result['status'] : 200,
-                'headers' => is_array($result) && array_key_exists('headers', $result) ? $result['headers'] : [],
-            ], $model);
+                        if (! is_callable($this->transport)) {
+                            return $this->runDefaultTransport($model, $context, $providerOptions, $params);
+                        }
 
-            return $stream;
-        } catch (\Throwable $error) {
-            $message = new AssistantMessage(
-                content: [],
-                api: $model->api,
-                provider: $model->provider,
-                model: $model->id,
-                usage: Usage::zero(),
-                stopReason: StopReason::Error,
-                timestamp: time(),
-                errorMessage: $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent(StopReason::Error, $message));
+                        return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                    })
+                    ->then(function ($result) use ($stream, $model) {
+                        $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
+                        OpenAIResponsesShared::processStream($events, $stream, $model);
+                        $stream->end();
+                    });
+            },
+            function (\Throwable $error) use ($stream, $model): void {
+                $message = new AssistantMessage(
+                    content: [],
+                    api: $model->api,
+                    provider: $model->provider,
+                    model: $model->id,
+                    usage: Usage::zero(),
+                    stopReason: StopReason::Error,
+                    timestamp: time(),
+                    errorMessage: $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent(StopReason::Error, $message));
+                $stream->end();
+            },
+        );
 
-            return $stream;
-        }
+        return $stream;
     }
 
     public function streamSimple(Model $model, Context $context, ?SimpleStreamOptions $options = null): AssistantMessageEventStream
@@ -164,7 +169,7 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
     /**
      * @return array{events: array<int, array<string, mixed>>, status: int, headers: array<string, string>}
      */
-    private function runDefaultTransport(Model $model, Context $context, ProviderOptions $options, array $params): array
+    private function runDefaultTransport(Model $model, Context $context, ProviderOptions $options, array $params): PromiseInterface
     {
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai') ?: null;
         if ($apiKey === null || $apiKey === '') {
@@ -174,16 +179,6 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
         $url = rtrim($model->baseUrl, '/').'/responses';
         $headers = array_merge($model->headers, $options->headers);
 
-        $onResponse = null;
-        $responseStatus = 200;
-        $responseHeaders = [];
-        if ($options->onResponse !== null) {
-            $onResponse = static function (array $response) use (&$responseStatus, &$responseHeaders): void {
-                $responseStatus = $response['status'];
-                $responseHeaders = $response['headers'];
-            };
-        }
-
         $transport = new HttpTransport(
             signal: $options->signal,
             timeoutMs: $options->timeoutMs,
@@ -191,17 +186,18 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
             maxRetryDelayMs: $options->maxRetryDelayMs,
         );
 
-        $events = $transport->stream('POST', $url, [
+        return $transport->stream('POST', $url, [
             'headers' => $headers,
             'body' => $params,
             'apiKey' => $apiKey,
-            'onResponse' => $onResponse,
+            'onResponse' => $options->onResponse !== null
+                ? static function (array $response) use ($options, $model): mixed {
+                    return $options->onResponse?->__invoke([
+                        'status' => $response['status'],
+                        'headers' => $response['headers'],
+                    ], $model);
+                }
+                : null,
         ]);
-
-        return [
-            'events' => $events,
-            'status' => $responseStatus,
-            'headers' => $responseHeaders,
-        ];
     }
 }

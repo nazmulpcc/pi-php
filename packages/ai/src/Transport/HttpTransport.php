@@ -5,6 +5,17 @@ declare(strict_types=1);
 namespace Pi\AI\Transport;
 
 use Pi\AI\CancellationToken;
+use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\Loop;
+use React\EventLoop\TimerInterface;
+use React\Http\Browser;
+use React\Http\Message\ResponseException;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+use React\Socket\Connector;
+use React\Stream\ReadableStreamInterface;
+
+use function React\Promise\resolve;
 
 final class HttpTransport
 {
@@ -15,166 +26,183 @@ final class HttpTransport
         private readonly ?int $maxRetryDelayMs = null,
     ) {}
 
-    public function request(string $method, string $url, array $options = []): HttpResponse
+    /**
+     * @return PromiseInterface<HttpResponse>
+     */
+    public function request(string $method, string $url, array $options = []): PromiseInterface
     {
-        $headers = $options['headers'] ?? [];
-        $body = $options['body'] ?? null;
-        $apiKey = $options['apiKey'] ?? null;
-        $onResponse = $options['onResponse'] ?? null;
-
-        $requestHeaders = $this->buildRequestHeaders($headers, $apiKey, $body !== null);
-
-        $attempt = 0;
-        $maxRetries = $this->maxRetries ?? 0;
-
-        while (true) {
-            $this->ensureNotCancelled();
-
-            $curl = $this->initCurl($method, $url, $requestHeaders, $body);
-            $responseHeaders = [];
-            $status = 0;
-            $responseBody = '';
-
-            curl_setopt($curl, CURLOPT_HEADERFUNCTION, static function ($_handle, string $line) use (&$status, &$responseHeaders): int {
-                if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $line, $matches) === 1) {
-                    $status = (int) $matches[1];
-                } elseif (str_contains($line, ':')) {
-                    [$name, $value] = explode(':', $line, 2);
-                    $responseHeaders[strtolower(trim($name))] = trim($value);
-                }
-
-                return strlen($line);
-            });
-
-            curl_setopt($curl, CURLOPT_WRITEFUNCTION, static function ($_handle, string $chunk) use (&$responseBody): int {
-                $responseBody .= $chunk;
-
-                return strlen($chunk);
-            });
-
-            $success = curl_exec($curl);
-            $error = curl_error($curl);
-            curl_close($curl);
-
-            if ($success === false && $error !== '') {
-                if ($attempt < $maxRetries && $this->isTransientCurlError($error)) {
-                    $this->backoff($attempt);
-                    $attempt++;
-
-                    continue;
-                }
-                throw new ProviderError($error !== '' ? $error : 'Unknown cURL error');
-            }
-
-            $this->ensureNotCancelled();
-
-            if ($onResponse !== null && is_callable($onResponse)) {
-                $onResponse(['status' => $status, 'headers' => $responseHeaders]);
-            }
-
-            if ($status >= 400) {
-                if ($this->isTransientHttpStatus($status) && $attempt < $maxRetries) {
-                    $this->backoff($attempt);
-                    $attempt++;
-
-                    continue;
-                }
-                $this->throwProviderError($status, $responseBody);
-            }
-
-            return new HttpResponse($status, $responseHeaders, $responseBody);
-        }
+        return $this->withRetries(fn () => $this->doRequest($method, $url, $options));
     }
 
-    public function stream(string $method, string $url, array $options = []): iterable
+    /**
+     * @return PromiseInterface<array<int, array<string, mixed>>>
+     */
+    public function stream(string $method, string $url, array $options = []): PromiseInterface
     {
-        $headers = $options['headers'] ?? [];
-        $body = $options['body'] ?? null;
-        $apiKey = $options['apiKey'] ?? null;
+        return $this->withRetries(fn () => $this->doStream($method, $url, $options));
+    }
+
+    /**
+     * @return PromiseInterface<HttpResponse>
+     */
+    private function doRequest(string $method, string $url, array $options): PromiseInterface
+    {
+        $this->ensureNotCancelled();
+
+        $headers = $this->buildRequestHeaders(
+            $options['headers'] ?? [],
+            $options['apiKey'] ?? null,
+            array_key_exists('body', $options) && $options['body'] !== null,
+        );
+        $body = $this->encodeBody($options['body'] ?? null);
+        $browser = $this->createBrowser();
+
+        $promise = $browser->request(
+            $method,
+            $url,
+            $headers,
+            $body ?? '',
+        )->then(function (ResponseInterface $response) use ($options) {
+            return $this->handleBufferedResponse($response, $options['onResponse'] ?? null);
+        });
+
+        return $this->attachCancellation($promise);
+    }
+
+    /**
+     * @return PromiseInterface<array<int, array<string, mixed>>>
+     */
+    private function doStream(string $method, string $url, array $options): PromiseInterface
+    {
+        $this->ensureNotCancelled();
+
+        $headers = $this->buildRequestHeaders(
+            $options['headers'] ?? [],
+            $options['apiKey'] ?? null,
+            array_key_exists('body', $options) && $options['body'] !== null,
+        );
+        $body = $this->encodeBody($options['body'] ?? null);
+        $browser = $this->createBrowser();
         $onResponse = $options['onResponse'] ?? null;
+        $onEvent = $options['onEvent'] ?? null;
 
-        $requestHeaders = $this->buildRequestHeaders($headers, $apiKey, $body !== null);
+        $promise = $browser->requestStreaming(
+            $method,
+            $url,
+            $headers,
+            $body ?? '',
+        )->then(function (ResponseInterface $response) use ($onResponse, $onEvent) {
+            $status = $response->getStatusCode();
+            $responseHeaders = $this->normalizeResponseHeaders($response);
+            $body = $response->getBody();
 
-        $attempt = 0;
-        $maxRetries = $this->maxRetries ?? 0;
+            if (! $body instanceof ReadableStreamInterface) {
+                throw new ProviderError('Streaming response body is not readable.');
+            }
 
-        while (true) {
-            $this->ensureNotCancelled();
+            $body->pause();
 
-            $events = [];
-            $buffer = '';
-            $responseHeaders = [];
-            $status = 0;
+            return resolve($onResponse !== null ? $onResponse([
+                'status' => $status,
+                'headers' => $responseHeaders,
+            ]) : null)->then(function () use ($body, $status, $onEvent) {
+                $deferred = new Deferred;
+                $events = [];
+                $rawBody = '';
+                $buffer = '';
 
-            $curl = $this->initCurl($method, $url, $requestHeaders, $body);
+                $cancel = static function () use ($body): void {
+                    $body->close();
+                };
 
-            curl_setopt($curl, CURLOPT_HEADERFUNCTION, static function ($_handle, string $line) use (&$status, &$responseHeaders): int {
-                if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $line, $matches) === 1) {
-                    $status = (int) $matches[1];
-                } elseif (str_contains($line, ':')) {
-                    [$name, $value] = explode(':', $line, 2);
-                    $responseHeaders[strtolower(trim($name))] = trim($value);
-                }
+                $body->on('data', function (string $chunk) use (&$buffer, &$events, &$rawBody, $status, $onEvent): void {
+                    $rawBody .= $chunk;
 
-                return strlen($line);
-            });
-
-            curl_setopt($curl, CURLOPT_WRITEFUNCTION, static function ($_handle, string $chunk) use (&$buffer, &$events): int {
-                $buffer .= $chunk;
-                while (($separator = strpos($buffer, "\n\n")) !== false) {
-                    $frame = substr($buffer, 0, $separator);
-                    $buffer = substr($buffer, $separator + 2);
-                    $event = SseParser::parseFrame($frame);
-                    if ($event !== null) {
-                        $events[] = $event;
+                    if ($status >= 400) {
+                        return;
                     }
-                }
 
-                return strlen($chunk);
+                    $buffer .= $chunk;
+                    while (($separator = strpos($buffer, "\n\n")) !== false) {
+                        $frame = substr($buffer, 0, $separator);
+                        $buffer = substr($buffer, $separator + 2);
+                        $event = SseParser::parseFrame($frame);
+                        if ($event !== null) {
+                            $events[] = $event;
+                            if ($onEvent !== null) {
+                                $onEvent($event);
+                            }
+                        }
+                    }
+                });
+
+                $body->on('error', function (\Throwable $error) use ($deferred): void {
+                    $deferred->reject($error);
+                });
+
+                $body->on('close', function () use ($deferred, &$buffer, &$events, &$rawBody, $status): void {
+                    if ($buffer !== '' && $status < 400) {
+                        $event = SseParser::parseFrame($buffer);
+                        if ($event !== null) {
+                            $events[] = $event;
+                        }
+                    }
+
+                    if ($status >= 400) {
+                        $deferred->reject($this->createProviderError($status, $rawBody));
+
+                        return;
+                    }
+
+                    $deferred->resolve($events);
+                });
+
+                $body->resume();
+
+                return $this->attachCancellation($deferred->promise(), $cancel);
             });
+        });
 
-            $success = curl_exec($curl);
-            $error = curl_error($curl);
-            curl_close($curl);
-
-            if ($buffer !== '') {
-                $event = SseParser::parseFrame($buffer);
-                if ($event !== null) {
-                    $events[] = $event;
-                }
-            }
-
-            if ($success === false && $error !== '') {
-                if ($attempt < $maxRetries && $this->isTransientCurlError($error)) {
-                    $this->backoff($attempt);
-                    $attempt++;
-
-                    continue;
-                }
-                throw new ProviderError($error !== '' ? $error : 'Unknown cURL error');
-            }
-
-            $this->ensureNotCancelled();
-
-            if ($onResponse !== null && is_callable($onResponse)) {
-                $onResponse(['status' => $status, 'headers' => $responseHeaders]);
-            }
-
-            if ($status >= 400) {
-                if ($this->isTransientHttpStatus($status) && $attempt < $maxRetries) {
-                    $this->backoff($attempt);
-                    $attempt++;
-
-                    continue;
-                }
-                $responseBody = json_encode($events);
-                $this->throwProviderError($status, is_string($responseBody) ? $responseBody : '');
-            }
-
-            return $events;
-        }
+        return $this->attachCancellation($promise);
     }
 
+    private function createBrowser(): Browser
+    {
+        $connector = new Connector;
+        $browser = new Browser($connector, Loop::get());
+        $browser = $browser->withRejectErrorResponse(false);
+
+        if ($this->timeoutMs !== null) {
+            $browser = $browser->withTimeout($this->timeoutMs / 1000);
+        }
+
+        return $browser;
+    }
+
+    /**
+     * @return PromiseInterface<HttpResponse>
+     */
+    private function handleBufferedResponse(ResponseInterface $response, ?callable $onResponse): PromiseInterface
+    {
+        $status = $response->getStatusCode();
+        $headers = $this->normalizeResponseHeaders($response);
+        $body = (string) $response->getBody();
+
+        return resolve($onResponse !== null ? $onResponse([
+            'status' => $status,
+            'headers' => $headers,
+        ]) : null)->then(function () use ($status, $headers, $body) {
+            if ($status >= 400) {
+                throw $this->createProviderError($status, $body);
+            }
+
+            return new HttpResponse($status, $headers, $body);
+        });
+    }
+
+    /**
+     * @return array<string, string>
+     */
     private function buildRequestHeaders(array $headers, ?string $apiKey, bool $hasBody): array
     {
         $requestHeaders = [];
@@ -188,53 +216,157 @@ final class HttpTransport
             $requestHeaders[$name] = $value;
         }
 
-        $result = [];
         foreach ($requestHeaders as $name => $value) {
             if (preg_match('/[\r\n]/', $name) === 1 || preg_match('/[\r\n]/', $value) === 1) {
                 throw new ProviderError('Invalid header: contains newline character');
             }
-            $result[] = sprintf('%s: %s', $name, $value);
         }
 
-        return $result;
+        return $requestHeaders;
     }
 
-    private function initCurl(string $method, string $url, array $requestHeaders, ?array $body): \CurlHandle
+    private function encodeBody(mixed $body): string|null
     {
-        $curl = curl_init($url);
-        if ($curl === false) {
-            throw new ProviderError('Unable to initialize cURL');
+        if ($body === null) {
+            return null;
         }
 
-        $opts = [
-            CURLOPT_RETURNTRANSFER => false,
-            CURLOPT_HEADER => false,
-            CURLOPT_HTTPHEADER => $requestHeaders,
-            CURLOPT_TIMEOUT_MS => $this->timeoutMs ?? 0,
-        ];
-
-        if ($method === 'POST') {
-            $opts[CURLOPT_POST] = true;
-            if ($body !== null) {
-                $opts[CURLOPT_POSTFIELDS] = json_encode($body, JSON_THROW_ON_ERROR);
-            }
+        if (is_string($body)) {
+            return $body;
         }
 
-        curl_setopt_array($curl, $opts);
-
-        return $curl;
+        return json_encode($body, JSON_THROW_ON_ERROR);
     }
 
-    private function isTransientCurlError(string $error): bool
+    /**
+     * @return array<string, string>
+     */
+    private function normalizeResponseHeaders(ResponseInterface $response): array
+    {
+        $headers = [];
+        foreach ($response->getHeaders() as $name => $values) {
+            $headers[strtolower($name)] = implode(', ', $values);
+        }
+
+        return $headers;
+    }
+
+    /**
+     * @return PromiseInterface<mixed>
+     */
+    private function withRetries(callable $operation, int $attempt = 0): PromiseInterface
+    {
+        return resolve(null)
+            ->then(fn () => $operation())
+            ->then(
+                null,
+                function (mixed $error) use ($operation, $attempt) {
+                    $throwable = $this->normalizeTransportError($error);
+                    $maxRetries = $this->maxRetries ?? 0;
+
+                    if ($attempt >= $maxRetries || ! $this->isRetryable($throwable)) {
+                        throw $throwable;
+                    }
+
+                    return $this->sleep($this->retryDelayMs($attempt))
+                        ->then(fn () => $this->withRetries($operation, $attempt + 1));
+                },
+            );
+    }
+
+    /**
+     * @return PromiseInterface<mixed>
+     */
+    private function attachCancellation(PromiseInterface $promise, ?callable $cancel = null): PromiseInterface
+    {
+        if ($this->signal === null) {
+            return $promise;
+        }
+
+        $deferred = new Deferred;
+        $settled = false;
+        $timer = Loop::addPeriodicTimer(0.05, function (TimerInterface $timer) use (&$settled, $deferred, $cancel): void {
+            if (! $settled && $this->signal?->isCancelled()) {
+                $settled = true;
+                Loop::cancelTimer($timer);
+                if ($cancel !== null) {
+                    $cancel();
+                }
+                $deferred->reject(new ProviderError('Request was cancelled', 0, 'aborted'));
+            }
+        });
+
+        $promise->then(
+            function (mixed $value) use ($deferred, &$settled, $timer): void {
+                if ($settled) {
+                    return;
+                }
+                $settled = true;
+                Loop::cancelTimer($timer);
+                $deferred->resolve($value);
+            },
+            function (mixed $error) use ($deferred, &$settled, $timer): void {
+                if ($settled) {
+                    return;
+                }
+                $settled = true;
+                Loop::cancelTimer($timer);
+                $deferred->reject($error);
+            },
+        );
+
+        return $deferred->promise();
+    }
+
+    /**
+     * @return PromiseInterface<void>
+     */
+    private function sleep(int $delayMs): PromiseInterface
+    {
+        $deferred = new Deferred;
+        Loop::addTimer($delayMs / 1000, static function () use ($deferred): void {
+            $deferred->resolve(null);
+        });
+
+        return $deferred->promise();
+    }
+
+    private function retryDelayMs(int $attempt): int
+    {
+        $base = 1000;
+        $delay = $base * (2 ** $attempt);
+        $jitter = random_int(0, (int) ($delay * 0.2));
+        $maxDelay = $this->maxRetryDelayMs ?? 60000;
+
+        return min($delay + $jitter, $maxDelay);
+    }
+
+    private function isRetryable(\Throwable $error): bool
+    {
+        if ($error instanceof ProviderError) {
+            return $this->isTransientHttpStatus($error->status) || $this->isTransientTransportError($error->getMessage());
+        }
+
+        if ($error instanceof ResponseException) {
+            return $this->isTransientHttpStatus($error->getCode());
+        }
+
+        return $this->isTransientTransportError($error->getMessage());
+    }
+
+    private function isTransientTransportError(string $error): bool
     {
         $transient = [
             'connection refused',
             'connection timed out',
             'operation timed out',
             'could not resolve host',
-            'ssl connection timeout',
-            'transfer closed',
+            'dns query failed',
             'empty reply from server',
+            'temporarily unavailable',
+            'timed out',
+            'connection reset',
+            'closed',
         ];
         $lower = strtolower($error);
         foreach ($transient as $pattern) {
@@ -251,47 +383,64 @@ final class HttpTransport
         return $status >= 500 || $status === 429;
     }
 
-    private function backoff(int $attempt): void
-    {
-        $base = 1000;
-        $delay = $base * (2 ** $attempt);
-        $jitter = random_int(0, (int) ($delay * 0.2));
-        $delay += $jitter;
-        $maxDelay = $this->maxRetryDelayMs ?? 60000;
-        $delay = min($delay, $maxDelay);
-        usleep($delay * 1000);
-    }
-
     private function ensureNotCancelled(): void
     {
-        if ($this->signal !== null && $this->signal->isCancelled()) {
-            throw new ProviderError('Request was cancelled', 0, 'cancelled');
+        if ($this->signal?->isCancelled()) {
+            throw new ProviderError('Request was cancelled', 0, 'aborted');
         }
     }
 
-    private function throwProviderError(int $status, string $body): void
+    private function normalizeTransportError(mixed $error): \Throwable
     {
-        $message = 'HTTP '.$status;
-        $type = null;
-        $code = null;
+        if ($error instanceof ProviderError) {
+            return $error;
+        }
 
+        if ($error instanceof ResponseException) {
+            $status = $error->getCode();
+            $body = (string) $error->getResponse()->getBody();
+
+            return $this->createProviderError($status, $body, $error);
+        }
+
+        if ($error instanceof \Throwable) {
+            return $error;
+        }
+
+        return new ProviderError('Unknown transport error');
+    }
+
+    private function createProviderError(int $status, string $body, ?\Throwable $previous = null): ProviderError
+    {
+        $rawBody = strlen($body) > 4096 ? substr($body, 0, 4096).'…[truncated]' : $body;
+        $message = $this->extractErrorMessage($status, $rawBody);
+
+        return new ProviderError(
+            $message,
+            status: $status,
+            rawBody: $rawBody,
+            previous: $previous,
+        );
+    }
+
+    private function extractErrorMessage(int $status, string $body): string
+    {
         if ($body !== '') {
             $decoded = json_decode($body, true);
             if (is_array($decoded)) {
-                $error = $decoded['error'] ?? null;
-                if (is_array($error)) {
-                    $message = (string) ($error['message'] ?? $message);
-                    $type = isset($error['type']) ? (string) $error['type'] : null;
-                    $code = isset($error['code']) ? (string) $error['code'] : null;
-                } elseif (is_string($error)) {
-                    $message = $error;
-                } elseif (isset($decoded['message']) && is_string($decoded['message'])) {
-                    $message = $decoded['message'];
+                $message = $decoded['error']['message']
+                    ?? $decoded['message']
+                    ?? $decoded['error']['error']['message']
+                    ?? null;
+
+                if (is_string($message) && $message !== '') {
+                    return $message;
                 }
             }
+
+            return sprintf('HTTP %d: %s', $status, $body);
         }
 
-        $rawBody = strlen($body) > 4096 ? substr($body, 0, 4096).'... [truncated]' : ($body !== '' ? $body : null);
-        throw new ProviderError($message, $status, $type, $code, $rawBody);
+        return sprintf('HTTP %d', $status);
     }
 }

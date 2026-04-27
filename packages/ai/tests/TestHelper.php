@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use React\Promise\PromiseInterface;
+use React\EventLoop\Loop;
 
 use function Pi\AI\packageRoot;
 
@@ -17,20 +18,40 @@ if (! function_exists('block')) {
         $value = null;
         $error = null;
         $settled = false;
+        $loop = Loop::get();
+        $timer = null;
 
         $promise->then(
-            function ($resolved) use (&$value, &$settled): void {
+            function ($resolved) use (&$value, &$settled, $loop, &$timer): void {
                 $value = $resolved;
                 $settled = true;
+                if ($timer !== null) {
+                    Loop::cancelTimer($timer);
+                }
+                $loop->stop();
             },
-            function ($rejected) use (&$error, &$settled): void {
+            function ($rejected) use (&$error, &$settled, $loop, &$timer): void {
                 $error = $rejected;
                 $settled = true;
+                if ($timer !== null) {
+                    Loop::cancelTimer($timer);
+                }
+                $loop->stop();
             },
         );
 
         if (! $settled) {
-            throw new RuntimeException('Promise did not settle synchronously');
+            $timer = Loop::addTimer(5.0, function () use (&$settled, &$error, $loop): void {
+                if ($settled) {
+                    return;
+                }
+
+                $settled = true;
+                $error = new RuntimeException('Promise did not settle before timeout');
+                $loop->stop();
+            });
+
+            $loop->run();
         }
 
         if ($error !== null) {

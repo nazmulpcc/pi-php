@@ -131,25 +131,25 @@ describe('HttpTransport', function () {
 
         $transport = new HttpTransport(signal: $token);
 
-        expect(fn () => $transport->request('GET', 'http://localhost:1/test'))
+        expect(fn () => block($transport->request('GET', 'http://localhost:1/test')))
             ->toThrow(ProviderError::class, 'cancelled');
     });
 
     it('throws when header contains newline injection', function () {
         $transport = new HttpTransport;
 
-        expect(fn () => $transport->request('GET', 'http://localhost:1/test', [
+        expect(fn () => block($transport->request('GET', 'http://localhost:1/test', [
             'headers' => ["X-Evil: \r\n\r\nHTTP/1.1 200 OK" => 'value'],
-        ]))->toThrow(ProviderError::class, 'Invalid header');
+        ])))->toThrow(ProviderError::class, 'Invalid header');
     });
 
-    it('detects transient curl errors', function () {
+    it('detects transient transport errors', function () {
         $transport = new HttpTransport(maxRetries: 2);
         $reflection = new ReflectionClass($transport);
-        $method = $reflection->getMethod('isTransientCurlError');
+        $method = $reflection->getMethod('isTransientTransportError');
         expect($method->invoke($transport, 'Connection timed out'))->toBeTrue();
         expect($method->invoke($transport, 'Could not resolve host'))->toBeTrue();
-        expect($method->invoke($transport, 'SSL connection timeout'))->toBeTrue();
+        expect($method->invoke($transport, 'Connection reset by peer'))->toBeTrue();
         expect($method->invoke($transport, 'Some random error'))->toBeFalse();
     });
 
@@ -167,27 +167,23 @@ describe('HttpTransport', function () {
     it('truncates error response bodies', function () {
         $transport = new HttpTransport;
         $reflection = new ReflectionClass($transport);
-        $method = $reflection->getMethod('throwProviderError');
+        $method = $reflection->getMethod('createProviderError');
         $longBody = str_repeat('a', 5000);
-        try {
-            $method->invoke($transport, 500, $longBody);
-        } catch (ProviderError $e) {
-            expect(strlen($e->rawBody ?? ''))->toBeLessThan(5000);
-            expect(str_contains($e->rawBody ?? '', '[truncated]'))->toBeTrue();
-        }
+        $error = $method->invoke($transport, 500, $longBody);
+        expect($error)->toBeInstanceOf(ProviderError::class);
+        expect(strlen($error->rawBody ?? ''))->toBeLessThan(5000);
+        expect(str_contains($error->rawBody ?? '', '[truncated]'))->toBeTrue();
     });
 
     it('preserves short error response bodies', function () {
         $transport = new HttpTransport;
         $reflection = new ReflectionClass($transport);
-        $method = $reflection->getMethod('throwProviderError');
+        $method = $reflection->getMethod('createProviderError');
         $shortBody = json_encode(['error' => ['message' => 'Something went wrong']]);
-        try {
-            $method->invoke($transport, 500, $shortBody);
-        } catch (ProviderError $e) {
-            expect($e->rawBody)->toBe($shortBody);
-            expect($e->getMessage())->toBe('Something went wrong');
-        }
+        $error = $method->invoke($transport, 500, $shortBody);
+        expect($error)->toBeInstanceOf(ProviderError::class);
+        expect($error->rawBody)->toBe($shortBody);
+        expect($error->getMessage())->toBe('Something went wrong');
     });
 });
 

@@ -33,19 +33,21 @@ use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
 use Pi\AI\Support\JsonParse;
+use Pi\AI\Support\PromiseHelper;
 use Pi\AI\Support\SanitizeUnicode;
 use Pi\AI\Support\SimpleOptions;
 use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Transport\ProviderError;
 use Pi\AI\Usage;
 use Pi\AI\UsageCost;
+use React\Promise\PromiseInterface;
 
 final readonly class GoogleVertexProvider implements ApiProviderInterface
 {
     private const GCP_VERTEX_CREDENTIALS_MARKER = 'gcp-vertex-credentials';
 
     /**
-     * @param  null|callable(Model, Context, GoogleVertexOptions, array<string, mixed>): iterable<array<string, mixed>>  $transport
+     * @param  null|callable(Model, Context, GoogleVertexOptions, array<string, mixed>): PromiseInterface<iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}>|iterable<array<string, mixed>>|array{events: iterable<array<string, mixed>>, status?: int, headers?: array<string, string>}  $transport
      */
     public function __construct(
         private ?Closure $transport = null,
@@ -63,36 +65,40 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
             ? $options
             : self::mapToProviderOptions($options);
 
-        try {
-            $params = $this->buildParams($model, $context, $providerOptions);
-            $nextParams = $providerOptions->onPayload?->__invoke($params, $model);
-            if (is_array($nextParams)) {
-                $params = $nextParams;
-            }
+        PromiseHelper::start(
+            function () use ($model, $context, $providerOptions, $stream) {
+                $params = $this->buildParams($model, $context, $providerOptions);
 
-            if ($this->transport !== null) {
-                $result = ($this->transport)($model, $context, $providerOptions, $params);
-            } else {
-                $result = $this->runDefaultTransport($model, $providerOptions, $params);
-            }
+                return PromiseHelper::resolve($providerOptions->onPayload?->__invoke($params, $model))
+                    ->then(function ($nextParams) use ($model, $context, $providerOptions, $params) {
+                        if (is_array($nextParams)) {
+                            $params = $nextParams;
+                        }
 
-            $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
-            $status = is_array($result) && array_key_exists('status', $result) ? (int) $result['status'] : 200;
-            $headers = is_array($result) && array_key_exists('headers', $result) && is_array($result['headers']) ? $result['headers'] : [];
+                        if ($this->transport !== null) {
+                            return PromiseHelper::resolve(($this->transport)($model, $context, $providerOptions, $params));
+                        }
 
-            $output = $this->createOutput($model);
-            $stream->push(new StartEvent($output));
+                        return $this->runDefaultTransport($model, $providerOptions, $params);
+                    })
+                    ->then(function ($result) use ($model, $providerOptions, $stream) {
+                        $events = is_array($result) && array_key_exists('events', $result) ? $result['events'] : $result;
+                        $status = is_array($result) && array_key_exists('status', $result) ? (int) $result['status'] : 200;
+                        $headers = is_array($result) && array_key_exists('headers', $result) && is_array($result['headers']) ? $result['headers'] : [];
 
-            $blocks = [];
-            $currentBlock = null;
-            $currentBlockIndex = null;
-            $usage = $output->usage;
-            $stopReason = StopReason::Stop;
-            $responseId = null;
-            $errorMessage = null;
-            $toolCallSeen = false;
+                        $output = $this->createOutput($model);
+                        $stream->push(new StartEvent($output));
 
-            foreach ($events as $event) {
+                        $blocks = [];
+                        $currentBlock = null;
+                        $currentBlockIndex = null;
+                        $usage = $output->usage;
+                        $stopReason = StopReason::Stop;
+                        $responseId = null;
+                        $errorMessage = null;
+                        $toolCallSeen = false;
+
+                        foreach ($events as $event) {
                 if (! is_array($event)) {
                     continue;
                 }
@@ -196,46 +202,53 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
                 }
 
                 $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-            }
+                        }
 
-            $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
+                        $this->finishCurrentBlock($currentBlock, $currentBlockIndex, $stream, $output);
 
-            if ($providerOptions->signal?->isCancelled()) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($providerOptions->signal?->isCancelled()) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($stopReason === StopReason::Aborted) {
-                throw new ProviderError('Request was aborted', 0, 'aborted');
-            }
+                        if ($stopReason === StopReason::Aborted) {
+                            throw new ProviderError('Request was aborted', 0, 'aborted');
+                        }
 
-            if ($stopReason === StopReason::Error) {
-                throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason', $status);
-            }
+                        if ($stopReason === StopReason::Error) {
+                            throw new ProviderError($errorMessage ?: 'Provider returned an error stop reason', $status);
+                        }
 
-            $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
-            $stream->push(new DoneEvent($stopReason, $output));
-            $stream->end();
+                        $output = $this->snapshot($model, $blocks, $usage, $stopReason, $responseId, $errorMessage);
+                        $stream->push(new DoneEvent($stopReason, $output));
+                        $stream->end();
 
-            $providerOptions->onResponse?->__invoke([
-                'status' => $status,
-                'headers' => $headers,
-            ], $model);
-        } catch (\Throwable $error) {
-            $output = $this->createOutput($model);
-            $output = new AssistantMessage(
-                content: $output->content,
-                api: $output->api,
-                provider: $output->provider,
-                model: $output->model,
-                usage: $output->usage,
-                stopReason: $options?->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
-                timestamp: $output->timestamp,
-                responseId: $output->responseId,
-                errorMessage: $error->getMessage(),
-            );
-            $stream->push(new ErrorEvent($output->stopReason, $output));
-            $stream->end($output);
-        }
+                        if ($this->transport !== null && $providerOptions->onResponse !== null) {
+                            return PromiseHelper::resolve($providerOptions->onResponse->__invoke([
+                                'status' => $status,
+                                'headers' => $headers,
+                            ], $model));
+                        }
+
+                        return null;
+                    });
+            },
+            function (\Throwable $error) use ($stream, $providerOptions, $model): void {
+                $output = $this->createOutput($model);
+                $output = new AssistantMessage(
+                    content: $output->content,
+                    api: $output->api,
+                    provider: $output->provider,
+                    model: $output->model,
+                    usage: $output->usage,
+                    stopReason: $providerOptions->signal?->isCancelled() ? StopReason::Aborted : StopReason::Error,
+                    timestamp: $output->timestamp,
+                    responseId: $output->responseId,
+                    errorMessage: $error->getMessage(),
+                );
+                $stream->push(new ErrorEvent($output->stopReason, $output));
+                $stream->end($output);
+            },
+        );
 
         return $stream;
     }
@@ -430,9 +443,9 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
     }
 
     /**
-     * @return array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}
+     * @return PromiseInterface<array{events: iterable<array<string, mixed>>, status: int, headers: array<string, string>}>
      */
-    private function runDefaultTransport(Model $model, GoogleVertexOptions $options, array $params): array
+    private function runDefaultTransport(Model $model, GoogleVertexOptions $options, array $params): PromiseInterface
     {
         $project = $this->resolveProject($options);
         $location = $this->resolveLocation($options);
@@ -461,37 +474,40 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
 
         $headers = array_merge($model->headers, $options->headers);
 
-        $accessToken = $this->resolveAccessToken();
-        if ($accessToken !== null && $accessToken !== '') {
-            $headers['Authorization'] = 'Bearer '.$accessToken;
-        }
-
-        $transport = new HttpTransport(
-            signal: $options->signal,
-            timeoutMs: $options->timeoutMs,
-            maxRetries: $options->maxRetries,
-            maxRetryDelayMs: $options->maxRetryDelayMs,
-        );
-
-        $onResponse = $options->onResponse !== null
-            ? static function (array $response) use ($options, $model): void {
-                $options->onResponse->__invoke([
-                    'status' => $response['status'],
-                    'headers' => $response['headers'],
-                ], $model);
+        return $this->resolveAccessToken()->then(function (?string $accessToken) use ($headers, $options, $model, $params, $url) {
+            if ($accessToken !== null && $accessToken !== '') {
+                $headers['Authorization'] = 'Bearer '.$accessToken;
             }
-        : null;
 
-        return [
-            'events' => $transport->stream('POST', $url, [
+            $transport = new HttpTransport(
+                signal: $options->signal,
+                timeoutMs: $options->timeoutMs,
+                maxRetries: $options->maxRetries,
+                maxRetryDelayMs: $options->maxRetryDelayMs,
+            );
+
+            $onResponse = $options->onResponse !== null
+                ? static function (array $response) use ($options, $model): mixed {
+                    return $options->onResponse->__invoke([
+                        'status' => $response['status'],
+                        'headers' => $response['headers'],
+                    ], $model);
+                }
+                : null;
+
+            return $transport->stream('POST', $url, [
                 'headers' => $headers,
                 'body' => $params,
                 'apiKey' => null,
                 'onResponse' => $onResponse,
-            ]),
-            'status' => 200,
-            'headers' => [],
-        ];
+            ])->then(
+                static fn ($events): array => [
+                    'events' => $events,
+                    'status' => 200,
+                    'headers' => [],
+                ],
+            );
+        });
     }
 
     private function resolveApiKey(GoogleVertexOptions $options): ?string
@@ -524,21 +540,21 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
         return $location;
     }
 
-    private function resolveAccessToken(): ?string
+    private function resolveAccessToken(): PromiseInterface
     {
         $adcPath = getenv('GOOGLE_APPLICATION_CREDENTIALS') ?: null;
         if ($adcPath === null || ! file_exists($adcPath)) {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         $contents = file_get_contents($adcPath);
         if ($contents === false) {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         $credentials = json_decode($contents, true);
         if (! is_array($credentials)) {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         if (isset($credentials['refresh_token'])) {
@@ -549,13 +565,13 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
             return $this->createServiceAccountToken($credentials);
         }
 
-        return null;
+        return PromiseHelper::resolve(null);
     }
 
     /**
      * @param  array<string, mixed>  $credentials
      */
-    private function exchangeRefreshToken(array $credentials): ?string
+    private function exchangeRefreshToken(array $credentials): PromiseInterface
     {
         $tokenUri = is_string($credentials['token_uri'] ?? null) ? $credentials['token_uri'] : 'https://oauth2.googleapis.com/token';
         $clientId = is_string($credentials['client_id'] ?? null) ? $credentials['client_id'] : '';
@@ -563,43 +579,42 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
         $refreshToken = is_string($credentials['refresh_token'] ?? null) ? $credentials['refresh_token'] : '';
 
         if ($refreshToken === '' || $clientId === '' || $clientSecret === '') {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         $transport = new HttpTransport;
-        try {
-            $response = $transport->request('POST', $tokenUri, [
-                'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-                'body' => [
-                    'grant_type' => 'refresh_token',
-                    'client_id' => $clientId,
-                    'client_secret' => $clientSecret,
-                    'refresh_token' => $refreshToken,
-                ],
-            ]);
+        return $transport->request('POST', $tokenUri, [
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'body' => [
+                'grant_type' => 'refresh_token',
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'refresh_token' => $refreshToken,
+            ],
+        ])->then(
+            static function ($response): ?string {
+                $data = json_decode($response->body, true);
+                if (is_array($data) && isset($data['access_token']) && is_string($data['access_token'])) {
+                    return $data['access_token'];
+                }
 
-            $data = json_decode($response->body, true);
-            if (is_array($data) && isset($data['access_token']) && is_string($data['access_token'])) {
-                return $data['access_token'];
-            }
-        } catch (\Throwable) {
-            return null;
-        }
-
-        return null;
+                return null;
+            },
+            static fn (): ?string => null,
+        );
     }
 
     /**
      * @param  array<string, mixed>  $credentials
      */
-    private function createServiceAccountToken(array $credentials): ?string
+    private function createServiceAccountToken(array $credentials): PromiseInterface
     {
         $clientEmail = is_string($credentials['client_email'] ?? null) ? $credentials['client_email'] : '';
         $privateKey = is_string($credentials['private_key'] ?? null) ? $credentials['private_key'] : '';
         $tokenUri = is_string($credentials['token_uri'] ?? null) ? $credentials['token_uri'] : 'https://oauth2.googleapis.com/token';
 
         if ($clientEmail === '' || $privateKey === '') {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         $now = time();
@@ -618,30 +633,29 @@ final readonly class GoogleVertexProvider implements ApiProviderInterface
 
         $signature = '';
         if (! openssl_sign($signatureInput, $signature, $privateKey, 'sha256')) {
-            return null;
+            return PromiseHelper::resolve(null);
         }
 
         $jwt = $signatureInput.'.'.str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
 
         $transport = new HttpTransport;
-        try {
-            $response = $transport->request('POST', $tokenUri, [
-                'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-                'body' => [
-                    'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                    'assertion' => $jwt,
-                ],
-            ]);
+        return $transport->request('POST', $tokenUri, [
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'body' => [
+                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion' => $jwt,
+            ],
+        ])->then(
+            static function ($response): ?string {
+                $data = json_decode($response->body, true);
+                if (is_array($data) && isset($data['access_token']) && is_string($data['access_token'])) {
+                    return $data['access_token'];
+                }
 
-            $data = json_decode($response->body, true);
-            if (is_array($data) && isset($data['access_token']) && is_string($data['access_token'])) {
-                return $data['access_token'];
-            }
-        } catch (\Throwable) {
-            return null;
-        }
-
-        return null;
+                return null;
+            },
+            static fn (): ?string => null,
+        );
     }
 
     private static function mapToProviderOptions(?StreamOptions $options): GoogleVertexOptions
