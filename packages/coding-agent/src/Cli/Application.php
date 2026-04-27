@@ -7,12 +7,14 @@ namespace Pi\CodingAgent\Cli;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Message\AssistantMessage;
 use Pi\Agent\ThinkingLevel;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntime;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Session\FilesystemSessionStore;
 use Pi\CodingAgent\Session\InMemorySessionStore;
+use Pi\CodingAgent\Settings\SettingsManager;
 use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 
@@ -47,7 +49,7 @@ final class Application
         $modelId = null;
         $apiKey = null;
         $systemPrompt = null;
-        $thinkingLevel = ThinkingLevel::Medium;
+        $thinkingLevel = null;
         $continueLatest = false;
         $resume = null;
         $noSession = false;
@@ -110,9 +112,11 @@ final class Application
     private function createRuntime(Args $args): CodingAgentRuntime
     {
         $cwd = $args->cwd ?? getcwd() ?: '.';
+        $settingsManager = SettingsManager::create($cwd);
+        $authStorage = AuthStorage::create();
         $sessionStore = $args->noSession
             ? new InMemorySessionStore
-            : new FilesystemSessionStore($args->sessionDir ?? $cwd.'/.pi/sessions');
+            : new FilesystemSessionStore($args->sessionDir ?? $settingsManager->getSessionDir($cwd));
 
         $config = new CodingAgentConfig(
             provider: $args->provider,
@@ -123,6 +127,8 @@ final class Application
             thinkingLevel: $args->thinkingLevel,
             allowedToolNames: $args->tools,
             sessionStore: $sessionStore,
+            authStorage: $authStorage,
+            settingsManager: $settingsManager,
         );
 
         $factory = new CodingAgentRuntimeFactory;

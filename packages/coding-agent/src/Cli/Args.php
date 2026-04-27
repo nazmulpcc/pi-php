@@ -18,7 +18,7 @@ readonly class Args
         public ?string $modelId = null,
         public ?string $apiKey = null,
         public ?string $systemPrompt = null,
-        public ThinkingLevel $thinkingLevel = ThinkingLevel::Medium,
+        public ?ThinkingLevel $thinkingLevel = null,
         public bool $continueLatest = false,
         public ?string $resume = null,
         public bool $noSession = false,

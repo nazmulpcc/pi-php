@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/TestHelper.php';
 
 use Pi\CodingAgent\Resource\FilesystemResourceLoader;
+use Pi\CodingAgent\Settings\SettingsManager;
 use Pi\CodingAgent\Tool\BashTool;
 use Pi\CodingAgent\Tool\EditTool;
 use Pi\CodingAgent\Tool\FindTool;
@@ -81,6 +82,51 @@ describe('Coding agent tools and resources', function () {
         expect($skills[0]->name)->toBe('debug');
         expect($templates)->toHaveCount(1);
         expect($templates[0]->name)->toBe('review');
+
+        codingAgentDeleteDir($dir);
+    });
+
+    it('loads richer prompt resources and can reload settings-backed paths', function () {
+        $dir = codingAgentTempDir();
+        mkdir($dir.'/shared-skills', 0777, true);
+        mkdir($dir.'/shared-prompts', 0777, true);
+        file_put_contents($dir.'/shared-skills/refactor.md', 'Refactor skill');
+        file_put_contents($dir.'/shared-prompts/commit.md', 'Commit template');
+
+        $settings = SettingsManager::inMemory(
+            global: [],
+            project: [
+                'skills' => [$dir.'/shared-skills'],
+                'prompts' => [$dir.'/shared-prompts'],
+            ],
+        );
+
+        $loader = new FilesystemResourceLoader(
+            cwd: $dir,
+            settingsManager: $settings,
+            systemPrompt: 'Base prompt',
+            appendSystemPrompt: ['Extra prompt'],
+        );
+
+        expect($loader->getSystemPrompt())->toBe('Base prompt');
+        expect($loader->getAppendSystemPrompt())->toBe(['Extra prompt']);
+        expect(array_map(static fn ($skill): string => $skill->name, $loader->loadSkills($dir)))->toContain('refactor');
+        expect(array_map(static fn ($template): string => $template->name, $loader->loadPromptTemplates($dir)))->toContain('commit');
+
+        $settings->setProjectSettings([
+            'skills' => [$dir.'/other-skills'],
+            'prompts' => [$dir.'/other-prompts'],
+        ]);
+        mkdir($dir.'/other-skills', 0777, true);
+        mkdir($dir.'/other-prompts', 0777, true);
+        file_put_contents($dir.'/other-skills/debug.md', 'Debug skill');
+        file_put_contents($dir.'/other-prompts/review.md', 'Review template');
+
+        $loader->reload();
+
+        expect(array_map(static fn ($skill): string => $skill->name, $loader->loadSkills($dir)))->toContain('debug');
+        expect(array_map(static fn ($template): string => $template->name, $loader->loadPromptTemplates($dir)))->toContain('review');
+        expect($loader->getDiagnostics())->toBe([]);
 
         codingAgentDeleteDir($dir);
     });

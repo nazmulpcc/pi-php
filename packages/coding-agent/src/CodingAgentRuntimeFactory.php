@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent;
 
+use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentTool;
 use Pi\AI\Model;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Resource\FilesystemResourceLoader;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Session\InMemorySessionStore;
 use Pi\CodingAgent\Session\SessionManager;
 use Pi\CodingAgent\Session\SessionStore;
+use Pi\CodingAgent\Settings\SettingsManager;
 use Pi\CodingAgent\Tool\BashTool;
 use Pi\CodingAgent\Tool\EditTool;
 use Pi\CodingAgent\Tool\FindTool;
@@ -26,15 +29,25 @@ final class CodingAgentRuntimeFactory
 {
     public function create(CodingAgentConfig $config): CodingAgentRuntime
     {
-        $sessionStore = $config->sessionStore ?? new InMemorySessionStore;
-        $resourceLoader = $config->resourceLoader ?? new FilesystemResourceLoader;
         $cwd = $config->cwd ?? getcwd() ?: '.';
+        $settingsManager = $config->settingsManager ?? SettingsManager::create($cwd);
+        $sessionStore = $config->sessionStore ?? new InMemorySessionStore;
+        $authStorage = $config->authStorage ?? AuthStorage::create();
+        $resourceLoader = $config->resourceLoader ?? new FilesystemResourceLoader(
+            cwd: $cwd,
+            settingsManager: $settingsManager,
+            systemPrompt: $config->systemPrompt,
+            appendSystemPrompt: $config->appendSystemPrompt,
+            enableContextFiles: $config->enableContextFiles,
+        );
+        $config = $this->applySettingsDefaults($config, $settingsManager);
         $model = $this->resolveModel($config);
         $tools = $this->resolveTools($cwd, $config->tools, $config->allowedToolNames);
         $contextFiles = $config->enableContextFiles ? $resourceLoader->loadContextFiles($cwd) : [];
         $systemPrompt = SystemPromptBuilder::build(
-            $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
+            $resourceLoader->getSystemPrompt() ?? $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
             $contextFiles,
+            $resourceLoader->getAppendSystemPrompt(),
         );
 
         $manager = $sessionStore->createManager($cwd, $config->sessionId);
@@ -43,14 +56,23 @@ final class CodingAgentRuntimeFactory
         }
         $manager->appendThinkingLevelChange($config->thinkingLevel);
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager);
     }
 
     public function resume(CodingAgentConfig $config, string $sessionIdOrPath): CodingAgentRuntime
     {
-        $sessionStore = $config->sessionStore ?? new InMemorySessionStore;
-        $resourceLoader = $config->resourceLoader ?? new FilesystemResourceLoader;
         $cwd = $config->cwd ?? getcwd() ?: '.';
+        $settingsManager = $config->settingsManager ?? SettingsManager::create($cwd);
+        $sessionStore = $config->sessionStore ?? new InMemorySessionStore;
+        $authStorage = $config->authStorage ?? AuthStorage::create();
+        $resourceLoader = $config->resourceLoader ?? new FilesystemResourceLoader(
+            cwd: $cwd,
+            settingsManager: $settingsManager,
+            systemPrompt: $config->systemPrompt,
+            appendSystemPrompt: $config->appendSystemPrompt,
+            enableContextFiles: $config->enableContextFiles,
+        );
+        $config = $this->applySettingsDefaults($config, $settingsManager);
         $manager = $sessionStore->openManager($sessionIdOrPath, $cwd);
         if (! $manager instanceof SessionManager) {
             throw new \RuntimeException(sprintf('Session not found: %s', $sessionIdOrPath));
@@ -61,8 +83,9 @@ final class CodingAgentRuntimeFactory
         $tools = $this->resolveTools($runtimeCwd, $config->tools, $config->allowedToolNames);
         $contextFiles = $config->enableContextFiles ? $resourceLoader->loadContextFiles($runtimeCwd) : [];
         $systemPrompt = SystemPromptBuilder::build(
-            $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
+            $resourceLoader->getSystemPrompt() ?? $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
             $contextFiles,
+            $resourceLoader->getAppendSystemPrompt(),
         );
         $model = $config->model ?? $runtimeContext['model'] ?? $this->resolveModel($config);
         $thinkingLevel = $runtimeContext['thinkingLevel'] ?? $config->thinkingLevel;
@@ -79,13 +102,16 @@ final class CodingAgentRuntimeFactory
             allowedToolNames: $config->allowedToolNames,
             sessionStore: $sessionStore,
             resourceLoader: $resourceLoader,
+            authStorage: $authStorage,
+            settingsManager: $settingsManager,
             streamFn: $config->streamFn,
             getApiKey: $config->getApiKey,
             enableContextFiles: $config->enableContextFiles,
             sessionId: $config->sessionId,
+            appendSystemPrompt: $config->appendSystemPrompt,
         );
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager);
     }
 
     public function continueLatest(CodingAgentConfig $config): CodingAgentRuntime
@@ -144,18 +170,50 @@ final class CodingAgentRuntimeFactory
         string $systemPrompt,
         ?Model $model,
         SessionManager $manager,
+        ?AuthStorage $authStorage,
+        ?SettingsManager $settingsManager,
     ): CodingAgentRuntime {
         return new CodingAgentRuntime(
             sessionStore: $sessionStore,
+            sessionManager: $manager,
             resourceLoader: $resourceLoader,
             tools: $tools,
+            authStorage: $authStorage,
+            settingsManager: $settingsManager,
             explicitApiKey: $config->apiKey,
             customStreamFn: $config->streamFn,
             getApiKey: $config->getApiKey,
             systemPrompt: $systemPrompt,
             model: $model,
             thinkingLevel: $config->thinkingLevel,
-            sessionManager: $manager,
+        );
+    }
+
+    private function applySettingsDefaults(CodingAgentConfig $config, SettingsManager $settingsManager): CodingAgentConfig
+    {
+        $provider = $config->provider ?? $settingsManager->getDefaultProvider();
+        $modelId = $config->modelId ?? $settingsManager->getDefaultModel();
+        $thinkingLevel = $config->thinkingLevel ?? $settingsManager->getDefaultThinkingLevel() ?? ThinkingLevel::Medium;
+
+        return new CodingAgentConfig(
+            model: $config->model,
+            provider: $provider,
+            modelId: $modelId,
+            apiKey: $config->apiKey,
+            cwd: $config->cwd,
+            systemPrompt: $config->systemPrompt,
+            thinkingLevel: $thinkingLevel,
+            tools: $config->tools,
+            allowedToolNames: $config->allowedToolNames,
+            sessionStore: $config->sessionStore,
+            resourceLoader: $config->resourceLoader,
+            authStorage: $config->authStorage,
+            settingsManager: $settingsManager,
+            streamFn: $config->streamFn,
+            getApiKey: $config->getApiKey,
+            enableContextFiles: $config->enableContextFiles,
+            sessionId: $config->sessionId,
+            appendSystemPrompt: $config->appendSystemPrompt,
         );
     }
 }

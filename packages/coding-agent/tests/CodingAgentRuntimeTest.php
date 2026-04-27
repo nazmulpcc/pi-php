@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 require_once __DIR__.'/TestHelper.php';
 
+use Pi\Agent\AiAdapter;
 use Pi\Agent\CancellationToken;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Message\AssistantMessage;
+use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentToolResult;
+use Pi\AI\Model;
 use Pi\AI\Schema\Type;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Session\FilesystemSessionStore;
 use Pi\CodingAgent\Session\InMemorySessionStore;
+use Pi\CodingAgent\Settings\SettingsManager;
 use Pi\CodingAgent\Tool\AbstractTool;
 
 use function Pi\AI\fauxAssistantMessage;
 use function Pi\AI\registerFauxProvider;
+use function Pi\AI\streamSimple;
 
 describe('Coding agent runtime', function () {
     it('creates an in-memory runtime and prompts through pi ai', function () {
@@ -124,5 +129,83 @@ describe('Coding agent runtime', function () {
         ));
 
         expect($runtime->getState()->toolNames)->toBe(['custom']);
+    });
+
+    it('uses settings-backed model defaults and runtime replacement hooks', function () {
+        $registration = registerFauxProvider();
+        $registration->setResponses([
+            fauxAssistantMessage('from settings'),
+        ]);
+
+        $settings = SettingsManager::inMemory(
+            global: [
+                'defaultProvider' => 'openai',
+                'defaultModel' => 'gpt-5.4-mini',
+                'defaultThinkingLevel' => 'high',
+                'steeringMode' => 'all',
+                'followUpMode' => 'all',
+            ],
+        );
+
+        $runtime = (new CodingAgentRuntimeFactory)->create(new CodingAgentConfig(
+            sessionStore: new InMemorySessionStore,
+            settingsManager: $settings,
+            streamFn: function (?Model $model, $context) use ($registration) {
+                return streamSimple($registration->getModel(), AiAdapter::toAiContext($context));
+            },
+        ));
+
+        codingAgentBlock($runtime->prompt('hi'));
+
+        expect($runtime->getState()->model?->provider->value)->toBe('openai');
+        expect($runtime->getState()->model?->id)->toBe('gpt-5.4-mini');
+        expect($runtime->getState()->messages[1]->content[0]->text)->toBe('from settings');
+        expect($runtime->getState()->thinkingLevel)->toBe(ThinkingLevel::High);
+        expect($runtime->getState()->steeringMode)->toBe('all');
+        expect($runtime->getState()->followUpMode)->toBe('all');
+
+        $registration->unregister();
+    });
+
+    it('rebinds runtime listeners and invalidates stale session handles on session replacement', function () {
+        $registration = registerFauxProvider();
+        $registration->setResponses([
+            fauxAssistantMessage('first'),
+            fauxAssistantMessage('second'),
+        ]);
+
+        $runtime = (new CodingAgentRuntimeFactory)->create(new CodingAgentConfig(
+            model: $registration->getModel(),
+            sessionStore: new InMemorySessionStore,
+        ));
+
+        $staleSession = $runtime->session;
+        $beforeInvalidated = 0;
+        $rebound = 0;
+        $events = [];
+        $runtime->setBeforeSessionInvalidate(function () use (&$beforeInvalidated): void {
+            $beforeInvalidated++;
+        });
+        $runtime->setRebindSession(function () use (&$rebound): void {
+            $rebound++;
+        });
+        $runtime->subscribe(function (CodingAgentEvent $event) use (&$events): void {
+            $events[] = $event->type;
+        });
+
+        $runtime->newSession();
+
+        expect($beforeInvalidated)->toBe(1);
+        expect($rebound)->toBe(1);
+        expect($events)->toContain('session_shutdown', 'session_start');
+
+        expect(function () use ($staleSession): void {
+            $staleSession->prompt('stale');
+        })->toThrow(RuntimeException::class, 'stale');
+
+        codingAgentBlock($runtime->prompt('fresh'));
+        expect($runtime->getState()->messages[1]->content[0]->text)->toBe('first');
+
+        $registration->unregister();
     });
 });

@@ -31,6 +31,9 @@ readonly class CodingAgentState implements \JsonSerializable
         public bool $isCompacting = false,
         public string $steeringMode = 'one-at-a-time',
         public string $followUpMode = 'one-at-a-time',
+        public bool $autoCompactionEnabled = true,
+        public bool $autoRetryEnabled = true,
+        public int $pendingMessageCount = 0,
     ) {}
 
     public function jsonSerialize(): array
@@ -55,6 +58,9 @@ readonly class CodingAgentState implements \JsonSerializable
             'isCompacting' => $this->isCompacting,
             'steeringMode' => $this->steeringMode,
             'followUpMode' => $this->followUpMode,
+            'autoCompactionEnabled' => $this->autoCompactionEnabled,
+            'autoRetryEnabled' => $this->autoRetryEnabled,
+            'pendingMessageCount' => $this->pendingMessageCount,
         ];
     }
 }

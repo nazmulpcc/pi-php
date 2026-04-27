@@ -13,6 +13,7 @@ use Pi\Agent\Content\ImageContent;
 use Pi\Agent\Content\TextContent;
 use Pi\Agent\Content\ThinkingContent;
 use Pi\Agent\Content\ToolCall;
+use Pi\Agent\Event\AgentEndEvent;
 use Pi\Agent\Event\AgentEvent;
 use Pi\Agent\Event\MessageEndEvent;
 use Pi\Agent\Message\AssistantMessage;
@@ -20,20 +21,23 @@ use Pi\Agent\Message\ToolResultMessage;
 use Pi\Agent\Message\UserMessage;
 use Pi\Agent\MessageRole;
 use Pi\Agent\MutableAgentState;
+use Pi\Agent\StopReason;
 use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentTool;
 use Pi\AI\Model;
 use Pi\AI\SimpleStreamOptions;
 use Pi\AI\ThinkingLevel as AiThinkingLevel;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Event\CodingAgentEventSerializer;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
 use Pi\CodingAgent\Session\SessionManager;
+use Pi\CodingAgent\Settings\SettingsManager;
+use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 
-use function Pi\AI\getEnvApiKey;
 use function Pi\AI\getModels;
 use function Pi\AI\getProviders;
 use function Pi\AI\streamSimple;
@@ -52,6 +56,12 @@ final class CodingAgentSession
 
     private mixed $unsubscribeAgent = null;
 
+    private bool $autoCompactionEnabled = true;
+
+    private bool $autoRetryEnabled = true;
+
+    private int $retryAttempt = 0;
+
     public function __construct(
         public readonly SessionManager $sessionManager,
         private ?Model $model,
@@ -59,11 +69,17 @@ final class CodingAgentSession
         private ThinkingLevel $thinkingLevel,
         private array $tools,
         private readonly ResourceLoaderInterface $resourceLoader,
+        private readonly ?AuthStorage $authStorage = null,
+        private readonly ?SettingsManager $settingsManager = null,
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
     ) {
+        $this->autoCompactionEnabled = $this->settingsManager?->getCompactionEnabled() ?? true;
+        $this->autoRetryEnabled = $this->settingsManager?->getRetryEnabled() ?? true;
         $this->agent = $this->createAgent();
+        $this->agent->setSteeringMode($this->settingsManager?->getSteeringMode() ?? 'one-at-a-time');
+        $this->agent->setFollowUpMode($this->settingsManager?->getFollowUpMode() ?? 'one-at-a-time');
         $this->unsubscribeAgent = $this->agent->subscribe(function (AgentEvent $event): void {
             $this->handleAgentEvent($event);
         });
@@ -127,12 +143,16 @@ final class CodingAgentSession
     public function reload(): void
     {
         $this->assertUsable();
+        $this->settingsManager?->reload();
+        $this->resourceLoader->reload();
         $this->sessionManager->reload();
         $context = $this->sessionManager->buildSessionContext();
         $this->model = $context['model'] ?? $this->model;
         $this->thinkingLevel = $context['thinkingLevel'] ?? $this->thinkingLevel;
         $this->agent->getState()->setMessages($context['messages']);
         $this->agent->getState()->setThinkingLevel($this->thinkingLevel);
+        $this->autoCompactionEnabled = $this->settingsManager?->getCompactionEnabled() ?? $this->autoCompactionEnabled;
+        $this->autoRetryEnabled = $this->settingsManager?->getRetryEnabled() ?? $this->autoRetryEnabled;
     }
 
     public function subscribe(callable $listener): callable
@@ -200,6 +220,47 @@ final class CodingAgentSession
         return $result;
     }
 
+    public function setAutoCompactionEnabled(bool $enabled): void
+    {
+        $this->assertUsable();
+        $this->autoCompactionEnabled = $enabled;
+    }
+
+    public function setAutoRetryEnabled(bool $enabled): void
+    {
+        $this->assertUsable();
+        $this->autoRetryEnabled = $enabled;
+    }
+
+    public function getSessionStats(): array
+    {
+        $messages = $this->agent->getState()->getMessages();
+        $assistantCount = 0;
+        $userCount = 0;
+        $toolResultCount = 0;
+        foreach ($messages as $message) {
+            $role = $message->getRole();
+            if ($role === MessageRole::Assistant) {
+                $assistantCount++;
+            } elseif ($role === MessageRole::User) {
+                $userCount++;
+            } elseif ($role === MessageRole::ToolResult) {
+                $toolResultCount++;
+            }
+        }
+
+        return [
+            'sessionFile' => $this->sessionManager->getSessionFile(),
+            'sessionId' => $this->sessionManager->getSessionId(),
+            'cwd' => $this->sessionManager->getCwd(),
+            'messageCount' => count($messages),
+            'userMessages' => $userCount,
+            'assistantMessages' => $assistantCount,
+            'toolResults' => $toolResultCount,
+            'entryCount' => count($this->sessionManager->getEntries()),
+        ];
+    }
+
     public function getState(): CodingAgentState
     {
         $state = $this->agent->getState();
@@ -220,6 +281,9 @@ final class CodingAgentSession
             isCompacting: $this->isCompacting,
             steeringMode: $this->agent->getSteeringMode(),
             followUpMode: $this->agent->getFollowUpMode(),
+            autoCompactionEnabled: $this->autoCompactionEnabled,
+            autoRetryEnabled: $this->autoRetryEnabled,
+            pendingMessageCount: count($state->getPendingToolCalls()),
         );
     }
 
@@ -382,7 +446,11 @@ final class CodingAgentSession
                     return $this->explicitApiKey;
                 }
 
-                return getEnvApiKey($provider);
+                if ($this->authStorage !== null) {
+                    return $this->authStorage->getApiKey($provider);
+                }
+
+                return \Pi\AI\getEnvApiKey($provider);
             },
         );
     }
@@ -396,6 +464,10 @@ final class CodingAgentSession
         }
 
         $this->emit(CodingAgentEventSerializer::fromAgentEvent($event));
+
+        if ($event instanceof AgentEndEvent) {
+            $this->handlePostRunState();
+        }
     }
 
     private function emit(CodingAgentEvent $event): void
@@ -419,7 +491,11 @@ final class CodingAgentSession
             return ($this->getApiKey)($this->model->provider->value);
         }
 
-        return getEnvApiKey($this->model->provider->value);
+        if ($this->authStorage !== null) {
+            return $this->authStorage->getApiKey($this->model->provider->value);
+        }
+
+        return \Pi\AI\getEnvApiKey($this->model->provider->value);
     }
 
     private function toAiThinkingLevel(ThinkingLevel $thinkingLevel): ?AiThinkingLevel
@@ -511,5 +587,141 @@ final class CodingAgentSession
         if ($this->disposed) {
             throw new \RuntimeException('This session handle is stale and can no longer be used.');
         }
+    }
+
+    private function handlePostRunState(): void
+    {
+        $messages = $this->agent->getState()->getMessages();
+        $last = $messages[count($messages) - 1] ?? null;
+        if (! $last instanceof AssistantMessage) {
+            return;
+        }
+
+        if ($this->autoCompactionEnabled && ! $this->isCompacting) {
+            $this->maybeAutoCompact($messages);
+        }
+
+        if ($this->autoRetryEnabled) {
+            $this->maybeScheduleRetry($last);
+        } else {
+            $this->retryAttempt = 0;
+        }
+    }
+
+    /**
+     * @param  array<AgentMessage>  $messages
+     */
+    private function maybeAutoCompact(array $messages): void
+    {
+        $contextWindow = $this->model?->contextWindow ?? 0;
+        if ($contextWindow <= 0) {
+            return;
+        }
+
+        $reserve = $this->settingsManager?->getCompactionReserveTokens() ?? 16384;
+        $keepRecent = $this->settingsManager?->getCompactionKeepRecentTokens() ?? 20000;
+        $estimated = $this->estimateTokens($messages);
+        if ($estimated <= max(0, $contextWindow - $reserve)) {
+            return;
+        }
+
+        $keepMessages = $this->resolveKeepRecentMessageCount($messages, $keepRecent);
+        if ($keepMessages >= count($messages)) {
+            return;
+        }
+
+        $this->compact($keepMessages);
+    }
+
+    private function maybeScheduleRetry(AssistantMessage $message): void
+    {
+        if ($message->stopReason !== StopReason::Error) {
+            $this->retryAttempt = 0;
+
+            return;
+        }
+
+        if ($this->isContextOverflowError($message->errorMessage)) {
+            return;
+        }
+
+        $maxRetries = $this->settingsManager?->getRetryMaxRetries() ?? 0;
+        if ($this->retryAttempt >= $maxRetries) {
+            return;
+        }
+
+        $messages = $this->agent->getState()->getMessages();
+        array_pop($messages);
+        $this->agent->getState()->setMessages($messages);
+
+        $delayMs = ($this->settingsManager?->getRetryBaseDelayMs() ?? 2000) * (2 ** $this->retryAttempt);
+        $this->retryAttempt++;
+
+        Loop::addTimer($delayMs / 1000, function (): void {
+            if ($this->disposed || $this->agent->isRunning()) {
+                return;
+            }
+
+            $this->agent->continue()->then(
+                function (): void {
+                    $this->retryAttempt = 0;
+                },
+                function (): void {
+                    // Keep current retryAttempt for subsequent failures.
+                },
+            );
+        });
+    }
+
+    private function isContextOverflowError(?string $errorMessage): bool
+    {
+        if (! is_string($errorMessage) || $errorMessage === '') {
+            return false;
+        }
+
+        $needle = strtolower($errorMessage);
+
+        return str_contains($needle, 'context length') ||
+            str_contains($needle, 'context window') ||
+            str_contains($needle, 'maximum context') ||
+            str_contains($needle, 'too many tokens') ||
+            str_contains($needle, 'maximum number of tokens') ||
+            str_contains($needle, 'prompt is too long');
+    }
+
+    /**
+     * @param  array<AgentMessage>  $messages
+     */
+    private function estimateTokens(array $messages): int
+    {
+        $chars = 0;
+        foreach ($messages as $message) {
+            if ($message instanceof UserMessage || $message instanceof AssistantMessage || $message instanceof ToolResultMessage) {
+                $chars += strlen($this->flattenContent($message->content));
+            }
+        }
+
+        return (int) ceil($chars / 4);
+    }
+
+    /**
+     * @param  array<AgentMessage>  $messages
+     */
+    private function resolveKeepRecentMessageCount(array $messages, int $keepRecentTokens): int
+    {
+        $count = 0;
+        $chars = 0;
+        for ($i = count($messages) - 1; $i >= 0; $i--) {
+            $message = $messages[$i];
+            if ($message instanceof UserMessage || $message instanceof AssistantMessage || $message instanceof ToolResultMessage) {
+                $chars += strlen($this->flattenContent($message->content));
+            }
+            $count++;
+            if ((int) ceil($chars / 4) >= $keepRecentTokens) {
+                break;
+            }
+        }
+
+        return max(1, $count);
     }
 }

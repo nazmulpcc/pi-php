@@ -7,12 +7,14 @@ namespace Pi\CodingAgent;
 use Pi\Agent\AgentMessage;
 use Pi\Agent\ThinkingLevel;
 use Pi\AI\Model;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
 use Pi\CodingAgent\Session\SessionManager;
 use Pi\CodingAgent\Session\SessionStore;
+use Pi\CodingAgent\Settings\SettingsManager;
 use React\Promise\PromiseInterface;
 
 final class CodingAgentRuntime
@@ -24,11 +26,17 @@ final class CodingAgentRuntime
 
     private mixed $sessionSubscription = null;
 
+    private mixed $rebindSession = null;
+
+    private mixed $beforeSessionInvalidate = null;
+
     public function __construct(
         private readonly SessionStore $sessionStore,
         SessionManager $sessionManager,
         private readonly ResourceLoaderInterface $resourceLoader,
         private readonly array $tools,
+        private readonly ?AuthStorage $authStorage = null,
+        private readonly ?SettingsManager $settingsManager = null,
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
@@ -89,6 +97,16 @@ final class CodingAgentRuntime
                 static fn (callable $registered): bool => $registered !== $listener,
             ));
         };
+    }
+
+    public function setRebindSession(?callable $rebindSession): void
+    {
+        $this->rebindSession = $rebindSession;
+    }
+
+    public function setBeforeSessionInvalidate(?callable $beforeSessionInvalidate): void
+    {
+        $this->beforeSessionInvalidate = $beforeSessionInvalidate;
     }
 
     public function newSession(?string $parentSession = null): array
@@ -155,8 +173,20 @@ final class CodingAgentRuntime
 
     private function replaceSession(SessionManager $manager, string $reason, ?string $previousSessionFile): void
     {
+        foreach ($this->listeners as $listener) {
+            $listener(new CodingAgentEvent('session_shutdown', [
+                'reason' => $reason,
+                'targetSessionFile' => $manager->getSessionFile(),
+            ]));
+        }
+        if ($this->beforeSessionInvalidate !== null) {
+            ($this->beforeSessionInvalidate)();
+        }
         $this->session->dispose();
         $this->session = $this->createSession($manager, $reason, $previousSessionFile);
+        if ($this->rebindSession !== null) {
+            ($this->rebindSession)($this->session);
+        }
     }
 
     private function createSession(SessionManager $manager, string $reason, ?string $previousSessionFile): CodingAgentSession
@@ -176,6 +206,8 @@ final class CodingAgentRuntime
             thinkingLevel: $this->thinkingLevel,
             tools: $this->tools,
             resourceLoader: $this->resourceLoader,
+            authStorage: $this->authStorage,
+            settingsManager: $this->settingsManager,
             explicitApiKey: $this->explicitApiKey,
             customStreamFn: $this->customStreamFn,
             getApiKey: $this->getApiKey,
