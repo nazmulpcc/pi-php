@@ -28,15 +28,11 @@ use Pi\Agent\Tool\AgentToolResult;
 
 final class CodingAgentEventSerializer
 {
-    public static function fromAgentEvent(AgentEvent $event, string $sessionId): CodingAgentEvent
+    public static function fromAgentEvent(AgentEvent $event): CodingAgentEvent
     {
-        $timestamp = (int) (microtime(true) * 1000);
-
         return new CodingAgentEvent(
             type: $event->getType()->value,
-            sessionId: $sessionId,
-            timestamp: $timestamp,
-            data: match (true) {
+            payload: match (true) {
                 $event instanceof AgentStartEvent => [],
                 $event instanceof AgentEndEvent => ['messages' => array_map([self::class, 'serializeMessage'], $event->messages)],
                 $event instanceof TurnStartEvent => [],
@@ -49,7 +45,7 @@ final class CodingAgentEventSerializer
                 ],
                 $event instanceof MessageUpdateEvent => [
                     'message' => self::serializeMessage($event->message),
-                    'rawEvent' => self::normalizeValue($event->rawEvent),
+                    'assistantMessageEvent' => self::normalizeValue($event->rawEvent),
                 ],
                 $event instanceof ToolExecutionStartEvent => [
                     'toolCallId' => $event->toolCallId,
@@ -112,19 +108,6 @@ final class CodingAgentEventSerializer
         };
     }
 
-    public static function serializeToolResult(mixed $result): mixed
-    {
-        if ($result instanceof AgentToolResult) {
-            return [
-                'content' => array_map([self::class, 'serializeContent'], $result->content),
-                'details' => self::normalizeValue($result->details),
-                'terminate' => $result->terminate,
-            ];
-        }
-
-        return self::normalizeValue($result);
-    }
-
     public static function serializeContent(object $content): array
     {
         return match (true) {
@@ -145,6 +128,19 @@ final class CodingAgentEventSerializer
             ],
             default => throw new \RuntimeException('Unsupported content type: '.get_debug_type($content)),
         };
+    }
+
+    public static function serializeToolResult(mixed $result): mixed
+    {
+        if ($result instanceof AgentToolResult) {
+            return [
+                'content' => array_map([self::class, 'serializeContent'], $result->content),
+                'details' => self::normalizeValue($result->details),
+                'terminate' => $result->terminate,
+            ];
+        }
+
+        return self::normalizeValue($result);
     }
 
     public static function normalizeValue(mixed $value): mixed

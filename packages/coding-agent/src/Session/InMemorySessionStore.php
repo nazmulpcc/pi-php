@@ -4,74 +4,47 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Session;
 
-use Pi\Agent\ThinkingLevel;
-use Pi\AI\Model;
-
 final class InMemorySessionStore implements SessionStore
 {
-    /** @var array<string, SessionSnapshot> */
-    private array $snapshots = [];
+    /** @var array<string, SessionManager> */
+    private array $sessions = [];
 
-    public function createSnapshot(
-        string $cwd,
-        ?Model $model,
-        string $systemPrompt,
-        ThinkingLevel $thinkingLevel,
-        array $messages,
-        ?string $sessionId = null,
-    ): SessionSnapshot {
-        $now = (int) (microtime(true) * 1000);
+    public function createManager(string $cwd, ?string $sessionId = null): SessionManager
+    {
+        $manager = SessionManager::create($cwd, null, false, $sessionId);
+        $this->sessions[$manager->getSessionId()] = $manager;
 
-        return new SessionSnapshot(
-            sessionId: $sessionId ?? bin2hex(random_bytes(16)),
-            cwd: $cwd,
-            model: $model,
-            systemPrompt: $systemPrompt,
-            thinkingLevel: $thinkingLevel,
-            messages: $messages,
-            createdAt: $now,
-            updatedAt: $now,
-        );
+        return $manager;
     }
 
-    public function save(SessionSnapshot $snapshot): SessionSnapshot
+    public function openManager(string $sessionIdOrPath, ?string $cwd = null): ?SessionManager
     {
-        $updated = new SessionSnapshot(
-            sessionId: $snapshot->sessionId,
-            cwd: $snapshot->cwd,
-            model: $snapshot->model,
-            systemPrompt: $snapshot->systemPrompt,
-            thinkingLevel: $snapshot->thinkingLevel,
-            messages: $snapshot->messages,
-            createdAt: $snapshot->createdAt,
-            updatedAt: (int) (microtime(true) * 1000),
-            path: $snapshot->path,
-        );
-        $this->snapshots[$updated->sessionId] = $updated;
-
-        return $updated;
-    }
-
-    public function load(string $sessionIdOrPath): ?SessionSnapshot
-    {
-        if (isset($this->snapshots[$sessionIdOrPath])) {
-            return $this->snapshots[$sessionIdOrPath];
+        if (isset($this->sessions[$sessionIdOrPath])) {
+            return $this->sessions[$sessionIdOrPath];
         }
 
-        foreach ($this->snapshots as $snapshot) {
-            if (str_starts_with($snapshot->sessionId, $sessionIdOrPath)) {
-                return $snapshot;
+        foreach ($this->sessions as $sessionId => $manager) {
+            if (str_starts_with($sessionId, $sessionIdOrPath)) {
+                return $manager;
             }
         }
 
         return null;
     }
 
-    public function loadLatest(): ?SessionSnapshot
+    public function continueLatest(string $cwd): ?SessionManager
     {
-        $snapshots = array_values($this->snapshots);
-        usort($snapshots, static fn (SessionSnapshot $a, SessionSnapshot $b): int => $b->updatedAt <=> $a->updatedAt);
+        $sessions = array_filter(
+            $this->sessions,
+            static fn (SessionManager $manager): bool => $manager->getCwd() === $cwd,
+        );
 
-        return $snapshots[0] ?? null;
+        if ($sessions === []) {
+            return null;
+        }
+
+        usort($sessions, static fn (SessionManager $a, SessionManager $b): int => strcmp($b->getLastTimestamp(), $a->getLastTimestamp()));
+
+        return $sessions[0] ?? null;
     }
 }

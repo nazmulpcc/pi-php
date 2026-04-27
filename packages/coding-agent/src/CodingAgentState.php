@@ -28,6 +28,9 @@ readonly class CodingAgentState implements \JsonSerializable
         public array $pendingToolCalls,
         public ?string $errorMessage,
         public array $toolNames,
+        public bool $isCompacting = false,
+        public string $steeringMode = 'one-at-a-time',
+        public string $followUpMode = 'one-at-a-time',
     ) {}
 
     public function jsonSerialize(): array
@@ -49,6 +52,9 @@ readonly class CodingAgentState implements \JsonSerializable
             'pendingToolCalls' => $this->pendingToolCalls,
             'errorMessage' => $this->errorMessage,
             'toolNames' => $this->toolNames,
+            'isCompacting' => $this->isCompacting,
+            'steeringMode' => $this->steeringMode,
+            'followUpMode' => $this->followUpMode,
         ];
     }
 }

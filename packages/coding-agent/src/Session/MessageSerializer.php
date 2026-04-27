@@ -14,7 +14,6 @@ use Pi\Agent\Message\CustomMessage;
 use Pi\Agent\Message\ToolResultMessage;
 use Pi\Agent\Message\UserMessage;
 use Pi\Agent\StopReason;
-use Pi\Agent\ThinkingLevel;
 use Pi\AI\Api;
 use Pi\AI\Model;
 use Pi\AI\Provider;
@@ -23,35 +22,6 @@ use Pi\CodingAgent\Event\CodingAgentEventSerializer;
 
 final class MessageSerializer
 {
-    public static function serializeSnapshot(SessionSnapshot $snapshot): array
-    {
-        return [
-            'sessionId' => $snapshot->sessionId,
-            'cwd' => $snapshot->cwd,
-            'model' => self::serializeModel($snapshot->model),
-            'systemPrompt' => $snapshot->systemPrompt,
-            'thinkingLevel' => $snapshot->thinkingLevel->value,
-            'messages' => array_map([self::class, 'serializeMessage'], $snapshot->messages),
-            'createdAt' => $snapshot->createdAt,
-            'updatedAt' => $snapshot->updatedAt,
-        ];
-    }
-
-    public static function hydrateSnapshot(array $data, ?string $path = null): SessionSnapshot
-    {
-        return new SessionSnapshot(
-            sessionId: (string) $data['sessionId'],
-            cwd: (string) $data['cwd'],
-            model: self::hydrateModel($data['model'] ?? null),
-            systemPrompt: (string) ($data['systemPrompt'] ?? ''),
-            thinkingLevel: ThinkingLevel::from((string) ($data['thinkingLevel'] ?? ThinkingLevel::Medium->value)),
-            messages: array_map([self::class, 'hydrateMessage'], $data['messages'] ?? []),
-            createdAt: (int) ($data['createdAt'] ?? (int) (microtime(true) * 1000)),
-            updatedAt: (int) ($data['updatedAt'] ?? (int) (microtime(true) * 1000)),
-            path: $path,
-        );
-    }
-
     public static function serializeMessage(AgentMessage $message): array
     {
         return CodingAgentEventSerializer::serializeMessage($message);
@@ -88,7 +58,7 @@ final class MessageSerializer
                 display: (bool) ($data['display'] ?? true),
                 details: $data['details'] ?? null,
             ),
-            default => throw new \RuntimeException('Unsupported message role'),
+            default => throw new \RuntimeException('Unsupported message role: '.(string) ($data['role'] ?? 'unknown')),
         };
     }
 
@@ -108,7 +78,7 @@ final class MessageSerializer
                 $data['arguments'] ?? [],
                 isset($data['thoughtSignature']) ? (string) $data['thoughtSignature'] : null,
             ),
-            default => throw new \RuntimeException('Unsupported content type'),
+            default => throw new \RuntimeException('Unsupported content type: '.(string) ($data['type'] ?? 'unknown')),
         };
     }
 
@@ -150,8 +120,8 @@ final class MessageSerializer
             name: (string) $data['name'],
             api: new Api((string) $data['api']),
             provider: new Provider((string) $data['provider']),
-            baseUrl: (string) $data['baseUrl'],
-            reasoning: (bool) $data['reasoning'],
+            baseUrl: (string) ($data['baseUrl'] ?? ''),
+            reasoning: (bool) ($data['reasoning'] ?? false),
             input: $data['input'] ?? ['text'],
             cost: new UsageCost(
                 input: (float) ($data['cost']['input'] ?? 0.0),
@@ -159,8 +129,8 @@ final class MessageSerializer
                 cacheRead: (float) ($data['cost']['cacheRead'] ?? 0.0),
                 cacheWrite: (float) ($data['cost']['cacheWrite'] ?? 0.0),
             ),
-            contextWindow: (int) $data['contextWindow'],
-            maxTokens: (int) $data['maxTokens'],
+            contextWindow: (int) ($data['contextWindow'] ?? 0),
+            maxTokens: (int) ($data['maxTokens'] ?? 0),
             headers: $data['headers'] ?? [],
             compat: $data['compat'] ?? null,
         );

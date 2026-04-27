@@ -95,7 +95,8 @@ describe('Coding agent runtime', function () {
         $summary = $runtime->compact(2);
 
         $messages = $runtime->getState()->messages;
-        expect($summary)->toContain('user: one');
+        expect($summary['summary'])->toContain('user: one');
+        expect($summary['changed'])->toBeTrue();
         expect($messages[0]->content[0]->text)->toContain('Compacted conversation summary');
         expect($messages)->toHaveCount(3);
 

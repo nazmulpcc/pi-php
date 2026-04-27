@@ -41,6 +41,7 @@ describe('Coding agent cli', function () {
         exec('PI_CODING_AGENT_FAUX_RESPONSE="cli json" php '.escapeshellarg(getcwd().'/bin/pi').' --mode json --provider faux --no-session "hello"', $output, $exitCode);
 
         expect($exitCode)->toBe(0);
+        expect($output[0] ?? '')->toContain('"type":"session"');
         expect(implode("\n", $output))->toContain('"type":"agent_start"');
         expect(implode("\n", $output))->toContain('"type":"agent_end"');
     });
@@ -69,8 +70,9 @@ describe('Coding agent cli', function () {
 
         expect($stderr)->toBe('');
         expect($exitCode)->toBe(0);
-        expect($stdout)->toContain('"type":"event"');
+        expect($stdout)->toContain('"type":"agent_start"');
         expect($stdout)->toContain('"id":"1"');
+        expect($stdout)->toContain('"command":"prompt"');
         expect($stdout)->toContain('"success":true');
         expect($stdout)->toContain('rpc answer');
     });
