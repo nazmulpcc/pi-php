@@ -19,6 +19,7 @@ use Pi\AI\OpenAI\SimpleOptions as ProviderSimpleOptions;
 use Pi\AI\SimpleStreamOptions;
 use Pi\AI\StopReason;
 use Pi\AI\StreamOptions;
+use Pi\AI\Transport\HttpTransport;
 use Pi\AI\Usage;
 
 final readonly class OpenAIResponsesProvider implements ApiProviderInterface
@@ -165,117 +166,42 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
      */
     private function runDefaultTransport(Model $model, Context $context, ProviderOptions $options, array $params): array
     {
-        if (! function_exists('curl_init')) {
-            throw new \RuntimeException('cURL is required for the default OpenAI Responses transport.');
-        }
-
         $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai') ?: null;
         if ($apiKey === null || $apiKey === '') {
             throw new \RuntimeException('OpenAI API key is required. Set OPENAI_API_KEY or pass apiKey explicitly.');
         }
 
         $url = rtrim($model->baseUrl, '/').'/responses';
-        $events = [];
-        $headers = [];
-        $status = 0;
-        $buffer = '';
+        $headers = array_merge($model->headers, $options->headers);
 
-        $curl = curl_init($url);
-        if ($curl === false) {
-            throw new \RuntimeException('Unable to initialize cURL for OpenAI Responses transport.');
+        $onResponse = null;
+        $responseStatus = 200;
+        $responseHeaders = [];
+        if ($options->onResponse !== null) {
+            $onResponse = static function (array $response) use (&$responseStatus, &$responseHeaders): void {
+                $responseStatus = $response['status'];
+                $responseHeaders = $response['headers'];
+            };
         }
 
-        $requestHeaders = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$apiKey,
-        ];
+        $transport = new HttpTransport(
+            signal: $options->signal,
+            timeoutMs: $options->timeoutMs,
+            maxRetries: $options->maxRetries,
+            maxRetryDelayMs: $options->maxRetryDelayMs,
+        );
 
-        foreach (array_merge($model->headers, $options->headers) as $name => $value) {
-            $requestHeaders[] = sprintf('%s: %s', $name, $value);
-        }
-
-        curl_setopt_array($curl, [
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => $requestHeaders,
-            CURLOPT_POSTFIELDS => json_encode($params, JSON_THROW_ON_ERROR),
-            CURLOPT_RETURNTRANSFER => false,
-            CURLOPT_HEADER => false,
-            CURLOPT_TIMEOUT_MS => $options->timeoutMs ?? 0,
-            CURLOPT_WRITEFUNCTION => static function ($handle, string $chunk) use (&$buffer, &$events): int {
-                $buffer .= $chunk;
-
-                while (($separator = strpos($buffer, "\n\n")) !== false) {
-                    $frame = substr($buffer, 0, $separator);
-                    $buffer = substr($buffer, $separator + 2);
-                    $event = self::parseSseFrame($frame);
-                    if ($event !== null) {
-                        $events[] = $event;
-                    }
-                }
-
-                return strlen($chunk);
-            },
-            CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$status, &$headers): int {
-                if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $line, $matches) === 1) {
-                    $status = (int) $matches[1];
-                } elseif (str_contains($line, ':')) {
-                    [$name, $value] = explode(':', $line, 2);
-                    $headers[strtolower(trim($name))] = trim($value);
-                }
-
-                return strlen($line);
-            },
+        $events = $transport->stream('POST', $url, [
+            'headers' => $headers,
+            'body' => $params,
+            'apiKey' => $apiKey,
+            'onResponse' => $onResponse,
         ]);
-
-        $success = curl_exec($curl);
-        if ($success === false) {
-            $error = curl_error($curl);
-            curl_close($curl);
-
-            throw new \RuntimeException($error !== '' ? $error : 'Unknown cURL error while calling OpenAI Responses API.');
-        }
-
-        if ($buffer !== '') {
-            $event = self::parseSseFrame($buffer);
-            if ($event !== null) {
-                $events[] = $event;
-            }
-        }
-
-        curl_close($curl);
 
         return [
             'events' => $events,
-            'status' => $status,
-            'headers' => $headers,
+            'status' => $responseStatus,
+            'headers' => $responseHeaders,
         ];
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    private static function parseSseFrame(string $frame): ?array
-    {
-        $dataLines = [];
-        foreach (preg_split('/\r?\n/', $frame) as $line) {
-            if (! str_starts_with($line, 'data:')) {
-                continue;
-            }
-
-            $dataLines[] = ltrim(substr($line, 5));
-        }
-
-        if ($dataLines === []) {
-            return null;
-        }
-
-        $payload = implode("\n", $dataLines);
-        if ($payload === '[DONE]') {
-            return null;
-        }
-
-        $decoded = json_decode($payload, true);
-
-        return is_array($decoded) ? $decoded : null;
     }
 }

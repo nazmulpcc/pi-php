@@ -143,7 +143,7 @@ final class AiAdapter
             return new AiThinkingContent($content->thinking, $content->thinkingSignature, $content->redacted);
         }
 
-        return new AiToolCall($content->id, $content->name, $content->arguments);
+        return new AiToolCall($content->id, $content->name, $content->arguments, $content->thoughtSignature);
     }
 
     private static function toAgentAssistantContent(AiTextContent|AiThinkingContent|AiToolCall $content): TextContent|ThinkingContent|ToolCall
@@ -156,7 +156,7 @@ final class AiAdapter
             return new ThinkingContent($content->thinking, $content->thinkingSignature, $content->redacted);
         }
 
-        return new ToolCall($content->id, $content->name, $content->arguments);
+        return new ToolCall($content->id, $content->name, $content->arguments, $content->thoughtSignature);
     }
 
     private static function toAiStopReason(StopReason $reason): AiStopReason
