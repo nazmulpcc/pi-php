@@ -10,6 +10,7 @@ use Pi\AI\ApiProviderInterface;
 use Pi\AI\AssistantMessageEventStream;
 use Pi\AI\CacheRetention;
 use Pi\AI\Context;
+use Pi\AI\EnvApiKeys;
 use Pi\AI\Event\ErrorEvent;
 use Pi\AI\Message\AssistantMessage;
 use Pi\AI\Model;
@@ -168,7 +169,7 @@ final readonly class OpenAIResponsesProvider implements ApiProviderInterface
             throw new \RuntimeException('cURL is required for the default OpenAI Responses transport.');
         }
 
-        $apiKey = $options->apiKey ?: getenv('OPENAI_API_KEY') ?: null;
+        $apiKey = $options->apiKey ?: EnvApiKeys::getEnvApiKey('openai') ?: null;
         if ($apiKey === null || $apiKey === '') {
             throw new \RuntimeException('OpenAI API key is required. Set OPENAI_API_KEY or pass apiKey explicitly.');
         }

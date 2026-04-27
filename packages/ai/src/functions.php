@@ -61,6 +61,11 @@ function completeSimple(Model $model, Context $context, ?SimpleStreamOptions $op
     return Stream::completeSimple($model, $context, $options);
 }
 
+function getEnvApiKey(string $provider): ?string
+{
+    return EnvApiKeys::getEnvApiKey($provider);
+}
+
 function getModel(Provider|string $provider, string $modelId): ?Model
 {
     return Models::getModel($provider, $modelId);
