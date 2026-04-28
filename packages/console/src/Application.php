@@ -27,8 +27,9 @@ final class Application
         $application->add(new SettingsCommand);
         $application->add(new ResourcesCommand);
         $application->add(new ModelsCommand);
+        $application->add(new ExtensionsCommand);
         $application->add(new DiagnosticsCommand);
-        $knownCommands = ['_default', 'help', 'list', 'login', 'logout', 'auth', 'sessions', 'settings', 'resources', 'models', 'diagnostics'];
+        $knownCommands = ['_default', 'help', 'list', 'login', 'logout', 'auth', 'sessions', 'settings', 'resources', 'models', 'extensions', 'diagnostics'];
         foreach ($mainCommand->getExtensionCommands() as $command) {
             $application->add($command);
             $knownCommands[] = $command->getName();

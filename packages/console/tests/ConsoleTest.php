@@ -161,6 +161,7 @@ PHP,
         expect($listExit)->toBe(0);
         expect(implode("\n", $listOutput))->toContain('login');
         expect(implode("\n", $listOutput))->toContain('models');
+        expect(implode("\n", $listOutput))->toContain('extensions');
 
         $helpOutput = [];
         $helpExit = 0;
@@ -169,6 +170,14 @@ PHP,
         expect($helpExit)->toBe(0);
         expect(implode("\n", $helpOutput))->toContain('Usage:');
         expect(implode("\n", $helpOutput))->toContain('models [options]');
+
+        $extensionsHelpOutput = [];
+        $extensionsHelpExit = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' help extensions', $extensionsHelpOutput, $extensionsHelpExit);
+
+        expect($extensionsHelpExit)->toBe(0);
+        expect(implode("\n", $extensionsHelpOutput))->toContain('extensions [options]');
+        expect(implode("\n", $extensionsHelpOutput))->toContain('install');
     });
 
     it('recognizes management commands when --cwd appears before the command name', function () {
@@ -191,5 +200,77 @@ PHP,
         expect($modelsExit)->toBe(0);
         expect(implode("\n", $modelsOutput))->toContain('Provider');
         expect(implode("\n", $modelsOutput))->toContain('Model');
+    });
+
+    it('manages extension packages through bin/pi and loads installed extension commands on the next run', function () {
+        $dir = codingAgentTempDir('console-extension-cli');
+        putenv('PI_CODING_AGENT_DIR='.$dir.'/.agent');
+        $package = createExtensionPackageFixture(
+            $dir.'/fixtures/cli-package',
+            'fixture/cli-package',
+            ['index.php'],
+        );
+
+        $installOutput = [];
+        $installExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' extensions install '.escapeshellarg($package).' --cwd '.escapeshellarg($dir),
+            $installOutput,
+            $installExit,
+        );
+        expect($installExit)->toBe(0);
+        expect(implode("\n", $installOutput))->toContain('Installed fixture-cli-package');
+
+        $listOutput = [];
+        $listExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' extensions list --json --cwd '.escapeshellarg($dir),
+            $listOutput,
+            $listExit,
+        );
+        expect($listExit)->toBe(0);
+        expect(implode("\n", $listOutput))->toContain('"id": "fixture-cli-package"');
+
+        $extensionOutput = [];
+        $extensionExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' managed-ext hello --cwd '.escapeshellarg($dir),
+            $extensionOutput,
+            $extensionExit,
+        );
+        expect($extensionExit)->toBe(0);
+        expect(implode("\n", $extensionOutput))->toContain('managed hello');
+
+        $disableOutput = [];
+        $disableExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' extensions disable fixture-cli-package --cwd '.escapeshellarg($dir),
+            $disableOutput,
+            $disableExit,
+        );
+        expect($disableExit)->toBe(0);
+
+        $disabledExtensionOutput = [];
+        $disabledExtensionExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' help managed-ext --cwd '.escapeshellarg($dir).' 2>&1',
+            $disabledExtensionOutput,
+            $disabledExtensionExit,
+        );
+        expect($disabledExtensionExit)->not->toBe(0);
+        expect(implode("\n", $disabledExtensionOutput))->toContain('Command "managed-ext" is not defined.');
+
+        $missingInstallOutput = [];
+        $missingInstallExit = 0;
+        exec(
+            'php '.escapeshellarg(getcwd().'/bin/pi').' extensions install '.escapeshellarg($dir.'/missing-package').' --cwd '.escapeshellarg($dir).' 2>&1',
+            $missingInstallOutput,
+            $missingInstallExit,
+        );
+
+        codingAgentDeleteDir($dir);
+
+        expect($missingInstallExit)->not->toBe(0);
+        expect(implode("\n", $missingInstallOutput))->toContain('Extension package path not found');
     });
 });
