@@ -24,6 +24,9 @@ final class ExtensionLoader
             $paths[] = $path;
         };
 
+        foreach ($this->discoverComposerConfiguredPaths($cwd) as $path) {
+            $add($path);
+        }
         foreach ($this->discoverInDirectory(rtrim($cwd, '/').'/'.Config::CONFIG_DIR_NAME.'/extensions') as $path) {
             $add($path);
         }
@@ -39,6 +42,32 @@ final class ExtensionLoader
         $loaded = $this->loadPaths($paths, $cwd);
 
         return new ExtensionLoadResult($loaded->extensions, [...$diagnostics, ...$loaded->diagnostics]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function discoverComposerConfiguredPaths(string $cwd): array
+    {
+        $paths = [];
+        $seen = [];
+        $diagnostics = [];
+
+        foreach ($this->ancestorDirectories($cwd) as $directory) {
+            foreach ($this->readComposerManifestEntries($directory) as $entry) {
+                foreach ($this->resolveConfiguredPath($entry, $directory, $diagnostics) as $resolved) {
+                    $real = realpath($resolved) ?: $resolved;
+                    if (isset($seen[$real])) {
+                        continue;
+                    }
+
+                    $seen[$real] = true;
+                    $paths[] = $resolved;
+                }
+            }
+        }
+
+        return $paths;
     }
 
     /**
@@ -221,5 +250,25 @@ final class ExtensionLoader
         }
 
         return rtrim($cwd, '/').'/'.$path;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function ancestorDirectories(string $cwd): array
+    {
+        $directories = [];
+        $current = realpath($cwd) ?: $cwd;
+
+        while (true) {
+            $directories[] = $current;
+            $parent = dirname($current);
+            if ($parent === $current) {
+                break;
+            }
+            $current = $parent;
+        }
+
+        return $directories;
     }
 }

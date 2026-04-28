@@ -1,0 +1,13 @@
+{
+  "name": "nazmulpcc/pi-extension-plan",
+  "description": "Planning mode extension for the Pi PHP console",
+  "type": "library",
+  "license": "MIT",
+  "extra": {
+    "pi": {
+      "extensions": [
+        "index.php"
+      ]
+    }
+  }
+}

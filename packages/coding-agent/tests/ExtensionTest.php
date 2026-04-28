@@ -9,6 +9,7 @@ use Pi\Agent\ThinkingLevel;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Extension\ExtensionLoader;
+use Pi\CodingAgent\Extension\HeadlessExtensionUI;
 use Pi\CodingAgent\Settings\SettingsManager;
 
 use function Pi\AI\fauxAssistantMessage;
@@ -114,6 +115,67 @@ PHP);
 
         expect($loadResult->extensions)->toHaveCount(1);
         expect($loadResult->extensions[0]->resolvedPath)->toEndWith('/src/manifest.php');
+
+        codingAgentDeleteDir($dir);
+    });
+
+    it('loads the plan extension from composer metadata and writes a session plan markdown file', function (): void {
+        $dir = codingAgentTempDir('coding-agent-plan-extension');
+        file_put_contents($dir.'/composer.json', json_encode([
+            'extra' => [
+                'pi' => [
+                    'extensions' => [getcwd().'/packages/extension-plan'],
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR));
+
+        $settings = SettingsManager::create($dir);
+        $loadResult = (new ExtensionLoader)->discover($dir, $settings);
+
+        expect(array_map(static fn ($extension): string => $extension->resolvedPath, $loadResult->extensions))
+            ->toContain(getcwd().'/packages/extension-plan/index.php');
+
+        $provider = registerFauxProvider(['provider' => 'faux-plan', 'api' => 'faux-plan']);
+        $provider->setResponses([
+            fauxAssistantMessage("# Plan\n\n- First plan"),
+            fauxAssistantMessage("# Plan\n\n- Second plan"),
+        ]);
+
+        $notifications = [];
+        $runtime = (new CodingAgentRuntimeFactory)->create(new CodingAgentConfig(
+            model: $provider->getModel(),
+            provider: 'faux-plan',
+            modelId: $provider->getModel()?->id,
+            cwd: $dir,
+            thinkingLevel: ThinkingLevel::Medium,
+            enableContextFiles: false,
+            extensions: $loadResult->extensions,
+            extensionUi: new HeadlessExtensionUI(
+                onNotify: static function (string $message, string $type) use (&$notifications): void {
+                    $notifications[] = ['message' => $message, 'type' => $type];
+                },
+            ),
+        ));
+
+        $commandResult = $runtime->getExtensionRunner()?->executeCommand('plan', '');
+        expect($commandResult)->toContain('Plan mode enabled');
+        expect($runtime->getState()->toolNames)->toBe(['read', 'find', 'grep', 'ls']);
+
+        codingAgentBlock($runtime->prompt('Map the work'));
+        $messages = $runtime->getState()->messages;
+        expect($messages[0]->content[0])->toBeInstanceOf(TextContent::class);
+        expect($messages[0]->content[0]->text)->toContain('Plan mode is active.');
+
+        $planFiles = glob($dir.'/.pi/plans/*.md');
+        expect($planFiles)->not->toBeFalse();
+        expect($planFiles)->toHaveCount(1);
+        expect((string) file_get_contents($planFiles[0]))->toContain('# Plan');
+        expect($notifications[0]['type'] ?? null)->toBe('info');
+
+        codingAgentBlock($runtime->prompt('Refine the plan'));
+        expect((string) file_get_contents($planFiles[0]))->toContain('Second plan');
+        expect($notifications[1]['type'] ?? null)->toBe('warning');
+        expect($notifications[1]['message'] ?? '')->toContain('Overwrote existing plan file');
 
         codingAgentDeleteDir($dir);
     });

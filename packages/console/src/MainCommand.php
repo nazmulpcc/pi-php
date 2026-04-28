@@ -82,24 +82,39 @@ final class MainCommand extends Command
         }
 
         $runtime = $this->createRuntime($parsed);
+        $recentEvents = [];
+        $runtime->subscribe(function (CodingAgentEvent $event) use (&$recentEvents): void {
+            $recentEvents[] = $event;
+            if (count($recentEvents) > 100) {
+                array_shift($recentEvents);
+            }
+        });
 
-        if ($parsed->mode === 'json') {
-            return $this->runJsonMode($runtime, $parsed, $this->readPipedStdin());
+        try {
+            if ($parsed->mode === 'json') {
+                return $this->runJsonMode($runtime, $parsed, $this->readPipedStdin());
+            }
+
+            if ($parsed->mode === 'rpc') {
+                return $this->runRpcMode($runtime);
+            }
+
+            if ($parsed->mode !== null && $parsed->mode !== 'text') {
+                throw new \RuntimeException(sprintf('Unsupported mode: %s', $parsed->mode));
+            }
+
+            if ($this->shouldStartRepl($parsed)) {
+                return $this->runRepl($runtime, $io);
+            }
+
+            return $this->runTextMode($runtime, $parsed, $this->readPipedStdin());
+        } catch (\Throwable $error) {
+            $logPath = (new RuntimeFailureLogger)->log($runtime, $error, $recentEvents);
+            fwrite(STDERR, $error->getMessage()."\n");
+            fwrite(STDERR, sprintf("Failure details logged to %s\n", $logPath));
+
+            return 1;
         }
-
-        if ($parsed->mode === 'rpc') {
-            return $this->runRpcMode($runtime);
-        }
-
-        if ($parsed->mode !== null && $parsed->mode !== 'text') {
-            throw new \RuntimeException(sprintf('Unsupported mode: %s', $parsed->mode));
-        }
-
-        if ($this->shouldStartRepl($parsed)) {
-            return $this->runRepl($runtime, $io);
-        }
-
-        return $this->runTextMode($runtime, $parsed, $this->readPipedStdin());
     }
 
     private function parseInput(InputInterface $input): ParsedInput
