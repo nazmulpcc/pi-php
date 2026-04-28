@@ -22,6 +22,7 @@ use Pi\Console\ExtensionsCommand;
 use Pi\Console\LoginCommand;
 use Pi\Console\LogoutCommand;
 use Pi\Console\ModelsCommand;
+use Pi\Console\ReplSlashCommandCompleter;
 use Pi\Console\ReplSlashCommandHandler;
 use Pi\Console\ResourcesCommand;
 use Pi\Console\SessionsCommand;
@@ -275,6 +276,19 @@ describe('Console management commands', function () {
         expect($help['output'] ?? '')->toContain('/model');
 
         codingAgentDeleteDir($dir);
+    });
+
+    it('builds and filters repl slash command completions', function () {
+        $handler = new ReplSlashCommandHandler;
+        $completer = new ReplSlashCommandCompleter;
+
+        expect($handler->getBuiltInCommands())->toContain('/model');
+        expect($handler->getBuiltInCommands())->toContain('/continue');
+        expect($completer->complete('/mo', $handler->getBuiltInCommands()))->toBe(['/model']);
+        expect($completer->complete('/s', $handler->getBuiltInCommands()))->toBe(['/session', '/sessions']);
+        expect($completer->complete('hello', $handler->getBuiltInCommands()))->toBe([]);
+        expect($completer->complete('/unknown', $handler->getBuiltInCommands()))->toBe([]);
+        expect($completer->complete('/pl', [...$handler->getBuiltInCommands(), '/plan']))->toBe(['/plan']);
     });
 
     it('lists installs updates toggles and removes managed extension packages', function () {

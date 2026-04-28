@@ -406,6 +406,11 @@ final class MainCommand extends Command
     {
         $renderState = (object) ['printedText' => false];
         $slashCommands = new ReplSlashCommandHandler;
+        $slashCompleter = new ReplSlashCommandCompleter;
+        $inputReader = new ReplInputReader(
+            $this->consoleOutputGuard(),
+            fn (string $input): array => $slashCompleter->complete($input, $this->getReplSlashCommandNames($runtime, $slashCommands)),
+        );
         $unsubscribe = $runtime->subscribe(function (CodingAgentEvent $event) use ($renderState): void {
             if ($event->type === 'message_update') {
                 $raw = $event->payload['assistantMessageEvent'] ?? null;
@@ -422,15 +427,13 @@ final class MainCommand extends Command
 
         try {
             while (true) {
-                $this->consoleOutputGuard()->writeProtocolLine('> ');
-                $line = fgets(STDIN);
-                if ($line === false) {
+                $line = $inputReader->readLine('> ');
+                if ($line === null) {
                     $this->consoleOutputGuard()->writeProtocolLine("\n");
 
                     return 0;
                 }
 
-                $line = trim($line);
                 if ($line === '') {
                     continue;
                 }
@@ -488,6 +491,25 @@ final class MainCommand extends Command
         } finally {
             $unsubscribe();
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getReplSlashCommandNames(CodingAgentRuntime $runtime, ReplSlashCommandHandler $slashCommands): array
+    {
+        $commands = $slashCommands->getBuiltInCommands();
+        $runner = $runtime->getExtensionRunner();
+        if ($runner instanceof ExtensionRunner) {
+            foreach ($runner->getCommands() as $command) {
+                $commands[] = '/'.$command->name;
+            }
+        }
+
+        $commands = array_values(array_unique($commands));
+        sort($commands);
+
+        return $commands;
     }
 
     private function finishReplTurn(CodingAgentRuntime $runtime, bool $printedStreamingText): void

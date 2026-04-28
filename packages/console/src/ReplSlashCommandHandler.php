@@ -9,9 +9,30 @@ use Pi\CodingAgent\CodingAgentRuntime;
 
 final class ReplSlashCommandHandler
 {
+    private const BUILT_IN_COMMANDS = [
+        '/help',
+        '/exit',
+        '/quit',
+        '/continue',
+        '/session',
+        '/sessions',
+        '/model',
+        '/thinking',
+        '/auth',
+        '/export',
+    ];
+
     public function __construct(
         private readonly ConsoleContextFactory $contextFactory = new ConsoleContextFactory,
     ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function getBuiltInCommands(): array
+    {
+        return self::BUILT_IN_COMMANDS;
+    }
 
     /**
      * @return array{handled: bool, exit?: bool, output?: string}
