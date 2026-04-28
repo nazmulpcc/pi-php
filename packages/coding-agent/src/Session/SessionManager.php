@@ -214,6 +214,37 @@ final class SessionManager
         ]);
     }
 
+    public function appendCustomEntry(string $customType, mixed $data = null): string
+    {
+        return $this->appendEntry([
+            'type' => 'custom',
+            'customType' => $customType,
+            'data' => $data,
+        ]);
+    }
+
+    public function appendLabel(string $entryId, ?string $label): string
+    {
+        return $this->appendEntry([
+            'type' => 'label',
+            'entryId' => $entryId,
+            'label' => $label,
+        ]);
+    }
+
+    public function getSessionName(): ?string
+    {
+        $name = null;
+        foreach ($this->entries as $entry) {
+            if (($entry['type'] ?? null) === 'session_info') {
+                $entryName = $entry['name'] ?? null;
+                $name = is_string($entryName) && $entryName !== '' ? $entryName : null;
+            }
+        }
+
+        return $name;
+    }
+
     /**
      * @return array{messages: array<int, AgentMessage>, thinkingLevel: ThinkingLevel, model: ?Model}
      */

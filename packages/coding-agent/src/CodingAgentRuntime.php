@@ -9,6 +9,8 @@ use Pi\Agent\ThinkingLevel;
 use Pi\AI\Model;
 use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
+use Pi\CodingAgent\Extension\ExtensionRunner;
+use Pi\CodingAgent\Extension\ExtensionUI;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
@@ -44,6 +46,10 @@ final class CodingAgentRuntime
         private string $systemPrompt = '',
         private ?Model $model = null,
         private ThinkingLevel $thinkingLevel = ThinkingLevel::Medium,
+        private readonly array $extensions = [],
+        private readonly array $extensionFlagValues = [],
+        private readonly ?ExtensionUI $extensionUi = null,
+        private ?ExtensionRunner $extensionRunner = null,
     ) {
         $this->session = $this->createSession($sessionManager, 'new', null);
     }
@@ -172,17 +178,35 @@ final class CodingAgentRuntime
         return $this->session->getPromptTemplates();
     }
 
+    public function getExtensionRunner(): ?ExtensionRunner
+    {
+        return $this->extensionRunner;
+    }
+
     private function replaceSession(SessionManager $manager, string $reason, ?string $previousSessionFile): void
     {
+        $this->extensionRunner?->emit('session_before_switch', [
+            'type' => 'session_before_switch',
+            'reason' => $reason,
+            'previousSessionFile' => $previousSessionFile,
+            'targetSessionFile' => $manager->getSessionFile(),
+        ], true);
         foreach ($this->listeners as $listener) {
             $listener(new CodingAgentEvent('session_shutdown', [
                 'reason' => $reason,
                 'targetSessionFile' => $manager->getSessionFile(),
             ]));
         }
+        $this->extensionRunner?->emit('session_shutdown', [
+            'type' => 'session_shutdown',
+            'reason' => $reason,
+            'previousSessionFile' => $previousSessionFile,
+            'targetSessionFile' => $manager->getSessionFile(),
+        ]);
         if ($this->beforeSessionInvalidate !== null) {
             ($this->beforeSessionInvalidate)();
         }
+        $this->extensionRunner?->invalidate();
         $this->session->dispose();
         $this->session = $this->createSession($manager, $reason, $previousSessionFile);
         if ($this->rebindSession !== null) {
@@ -212,6 +236,9 @@ final class CodingAgentRuntime
             explicitApiKey: $this->explicitApiKey,
             customStreamFn: $this->customStreamFn,
             getApiKey: $this->getApiKey,
+            extensionRunner: $this->extensionRunner,
+            extensionFlagValues: $this->extensionFlagValues,
+            extensionUi: $this->extensionUi,
         );
 
         if ($this->sessionSubscription !== null) {
@@ -231,6 +258,13 @@ final class CodingAgentRuntime
                 'previousSessionFile' => $previousSessionFile,
             ]));
         }
+        $this->extensionRunner?->emit('session_start', [
+            'type' => 'session_start',
+            'reason' => $reason,
+            'sessionFile' => $manager->getSessionFile(),
+            'sessionId' => $manager->getSessionId(),
+            'previousSessionFile' => $previousSessionFile,
+        ]);
 
         return $session;
     }

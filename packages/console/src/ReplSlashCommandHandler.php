@@ -35,7 +35,7 @@ final class ReplSlashCommandHandler
             '/thinking' => ['handled' => true, 'output' => $this->handleThinking($runtime, $rest)],
             '/auth' => ['handled' => true, 'output' => $this->renderAuth($runtime)],
             '/export' => ['handled' => true, 'output' => $this->handleExport($runtime, $rest)],
-            default => ['handled' => true, 'output' => sprintf('Unknown slash command: %s', $command)],
+            default => ['handled' => false],
         };
     }
 

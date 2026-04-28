@@ -33,5 +33,12 @@ interface ResourceLoaderInterface
      */
     public function getDiagnostics(): array;
 
+    /**
+     * @param  list<string>  $skillPaths
+     * @param  list<string>  $promptPaths
+     * @param  list<string>  $themePaths
+     */
+    public function extendResources(array $skillPaths = [], array $promptPaths = [], array $themePaths = []): void;
+
     public function reload(): void;
 }

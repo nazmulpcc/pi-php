@@ -8,6 +8,8 @@ use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentTool;
 use Pi\AI\Model;
 use Pi\CodingAgent\Auth\AuthStorage;
+use Pi\CodingAgent\Extension\Extension;
+use Pi\CodingAgent\Extension\ExtensionUI;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Session\SessionStore;
 use Pi\CodingAgent\Settings\SettingsManager;
@@ -18,6 +20,8 @@ readonly class CodingAgentConfig
      * @param  array<AgentTool>  $tools
      * @param  array<string>|null  $allowedToolNames
      * @param  array<string>  $appendSystemPrompt
+     * @param  array<Extension>  $extensions
+     * @param  array<string, bool|string>  $extensionFlagValues
      */
     public function __construct(
         public ?Model $model = null,
@@ -38,5 +42,8 @@ readonly class CodingAgentConfig
         public bool $enableContextFiles = true,
         public ?string $sessionId = null,
         public array $appendSystemPrompt = [],
+        public array $extensions = [],
+        public array $extensionFlagValues = [],
+        public ?ExtensionUI $extensionUi = null,
     ) {}
 }

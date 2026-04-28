@@ -9,13 +9,23 @@ final class Models
     /** @var array<string, array<string, Model>> */
     private static array $registry = [];
 
+    /** @var array<string, array<string, array<string, Model>>> */
+    private static array $dynamicRegistry = [];
+
     private static bool $loaded = false;
 
     public static function getModel(Provider|string $provider, string $modelId): ?Model
     {
         self::ensureLoaded();
 
-        return self::$registry[self::providerKey($provider)][$modelId] ?? null;
+        $providerKey = self::providerKey($provider);
+        foreach (self::$dynamicRegistry as $sourceModels) {
+            if (isset($sourceModels[$providerKey][$modelId])) {
+                return $sourceModels[$providerKey][$modelId];
+            }
+        }
+
+        return self::$registry[$providerKey][$modelId] ?? null;
     }
 
     /**
@@ -25,7 +35,14 @@ final class Models
     {
         self::ensureLoaded();
 
-        return array_map(static fn (string $provider): Provider => new Provider($provider), array_keys(self::$registry));
+        $providers = array_fill_keys(array_keys(self::$registry), true);
+        foreach (self::$dynamicRegistry as $sourceModels) {
+            foreach (array_keys($sourceModels) as $provider) {
+                $providers[$provider] = true;
+            }
+        }
+
+        return array_map(static fn (string $provider): Provider => new Provider($provider), array_keys($providers));
     }
 
     /**
@@ -35,7 +52,16 @@ final class Models
     {
         self::ensureLoaded();
 
-        return array_values(self::$registry[self::providerKey($provider)] ?? []);
+        $providerKey = self::providerKey($provider);
+        $models = self::$registry[$providerKey] ?? [];
+
+        foreach (self::$dynamicRegistry as $sourceModels) {
+            foreach (($sourceModels[$providerKey] ?? []) as $modelId => $model) {
+                $models[$modelId] = $model;
+            }
+        }
+
+        return array_values($models);
     }
 
     public static function calculateCost(Model $model, Usage $usage): UsageCost
@@ -92,6 +118,24 @@ final class Models
         self::$registry = [];
         self::$loaded = false;
         self::ensureLoaded();
+    }
+
+    /**
+     * @param  array<Model>  $models
+     */
+    public static function registerDynamicModels(string $sourceId, array $models): void
+    {
+        self::ensureLoaded();
+        self::unregisterDynamicModels($sourceId);
+
+        foreach ($models as $model) {
+            self::$dynamicRegistry[$sourceId][$model->provider->value][$model->id] = $model;
+        }
+    }
+
+    public static function unregisterDynamicModels(string $sourceId): void
+    {
+        unset(self::$dynamicRegistry[$sourceId]);
     }
 
     private static function ensureLoaded(): void

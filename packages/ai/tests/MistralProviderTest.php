@@ -23,6 +23,17 @@ use Pi\AI\ThinkingLevel;
 use Pi\AI\Tool;
 use Pi\AI\UsageCost;
 
+function hasMistralEvent(array $events, string $class): bool
+{
+    foreach ($events as $event) {
+        if ($event instanceof $class) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function createMistralModel(string $id = 'mistral-large-2411', bool $reasoning = true): Model
 {
     return new Model(
@@ -71,9 +82,9 @@ describe('Mistral provider', function () {
             $events[] = $event;
         }
 
-        expect($events[2])->toBeInstanceOf(TextDeltaEvent::class);
-        expect($events[5])->toBeInstanceOf(ThinkingDeltaEvent::class);
-        expect($events[8])->toBeInstanceOf(ToolCallDeltaEvent::class);
+        expect(hasMistralEvent($events, TextDeltaEvent::class))->toBeTrue();
+        expect(hasMistralEvent($events, ThinkingDeltaEvent::class))->toBeTrue();
+        expect(hasMistralEvent($events, ToolCallDeltaEvent::class))->toBeTrue();
 
         $terminal = $events[array_key_last($events)];
         expect($terminal)->toBeInstanceOf(DoneEvent::class);

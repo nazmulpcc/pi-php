@@ -31,6 +31,9 @@ use Pi\AI\ThinkingLevel as AiThinkingLevel;
 use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Event\CodingAgentEventSerializer;
+use Pi\CodingAgent\Extension\ExtensionRunner;
+use Pi\CodingAgent\Extension\ExtensionUI;
+use Pi\CodingAgent\Extension\HeadlessExtensionUI;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
@@ -75,12 +78,16 @@ final class CodingAgentSession
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
+        private readonly ?ExtensionRunner $extensionRunner = null,
+        private readonly array $extensionFlagValues = [],
+        private readonly ?ExtensionUI $extensionUi = null,
     ) {
         $this->autoCompactionEnabled = $this->settingsManager?->getCompactionEnabled() ?? true;
         $this->autoRetryEnabled = $this->settingsManager?->getRetryEnabled() ?? true;
         $this->agent = $this->createAgent();
         $this->agent->setSteeringMode($this->settingsManager?->getSteeringMode() ?? 'one-at-a-time');
         $this->agent->setFollowUpMode($this->settingsManager?->getFollowUpMode() ?? 'one-at-a-time');
+        $this->bindExtensions();
         $this->unsubscribeAgent = $this->agent->subscribe(function (AgentEvent $event): void {
             $this->handleAgentEvent($event);
         });
@@ -90,6 +97,21 @@ final class CodingAgentSession
     {
         $this->assertUsable();
         $options ??= new PromptOptions;
+        if (is_string($input) && $this->extensionRunner instanceof ExtensionRunner) {
+            $inputResult = $this->extensionRunner->emit('input', [
+                'type' => 'input',
+                'input' => $input,
+                'images' => $options->images,
+            ], true);
+            if (is_array($inputResult)) {
+                if (($inputResult['handled'] ?? false) === true) {
+                    return resolve(null);
+                }
+                if (isset($inputResult['input']) && is_string($inputResult['input'])) {
+                    $input = $inputResult['input'];
+                }
+            }
+        }
         $messages = $this->normalizePromptInput($input, $options->images);
 
         foreach ($messages as $message) {
@@ -175,6 +197,7 @@ final class CodingAgentSession
         }
 
         $this->disposed = true;
+        $this->extensionRunner?->invalidate();
         if ($this->unsubscribeAgent !== null) {
             ($this->unsubscribeAgent)();
             $this->unsubscribeAgent = null;
@@ -403,6 +426,17 @@ final class CodingAgentSession
         throw new \RuntimeException('Bash tool is not available');
     }
 
+    public function setActiveTools(array $toolNames): void
+    {
+        $this->assertUsable();
+        $allowed = array_fill_keys($toolNames, true);
+        $activeTools = array_values(array_filter(
+            $this->tools,
+            static fn (AgentTool $tool): bool => isset($allowed[$tool->getName()]),
+        ));
+        $this->agent->getState()->setTools($activeTools);
+    }
+
     private function createAgent(): Agent
     {
         $context = $this->sessionManager->buildSessionContext();
@@ -471,7 +505,12 @@ final class CodingAgentSession
             }
         }
 
-        $this->emit(CodingAgentEventSerializer::fromAgentEvent($event));
+        $serialized = CodingAgentEventSerializer::fromAgentEvent($event);
+        $this->emit($serialized);
+        $this->extensionRunner?->emit($serialized->type, [
+            'type' => $serialized->type,
+            ...$serialized->payload,
+        ]);
 
         if ($event instanceof AgentEndEvent) {
             $this->handlePostRunState();
@@ -731,5 +770,54 @@ final class CodingAgentSession
         }
 
         return max(1, $count);
+    }
+
+    private function bindExtensions(): void
+    {
+        if (! $this->extensionRunner instanceof ExtensionRunner) {
+            return;
+        }
+
+        $this->extensionRunner->bindRuntime(
+            actions: [
+                'cwd' => fn (): string => $this->sessionManager->getCwd(),
+                'sessionManager' => fn (): SessionManager => $this->sessionManager,
+                'getModel' => fn (): ?Model => $this->model,
+                'isIdle' => fn (): bool => ! $this->agent->isRunning(),
+                'abort' => fn (): mixed => $this->abort(),
+                'hasPendingMessages' => fn (): bool => $this->agent->getState()->getPendingToolCalls() !== [],
+                'shutdown' => function (): void {
+                    $this->dispose();
+                },
+                'getContextUsage' => fn (): array => $this->getSessionStats(),
+                'compact' => fn (array $options = []): array => $this->compact((int) ($options['keepLastMessages'] ?? 8)),
+                'getSystemPrompt' => fn (): string => $this->agent->getState()->getSystemPrompt(),
+                'waitForIdle' => fn (): mixed => $this->waitForIdle(),
+                'newSession' => fn (array $options = []): array => ['unsupported' => true, 'options' => $options],
+                'fork' => fn (string $entryId, array $options = []): array => ['unsupported' => true, 'entryId' => $entryId, 'options' => $options],
+                'switchSession' => fn (string $sessionPath, array $options = []): array => ['unsupported' => true, 'sessionPath' => $sessionPath, 'options' => $options],
+                'reload' => fn (): mixed => $this->reload(),
+                'sendMessage' => fn (array $message, array $options = []): mixed => null,
+                'sendUserMessage' => fn (string|array $content, array $options = []): mixed => $this->prompt(is_string($content) ? $content : json_encode($content, JSON_THROW_ON_ERROR)),
+                'appendEntry' => fn (string $customType, mixed $data = null): string => $this->sessionManager->appendCustomEntry($customType, $data),
+                'setSessionName' => fn (string $name): string => $this->sessionManager->appendSessionInfo($name),
+                'getSessionName' => fn (): ?string => $this->sessionManager->getSessionName(),
+                'setLabel' => fn (string $entryId, ?string $label): string => $this->sessionManager->appendLabel($entryId, $label),
+                'getActiveTools' => fn (): array => array_map(static fn (AgentTool $tool): string => $tool->getName(), $this->agent->getState()->getTools()),
+                'getAllTools' => fn (): array => array_map(static fn (AgentTool $tool): string => $tool->getName(), $this->tools),
+                'setActiveTools' => function (array $toolNames): void {
+                    $this->setActiveTools($toolNames);
+                },
+                'setModel' => function (Model $model): void {
+                    $this->setModel($model);
+                },
+                'getThinkingLevel' => fn (): ThinkingLevel => $this->thinkingLevel,
+                'setThinkingLevel' => function (ThinkingLevel|string $level): void {
+                    $this->setThinkingLevel($level instanceof ThinkingLevel ? $level : ThinkingLevel::from((string) $level));
+                },
+            ],
+            ui: $this->extensionUi ?? new HeadlessExtensionUI,
+            flagValues: $this->extensionFlagValues,
+        );
     }
 }

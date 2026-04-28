@@ -12,6 +12,10 @@ use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntime;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Event\CodingAgentEvent;
+use Pi\CodingAgent\Extension\Extension;
+use Pi\CodingAgent\Extension\ExtensionFlag;
+use Pi\CodingAgent\Extension\ExtensionRunner;
+use Pi\CodingAgent\Extension\HeadlessExtensionUI;
 use Pi\CodingAgent\PromptOptions;
 use Pi\CodingAgent\Session\FilesystemSessionStore;
 use Pi\CodingAgent\Session\InMemorySessionStore;
@@ -29,6 +33,15 @@ use function Pi\AI\registerFauxProvider;
 
 final class MainCommand extends Command
 {
+    /**
+     * @param  array<Extension>  $extensions
+     */
+    public function __construct(
+        private readonly array $extensions = [],
+    ) {
+        parent::__construct('_default');
+    }
+
     protected function configure(): void
     {
         $this
@@ -53,6 +66,10 @@ final class MainCommand extends Command
             ->addOption('list-models', null, InputOption::VALUE_OPTIONAL, 'List available models, optionally filtered by a search string', false)
             ->addOption('cwd', null, InputOption::VALUE_REQUIRED, 'Working directory override')
             ->addArgument('messages', InputArgument::IS_ARRAY, 'Prompt text and @file arguments');
+
+        foreach ($this->getExtensionFlags() as $flag) {
+            $this->addExtensionFlagOption($flag);
+        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -128,6 +145,20 @@ final class MainCommand extends Command
         $mode = is_string($mode) && $mode !== '' ? $mode : null;
 
         $listModels = $input->getOption('list-models');
+        $extensionFlagValues = [];
+        foreach ($this->getExtensionFlags() as $flag) {
+            $value = $input->getOption($flag->name);
+            if ($flag->type === 'boolean') {
+                $extensionFlagValues[$flag->name] = (bool) $value;
+
+                continue;
+            }
+            if (is_string($value) && $value !== '') {
+                $extensionFlagValues[$flag->name] = $value;
+            } elseif ($flag->default !== null) {
+                $extensionFlagValues[$flag->name] = $flag->default;
+            }
+        }
 
         return new ParsedInput(
             mode: $mode,
@@ -150,12 +181,44 @@ final class MainCommand extends Command
             fileArgs: $fileArgs,
             fileText: $processedFiles['text'],
             fileImages: $processedFiles['images'],
+            extensionFlagValues: $extensionFlagValues,
         );
     }
 
     private function createRuntime(ParsedInput $parsed): CodingAgentRuntime
     {
-        $cwd = $parsed->cwd ?? getcwd() ?: '.';
+        return $this->createRuntimeFromCwd(
+            $parsed->cwd ?? (getcwd() ?: '.'),
+            $parsed,
+        );
+    }
+
+    public function createRuntimeFromCwd(string $cwd, ?ParsedInput $parsed = null): CodingAgentRuntime
+    {
+        $parsed ??= new ParsedInput(
+            mode: null,
+            provider: null,
+            modelId: null,
+            apiKey: null,
+            systemPrompt: null,
+            appendSystemPrompt: [],
+            thinkingLevel: null,
+            continueLatest: false,
+            resume: false,
+            sessionTarget: null,
+            noSession: false,
+            sessionDir: null,
+            allowedToolNames: null,
+            enableContextFiles: true,
+            cwd: $cwd,
+            listModels: false,
+            messages: [],
+            fileArgs: [],
+            fileText: '',
+            fileImages: [],
+            extensionFlagValues: [],
+        );
+
         $settingsManager = SettingsManager::create($cwd);
         $authStorage = AuthStorage::create();
         $sessionStore = $parsed->noSession
@@ -175,6 +238,13 @@ final class MainCommand extends Command
             settingsManager: $settingsManager,
             enableContextFiles: $parsed->enableContextFiles,
             appendSystemPrompt: $parsed->appendSystemPrompt,
+            extensions: $this->extensions,
+            extensionFlagValues: $parsed->extensionFlagValues,
+            extensionUi: new HeadlessExtensionUI(
+                onNotify: static function (string $message, string $type): void {
+                    fwrite(STDERR, sprintf("[%s] %s\n", $type, $message));
+                },
+            ),
         );
 
         $factory = new CodingAgentRuntimeFactory;
@@ -201,6 +271,22 @@ final class MainCommand extends Command
         }
 
         return $factory->create($config);
+    }
+
+    /**
+     * @return array<ExtensionConsoleCommand>
+     */
+    public function getExtensionCommands(): array
+    {
+        $runner = new ExtensionRunner($this->extensions, getcwd() ?: '.');
+        $flags = $runner->getFlags();
+        $commands = [];
+        foreach ($runner->getCommands() as $command) {
+            $commands[] = new ExtensionConsoleCommand($command->name, $command->description, $this->extensions, $flags);
+        }
+        $runner->dispose();
+
+        return $commands;
     }
 
     private function listModels(ParsedInput $parsed): int
@@ -373,6 +459,23 @@ final class MainCommand extends Command
                         }
 
                         continue;
+                    }
+                    $runner = $runtime->getExtensionRunner();
+                    if ($runner instanceof ExtensionRunner) {
+                        $commandName = ltrim(strtok($line, ' ') ?: '', '/');
+                        $arguments = trim(substr($line, strlen('/'.$commandName)));
+                        try {
+                            $result = $runner->executeCommand($commandName, $arguments, true);
+                            if ($result !== null) {
+                                fwrite(STDOUT, rtrim((string) $result)."\n");
+                            }
+
+                            continue;
+                        } catch (\Throwable) {
+                            fwrite(STDOUT, sprintf("Unknown slash command: /%s\n", $commandName));
+
+                            continue;
+                        }
                     }
                 }
 
@@ -654,5 +757,24 @@ final class MainCommand extends Command
     private function rpcExecuteBash(CodingAgentRuntime $runtime, array $command): array
     {
         return ['result' => PromiseBlocker::block($runtime->session->executeBash((string) ($command['command'] ?? '')))];
+    }
+
+    /**
+     * @return array<ExtensionFlag>
+     */
+    private function getExtensionFlags(): array
+    {
+        $runner = new ExtensionRunner($this->extensions, getcwd() ?: '.');
+        $flags = $runner->getFlags();
+        $runner->dispose();
+
+        return $flags;
+    }
+
+    private function addExtensionFlagOption(ExtensionFlag $flag): void
+    {
+        $mode = $flag->type === 'boolean' ? InputOption::VALUE_NONE : InputOption::VALUE_REQUIRED;
+        $default = $flag->type === 'boolean' ? null : $flag->default;
+        $this->addOption($flag->name, null, $mode, $flag->description, $default);
     }
 }

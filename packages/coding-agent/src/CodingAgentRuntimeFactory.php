@@ -8,6 +8,11 @@ use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentTool;
 use Pi\AI\Model;
 use Pi\CodingAgent\Auth\AuthStorage;
+use Pi\CodingAgent\Extension\Extension;
+use Pi\CodingAgent\Extension\ExtensionAgentTool;
+use Pi\CodingAgent\Extension\ExtensionLoader;
+use Pi\CodingAgent\Extension\ExtensionRunner;
+use Pi\CodingAgent\Extension\InstrumentedAgentTool;
 use Pi\CodingAgent\Resource\FilesystemResourceLoader;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Session\InMemorySessionStore;
@@ -40,9 +45,17 @@ final class CodingAgentRuntimeFactory
             appendSystemPrompt: $config->appendSystemPrompt,
             enableContextFiles: $config->enableContextFiles,
         );
+        $extensions = $this->resolveExtensions($config, $cwd, $settingsManager);
+        $extensionRunner = new ExtensionRunner($extensions, $cwd);
+        $resourceContribution = $extensionRunner->discoverResources();
+        $resourceLoader->extendResources(
+            $resourceContribution['skillPaths'],
+            $resourceContribution['promptPaths'],
+            $resourceContribution['themePaths'],
+        );
         $config = $this->applySettingsDefaults($config, $settingsManager);
         $model = $this->resolveModel($config);
-        $tools = $this->resolveTools($cwd, $config->tools, $config->allowedToolNames);
+        $tools = $this->resolveTools($cwd, $config->tools, $config->allowedToolNames, $extensionRunner);
         $contextFiles = $config->enableContextFiles ? $resourceLoader->loadContextFiles($cwd) : [];
         $systemPrompt = SystemPromptBuilder::build(
             $resourceLoader->getSystemPrompt() ?? $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
@@ -56,7 +69,7 @@ final class CodingAgentRuntimeFactory
         }
         $manager->appendThinkingLevelChange($config->thinkingLevel);
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $extensionRunner);
     }
 
     public function resume(CodingAgentConfig $config, string $sessionIdOrPath): CodingAgentRuntime
@@ -72,6 +85,14 @@ final class CodingAgentRuntimeFactory
             appendSystemPrompt: $config->appendSystemPrompt,
             enableContextFiles: $config->enableContextFiles,
         );
+        $extensions = $this->resolveExtensions($config, $cwd, $settingsManager);
+        $extensionRunner = new ExtensionRunner($extensions, $cwd);
+        $resourceContribution = $extensionRunner->discoverResources();
+        $resourceLoader->extendResources(
+            $resourceContribution['skillPaths'],
+            $resourceContribution['promptPaths'],
+            $resourceContribution['themePaths'],
+        );
         $config = $this->applySettingsDefaults($config, $settingsManager);
         $manager = $sessionStore->openManager($sessionIdOrPath, $cwd);
         if (! $manager instanceof SessionManager) {
@@ -80,7 +101,7 @@ final class CodingAgentRuntimeFactory
 
         $runtimeContext = $manager->buildSessionContext();
         $runtimeCwd = $config->cwd ?? $manager->getCwd();
-        $tools = $this->resolveTools($runtimeCwd, $config->tools, $config->allowedToolNames);
+        $tools = $this->resolveTools($runtimeCwd, $config->tools, $config->allowedToolNames, $extensionRunner);
         $contextFiles = $config->enableContextFiles ? $resourceLoader->loadContextFiles($runtimeCwd) : [];
         $systemPrompt = SystemPromptBuilder::build(
             $resourceLoader->getSystemPrompt() ?? $config->systemPrompt ?? 'You are a practical coding assistant for a PHP developer. Be concise, accurate, and concrete.',
@@ -109,9 +130,12 @@ final class CodingAgentRuntimeFactory
             enableContextFiles: $config->enableContextFiles,
             sessionId: $config->sessionId,
             appendSystemPrompt: $config->appendSystemPrompt,
+            extensions: $config->extensions,
+            extensionFlagValues: $config->extensionFlagValues,
+            extensionUi: $config->extensionUi,
         );
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $extensionRunner);
     }
 
     public function continueLatest(CodingAgentConfig $config): CodingAgentRuntime
@@ -131,7 +155,7 @@ final class CodingAgentRuntimeFactory
      * @param  array<string>|null  $allowedToolNames
      * @return array<AgentTool>
      */
-    private function resolveTools(string $cwd, array $customTools, ?array $allowedToolNames): array
+    private function resolveTools(string $cwd, array $customTools, ?array $allowedToolNames, ?ExtensionRunner $extensionRunner = null): array
     {
         $builtIns = [
             new ReadTool($cwd),
@@ -143,7 +167,23 @@ final class CodingAgentRuntimeFactory
             new LsTool($cwd),
         ];
 
-        return (new ToolRegistry($builtIns, $customTools))->resolve($allowedToolNames);
+        $extensionTools = [];
+        if ($extensionRunner instanceof ExtensionRunner) {
+            foreach ($extensionRunner->getTools() as $tool) {
+                $extensionTools[] = new ExtensionAgentTool($tool);
+            }
+        }
+
+        $resolved = (new ToolRegistry($builtIns, [...$customTools, ...$extensionTools]))->resolve($allowedToolNames);
+
+        if (! $extensionRunner instanceof ExtensionRunner) {
+            return $resolved;
+        }
+
+        return array_map(
+            static fn (AgentTool $tool): AgentTool => new InstrumentedAgentTool($tool, $extensionRunner),
+            $resolved,
+        );
     }
 
     private function resolveModel(CodingAgentConfig $config): ?Model
@@ -172,6 +212,7 @@ final class CodingAgentRuntimeFactory
         SessionManager $manager,
         ?AuthStorage $authStorage,
         ?SettingsManager $settingsManager,
+        ?ExtensionRunner $extensionRunner,
     ): CodingAgentRuntime {
         return new CodingAgentRuntime(
             sessionStore: $sessionStore,
@@ -186,6 +227,10 @@ final class CodingAgentRuntimeFactory
             systemPrompt: $systemPrompt,
             model: $model,
             thinkingLevel: $config->thinkingLevel,
+            extensions: $config->extensions,
+            extensionFlagValues: $config->extensionFlagValues,
+            extensionUi: $config->extensionUi,
+            extensionRunner: $extensionRunner,
         );
     }
 
@@ -214,6 +259,21 @@ final class CodingAgentRuntimeFactory
             enableContextFiles: $config->enableContextFiles,
             sessionId: $config->sessionId,
             appendSystemPrompt: $config->appendSystemPrompt,
+            extensions: $config->extensions,
+            extensionFlagValues: $config->extensionFlagValues,
+            extensionUi: $config->extensionUi,
         );
+    }
+
+    /**
+     * @return array<Extension>
+     */
+    private function resolveExtensions(CodingAgentConfig $config, string $cwd, SettingsManager $settingsManager): array
+    {
+        if ($config->extensions !== []) {
+            return $config->extensions;
+        }
+
+        return (new ExtensionLoader)->discover($cwd, $settingsManager)->extensions;
     }
 }

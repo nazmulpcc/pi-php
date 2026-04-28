@@ -15,6 +15,7 @@ readonly class ParsedInput
      * @param  list<ImageContent>  $fileImages
      * @param  list<string>|null  $allowedToolNames
      * @param  list<string>  $appendSystemPrompt
+     * @param  array<string, bool|string>  $extensionFlagValues
      */
     public function __construct(
         public ?string $mode,
@@ -37,5 +38,6 @@ readonly class ParsedInput
         public array $fileArgs,
         public string $fileText,
         public array $fileImages,
+        public array $extensionFlagValues = [],
     ) {}
 }

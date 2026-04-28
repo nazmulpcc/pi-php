@@ -180,6 +180,16 @@ final class SettingsManager
     }
 
     /**
+     * @return list<string>
+     */
+    public function getExtensionPaths(): array
+    {
+        $value = $this->getSettings()['extensions'] ?? [];
+
+        return is_array($value) ? array_values(array_filter($value, 'is_string')) : [];
+    }
+
+    /**
      * @param  array<string, mixed>  $settings
      */
     public function setGlobalSettings(array $settings): void

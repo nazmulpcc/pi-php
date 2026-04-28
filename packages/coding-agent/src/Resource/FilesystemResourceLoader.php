@@ -11,6 +11,15 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
     /** @var list<array{scope:string,error:string}> */
     private array $diagnostics = [];
 
+    /** @var list<string> */
+    private array $extensionSkillPaths = [];
+
+    /** @var list<string> */
+    private array $extensionPromptPaths = [];
+
+    /** @var list<string> */
+    private array $extensionThemePaths = [];
+
     /**
      * @param  array<string>  $contextFileNames
      * @param  array<string>  $appendSystemPrompt
@@ -72,6 +81,7 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
         if ($this->settingsManager !== null) {
             $paths = array_merge($paths, $this->settingsManager->getSkillPaths());
         }
+        $paths = array_merge($paths, $this->extensionSkillPaths);
 
         return $this->loadNamedMarkdownResources($paths, Skill::class);
     }
@@ -82,6 +92,7 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
         if ($this->settingsManager !== null) {
             $paths = array_merge($paths, $this->settingsManager->getPromptPaths());
         }
+        $paths = array_merge($paths, $this->extensionPromptPaths);
 
         /** @var array<PromptTemplate> $templates */
         $templates = [];
@@ -105,6 +116,13 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
     public function getDiagnostics(): array
     {
         return $this->diagnostics;
+    }
+
+    public function extendResources(array $skillPaths = [], array $promptPaths = [], array $themePaths = []): void
+    {
+        $this->extensionSkillPaths = array_values(array_unique([...$this->extensionSkillPaths, ...$skillPaths]));
+        $this->extensionPromptPaths = array_values(array_unique([...$this->extensionPromptPaths, ...$promptPaths]));
+        $this->extensionThemePaths = array_values(array_unique([...$this->extensionThemePaths, ...$themePaths]));
     }
 
     public function reload(): void
