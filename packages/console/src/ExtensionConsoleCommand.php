@@ -81,7 +81,6 @@ final class ExtensionConsoleCommand extends Command
                 allowedToolNames: null,
                 enableContextFiles: true,
                 cwd: $cwd,
-                listModels: false,
                 messages: [],
                 fileArgs: [],
                 fileText: '',

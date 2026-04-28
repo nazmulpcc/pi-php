@@ -33,7 +33,6 @@ readonly class ParsedInput
         public ?array $allowedToolNames,
         public bool $enableContextFiles,
         public ?string $cwd,
-        public bool|string $listModels,
         public array $messages,
         public array $fileArgs,
         public string $fileText,

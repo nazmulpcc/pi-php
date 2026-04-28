@@ -34,6 +34,7 @@ use Pi\CodingAgent\Event\CodingAgentEventSerializer;
 use Pi\CodingAgent\Extension\ExtensionRunner;
 use Pi\CodingAgent\Extension\ExtensionUI;
 use Pi\CodingAgent\Extension\HeadlessExtensionUI;
+use Pi\CodingAgent\Model\ModelRegistry;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
@@ -42,8 +43,6 @@ use Pi\CodingAgent\Settings\SettingsManager;
 use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 
-use function Pi\AI\getModels;
-use function Pi\AI\getProviders;
 use function Pi\AI\streamSimple;
 use function React\Promise\resolve;
 
@@ -75,6 +74,7 @@ final class CodingAgentSession
         private readonly ResourceLoaderInterface $resourceLoader,
         private readonly ?AuthStorage $authStorage = null,
         private readonly ?SettingsManager $settingsManager = null,
+        private readonly ?ModelRegistry $modelRegistry = null,
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
@@ -332,18 +332,7 @@ final class CodingAgentSession
      */
     public function getAvailableModels(): array
     {
-        $models = [];
-        foreach (getProviders() as $provider) {
-            foreach (getModels($provider) as $model) {
-                $models[] = $model;
-            }
-        }
-
-        if ($this->authStorage !== null) {
-            return $this->authStorage->modifyModels($models);
-        }
-
-        return $models;
+        return $this->modelRegistry?->getAvailableModels() ?? [];
     }
 
     public function setModel(Model $model): void

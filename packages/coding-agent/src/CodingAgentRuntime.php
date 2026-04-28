@@ -11,6 +11,7 @@ use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Extension\ExtensionRunner;
 use Pi\CodingAgent\Extension\ExtensionUI;
+use Pi\CodingAgent\Model\ModelRegistry;
 use Pi\CodingAgent\Resource\PromptTemplate;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Resource\Skill;
@@ -40,6 +41,7 @@ final class CodingAgentRuntime
         private readonly array $tools,
         private readonly ?AuthStorage $authStorage = null,
         private readonly ?SettingsManager $settingsManager = null,
+        private readonly ?ModelRegistry $modelRegistry = null,
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
@@ -183,6 +185,11 @@ final class CodingAgentRuntime
         return $this->extensionRunner;
     }
 
+    public function getModelRegistry(): ?ModelRegistry
+    {
+        return $this->modelRegistry;
+    }
+
     private function replaceSession(SessionManager $manager, string $reason, ?string $previousSessionFile): void
     {
         $this->extensionRunner?->emit('session_before_switch', [
@@ -233,6 +240,7 @@ final class CodingAgentRuntime
             resourceLoader: $this->resourceLoader,
             authStorage: $this->authStorage,
             settingsManager: $this->settingsManager,
+            modelRegistry: $this->modelRegistry,
             explicitApiKey: $this->explicitApiKey,
             customStreamFn: $this->customStreamFn,
             getApiKey: $this->getApiKey,

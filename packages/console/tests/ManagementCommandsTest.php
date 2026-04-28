@@ -7,6 +7,7 @@ require_once __DIR__.'/TestHelper.php';
 use Pi\AI\OAuth\OAuthCredentials;
 use Pi\AI\OAuth\OAuthLoginCallbacks;
 use Pi\AI\OAuth\OAuthProviderInterface;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntime;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
@@ -150,11 +151,19 @@ describe('Console management commands', function () {
 
     it('shows and updates settings, reports resources, and lists models', function () {
         $dir = codingAgentTempDir('console-settings');
+        putenv('PI_CODING_AGENT_DIR='.$dir.'/.agent');
         file_put_contents($dir.'/AGENTS.md', "Top level context\n");
         mkdir($dir.'/skills', 0777, true);
         file_put_contents($dir.'/skills/debug.md', "# Debug\n");
         mkdir($dir.'/prompt-templates', 0777, true);
         file_put_contents($dir.'/prompt-templates/review.md', "# Review\n");
+        $auth = AuthStorage::create($dir.'/.agent/auth.json');
+        $auth->set('github-copilot', [
+            'type' => 'oauth',
+            'access' => 'tid=1;proxy-ep=proxy.enterprise.githubcopilot.com;exp=999',
+            'refresh' => 'refresh-token',
+            'expires' => time() * 1000 + 3600_000,
+        ]);
 
         $settings = new CommandTester(new SettingsCommand);
         expect($settings->execute([
@@ -184,10 +193,12 @@ describe('Console management commands', function () {
         $models = new CommandTester(new ModelsCommand);
         $models->execute([
             'action' => 'list',
-            'search' => 'gpt-5.4-mini',
+            'search' => 'gpt-5.2-codex',
+            '--usable' => true,
             '--cwd' => $dir,
         ]);
-        expect($models->getDisplay())->toContain('gpt-5.4-mini');
+        expect($models->getDisplay())->toContain('gpt-5.2-codex');
+        expect($models->getDisplay())->toContain('stored');
 
         codingAgentDeleteDir($dir);
     });

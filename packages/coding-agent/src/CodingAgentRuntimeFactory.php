@@ -13,6 +13,7 @@ use Pi\CodingAgent\Extension\ExtensionAgentTool;
 use Pi\CodingAgent\Extension\ExtensionLoader;
 use Pi\CodingAgent\Extension\ExtensionRunner;
 use Pi\CodingAgent\Extension\InstrumentedAgentTool;
+use Pi\CodingAgent\Model\ModelRegistry;
 use Pi\CodingAgent\Resource\FilesystemResourceLoader;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
 use Pi\CodingAgent\Session\InMemorySessionStore;
@@ -27,8 +28,6 @@ use Pi\CodingAgent\Tool\LsTool;
 use Pi\CodingAgent\Tool\ReadTool;
 use Pi\CodingAgent\Tool\ToolRegistry;
 use Pi\CodingAgent\Tool\WriteTool;
-
-use function Pi\AI\getModel;
 
 final class CodingAgentRuntimeFactory
 {
@@ -54,7 +53,8 @@ final class CodingAgentRuntimeFactory
             $resourceContribution['themePaths'],
         );
         $config = $this->applySettingsDefaults($config, $settingsManager);
-        $model = $this->resolveModel($config);
+        $modelRegistry = new ModelRegistry($authStorage, $settingsManager);
+        $model = $modelRegistry->resolve($config->model, $config->provider, $config->modelId)->model;
         $tools = $this->resolveTools($cwd, $config->tools, $config->allowedToolNames, $extensionRunner);
         $contextFiles = $config->enableContextFiles ? $resourceLoader->loadContextFiles($cwd) : [];
         $systemPrompt = SystemPromptBuilder::build(
@@ -69,7 +69,7 @@ final class CodingAgentRuntimeFactory
         }
         $manager->appendThinkingLevelChange($config->thinkingLevel);
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $extensionRunner);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $extensionRunner);
     }
 
     public function resume(CodingAgentConfig $config, string $sessionIdOrPath): CodingAgentRuntime
@@ -94,6 +94,7 @@ final class CodingAgentRuntimeFactory
             $resourceContribution['themePaths'],
         );
         $config = $this->applySettingsDefaults($config, $settingsManager);
+        $modelRegistry = new ModelRegistry($authStorage, $settingsManager);
         $manager = $sessionStore->openManager($sessionIdOrPath, $cwd);
         if (! $manager instanceof SessionManager) {
             throw new \RuntimeException(sprintf('Session not found: %s', $sessionIdOrPath));
@@ -108,7 +109,7 @@ final class CodingAgentRuntimeFactory
             $contextFiles,
             $resourceLoader->getAppendSystemPrompt(),
         );
-        $model = $config->model ?? $runtimeContext['model'] ?? $this->resolveModel($config);
+        $model = $config->model ?? $runtimeContext['model'] ?? $modelRegistry->resolve($config->model, $config->provider, $config->modelId)->model;
         $thinkingLevel = $runtimeContext['thinkingLevel'] ?? $config->thinkingLevel;
 
         $config = new CodingAgentConfig(
@@ -135,7 +136,7 @@ final class CodingAgentRuntimeFactory
             extensionUi: $config->extensionUi,
         );
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $extensionRunner);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $extensionRunner);
     }
 
     public function continueLatest(CodingAgentConfig $config): CodingAgentRuntime
@@ -186,19 +187,6 @@ final class CodingAgentRuntimeFactory
         );
     }
 
-    private function resolveModel(CodingAgentConfig $config): ?Model
-    {
-        if ($config->model instanceof Model) {
-            return $config->model;
-        }
-
-        if ($config->provider !== null && $config->modelId !== null) {
-            return getModel($config->provider, $config->modelId);
-        }
-
-        return null;
-    }
-
     /**
      * @param  array<AgentTool>  $tools
      */
@@ -212,6 +200,7 @@ final class CodingAgentRuntimeFactory
         SessionManager $manager,
         ?AuthStorage $authStorage,
         ?SettingsManager $settingsManager,
+        ModelRegistry $modelRegistry,
         ?ExtensionRunner $extensionRunner,
     ): CodingAgentRuntime {
         return new CodingAgentRuntime(
@@ -221,6 +210,7 @@ final class CodingAgentRuntimeFactory
             tools: $tools,
             authStorage: $authStorage,
             settingsManager: $settingsManager,
+            modelRegistry: $modelRegistry,
             explicitApiKey: $config->apiKey,
             customStreamFn: $config->streamFn,
             getApiKey: $config->getApiKey,

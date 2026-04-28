@@ -12,6 +12,7 @@ use Pi\Agent\ThinkingLevel;
 use Pi\Agent\Tool\AgentToolResult;
 use Pi\AI\Model;
 use Pi\AI\Schema\Type;
+use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Event\CodingAgentEvent;
@@ -165,6 +166,46 @@ describe('Coding agent runtime', function () {
         expect($runtime->getState()->followUpMode)->toBe('all');
 
         $registration->unregister();
+    });
+
+    it('resolves models through the shared registry with auth-aware provider availability', function () {
+        $settings = SettingsManager::inMemory(
+            global: [
+                'defaultProvider' => 'github-copilot',
+                'defaultModel' => 'gpt-5.2-codex',
+            ],
+        );
+        $auth = AuthStorage::inMemory([
+            'github-copilot' => [
+                'type' => 'oauth',
+                'access' => 'tid=1;proxy-ep=proxy.enterprise.githubcopilot.com;exp=999',
+                'refresh' => 'refresh-token',
+                'expires' => time() * 1000 + 3600_000,
+            ],
+        ]);
+
+        $runtime = (new CodingAgentRuntimeFactory)->create(new CodingAgentConfig(
+            sessionStore: new InMemorySessionStore,
+            settingsManager: $settings,
+            authStorage: $auth,
+        ));
+
+        $registry = $runtime->getModelRegistry();
+        expect($registry)->not->toBeNull();
+        expect($runtime->getState()->model?->provider->value)->toBe('github-copilot');
+        expect($runtime->getState()->model?->id)->toBe('gpt-5.2-codex');
+
+        $availability = [];
+        foreach ($registry->getProviderAvailability() as $providerAvailability) {
+            $availability[$providerAvailability->provider] = $providerAvailability;
+        }
+
+        expect($availability['github-copilot']->configured)->toBeTrue();
+        expect($availability['github-copilot']->source)->toBe('stored');
+
+        $model = $registry->findModel('github-copilot', 'gpt-5.2-codex');
+        expect($model)->not->toBeNull();
+        expect($model->baseUrl)->toBe('https://api.enterprise.githubcopilot.com');
     });
 
     it('rebinds runtime listeners and invalidates stale session handles on session replacement', function () {

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Pi\CodingAgent\Auth\AuthStorage;
 
 require_once __DIR__.'/TestHelper.php';
 
@@ -68,5 +69,27 @@ describe('Console cli', function () {
 
         expect($exitCode)->toBe(0);
         expect(implode("\n", $output))->toContain('file context');
+    });
+
+    it('supports usable-only model listing through models command', function () {
+        $dir = codingAgentTempDir('console-usable-models');
+        putenv('PI_CODING_AGENT_DIR='.$dir.'/.agent');
+        $auth = AuthStorage::create($dir.'/.agent/auth.json');
+        $auth->set('github-copilot', [
+            'type' => 'oauth',
+            'access' => 'tid=1;proxy-ep=proxy.enterprise.githubcopilot.com;exp=999',
+            'refresh' => 'refresh-token',
+            'expires' => time() * 1000 + 3600_000,
+        ]);
+
+        $output = [];
+        $exitCode = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' models list --usable --cwd '.escapeshellarg($dir), $output, $exitCode);
+
+        codingAgentDeleteDir($dir);
+
+        expect($exitCode)->toBe(0);
+        expect(implode("\n", $output))->toContain('github-copilot');
+        expect(implode("\n", $output))->not->toContain('openai/');
     });
 });

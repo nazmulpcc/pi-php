@@ -63,7 +63,6 @@ final class MainCommand extends Command
             ->addOption('no-tools', null, InputOption::VALUE_NONE, 'Disable all tools')
             ->addOption('no-builtin-tools', null, InputOption::VALUE_NONE, 'Disable built-in tools')
             ->addOption('no-context-files', null, InputOption::VALUE_NONE, 'Disable AGENTS/context file loading')
-            ->addOption('list-models', null, InputOption::VALUE_OPTIONAL, 'List available models, optionally filtered by a search string', false)
             ->addOption('cwd', null, InputOption::VALUE_REQUIRED, 'Working directory override')
             ->addArgument('messages', InputArgument::IS_ARRAY, 'Prompt text and @file arguments');
 
@@ -76,10 +75,6 @@ final class MainCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $parsed = $this->parseInput($input);
-
-        if ($parsed->listModels !== false) {
-            return $this->listModels($parsed);
-        }
 
         $runtime = $this->createRuntime($parsed);
         $recentEvents = [];
@@ -159,7 +154,6 @@ final class MainCommand extends Command
         $mode = $input->getOption('mode');
         $mode = is_string($mode) && $mode !== '' ? $mode : null;
 
-        $listModels = $input->getOption('list-models');
         $extensionFlagValues = [];
         foreach ($this->getExtensionFlags() as $flag) {
             $value = $input->getOption($flag->name);
@@ -191,7 +185,6 @@ final class MainCommand extends Command
             allowedToolNames: $allowedToolNames,
             enableContextFiles: ! (bool) $input->getOption('no-context-files'),
             cwd: $cwd,
-            listModels: is_string($listModels) ? $listModels : $listModels,
             messages: $messages,
             fileArgs: $fileArgs,
             fileText: $processedFiles['text'],
@@ -226,7 +219,6 @@ final class MainCommand extends Command
             allowedToolNames: null,
             enableContextFiles: true,
             cwd: $cwd,
-            listModels: false,
             messages: [],
             fileArgs: [],
             fileText: '',
@@ -302,23 +294,6 @@ final class MainCommand extends Command
         $runner->dispose();
 
         return $commands;
-    }
-
-    private function listModels(ParsedInput $parsed): int
-    {
-        $runtime = $this->createRuntime($parsed);
-        $filter = is_string($parsed->listModels) ? mb_strtolower($parsed->listModels) : null;
-
-        foreach ($runtime->session->getAvailableModels() as $model) {
-            $label = $model->provider->value.'/'.$model->id;
-            if ($filter !== null && $filter !== '' && ! str_contains(mb_strtolower($label), $filter)) {
-                continue;
-            }
-
-            fwrite(STDOUT, $label."\n");
-        }
-
-        return 0;
     }
 
     private function runTextMode(CodingAgentRuntime $runtime, ParsedInput $parsed, ?string $stdin): int

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Pi\Console;
 
-use Pi\CodingAgent\CodingAgentConfig;
-use Pi\CodingAgent\CodingAgentRuntimeFactory;
-use Pi\CodingAgent\Session\InMemorySessionStore;
+use Pi\CodingAgent\Model\ModelRegistry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,6 +21,7 @@ final class ModelsCommand extends Command
             ->setDescription('List available models.')
             ->addArgument('action', InputArgument::OPTIONAL, 'Only "list" is supported.', 'list')
             ->addArgument('search', InputArgument::OPTIONAL, 'Optional search filter')
+            ->addOption('usable', null, InputOption::VALUE_NONE, 'Only list models from providers with configured credentials')
             ->addOption('cwd', null, InputOption::VALUE_REQUIRED, 'Working directory override');
     }
 
@@ -33,29 +32,30 @@ final class ModelsCommand extends Command
         }
 
         $context = (new ConsoleContextFactory)->create(is_string($input->getOption('cwd')) ? $input->getOption('cwd') : null);
-        $runtime = (new CodingAgentRuntimeFactory)->create(new CodingAgentConfig(
-            cwd: $context->cwd,
-            sessionStore: new InMemorySessionStore,
-            authStorage: $context->authStorage,
-            settingsManager: $context->settingsManager,
-            resourceLoader: $context->resourceLoader,
-        ));
+        $registry = new ModelRegistry($context->authStorage, $context->settingsManager);
+        $availabilityByProvider = [];
+        foreach ($registry->getProviderAvailability() as $availability) {
+            $availabilityByProvider[$availability->provider] = $availability;
+        }
         $search = mb_strtolower((string) $input->getArgument('search'));
+        $models = $input->getOption('usable') ? $registry->getUsableModels() : $registry->getAvailableModels();
 
         $table = new Table($output);
-        $table->setHeaders(['Provider', 'Model', 'API', 'Reasoning', 'Context']);
-        foreach ($runtime->session->getAvailableModels() as $model) {
+        $table->setHeaders(['Provider', 'Model', 'API', 'Reasoning', 'Context', 'Auth']);
+        foreach ($models as $model) {
             $label = mb_strtolower($model->provider->value.'/'.$model->id.'/'.$model->name);
             if ($search !== '' && ! str_contains($label, $search)) {
                 continue;
             }
 
+            $availability = $availabilityByProvider[$model->provider->value] ?? null;
             $table->addRow([
                 $model->provider->value,
                 $model->id,
                 $model->api->value,
                 $model->reasoning ? 'yes' : 'no',
                 $model->contextWindow,
+                $availability?->source ?? ($availability?->configured === true ? 'configured' : ''),
             ]);
         }
         $table->render();
