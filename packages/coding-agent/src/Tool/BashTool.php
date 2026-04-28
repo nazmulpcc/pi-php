@@ -9,6 +9,11 @@ use Pi\Agent\Content\TextContent;
 use Pi\Agent\Tool\AgentToolResult;
 use Pi\Agent\ToolExecutionMode;
 use Pi\AI\Schema\Type;
+use Pi\CodingAgent\Process\ProcessResult;
+use Pi\CodingAgent\Process\ProcessRunner;
+use React\Promise\PromiseInterface;
+
+use function React\Promise\reject;
 
 final class BashTool extends AbstractTool
 {
@@ -26,85 +31,71 @@ final class BashTool extends AbstractTool
         );
     }
 
-    protected function doExecute(string $toolCallId, array $params, ?CancellationToken $signal = null, ?callable $onUpdate = null): AgentToolResult
-    {
+    public function execute(
+        string $toolCallId,
+        array $params,
+        ?CancellationToken $signal = null,
+        ?callable $onUpdate = null,
+    ): PromiseInterface {
         $command = (string) ($params['command'] ?? '');
         if ($command === '') {
-            throw new \RuntimeException('Command must not be empty');
+            return reject(new \RuntimeException('Command must not be empty'));
         }
 
         $timeoutSeconds = max(1, (int) ($params['timeoutSeconds'] ?? 30));
-        $descriptorSpec = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
 
-        $process = proc_open($command, $descriptorSpec, $pipes, $this->cwd);
-        if (! is_resource($process)) {
-            throw new \RuntimeException('Unable to start bash command');
-        }
+        $runner = new ProcessRunner(
+            command: $command,
+            cwd: $this->cwd,
+            timeoutSeconds: (float) $timeoutSeconds,
+        );
 
-        fclose($pipes[0]);
-        stream_set_blocking($pipes[1], false);
-        stream_set_blocking($pipes[2], false);
-
-        $stdout = '';
-        $stderr = '';
-        $startedAt = microtime(true);
-
-        while (true) {
-            $status = proc_get_status($process);
-            $stdoutChunk = stream_get_contents($pipes[1]);
-            $stderrChunk = stream_get_contents($pipes[2]);
-
-            if (is_string($stdoutChunk) && $stdoutChunk !== '') {
-                $stdout .= $stdoutChunk;
-                if ($onUpdate !== null) {
-                    $onUpdate(new AgentToolResult([new TextContent($stdout)], ['stdout' => $stdout, 'stderr' => $stderr]));
-                }
+        return $runner->run($signal, function (string $stdout, string $stderr) use ($onUpdate): void {
+            if ($onUpdate === null) {
+                return;
             }
+            $onUpdate(new AgentToolResult(
+                [new TextContent($this->formatOutput($stdout, $stderr, null))],
+                ['stdout' => $stdout, 'stderr' => $stderr],
+            ));
+        })->then(function (ProcessResult $result) use ($command) {
+            $outputText = $this->formatOutput($result->stdout, $result->stderr, $result->exitCode);
 
-            if (is_string($stderrChunk) && $stderrChunk !== '') {
-                $stderr .= $stderrChunk;
-            }
+            return new AgentToolResult(
+                content: [new TextContent($outputText)],
+                details: [
+                    'command' => $command,
+                    'exitCode' => $result->exitCode,
+                    'stdout' => $result->stdout,
+                    'stderr' => $result->stderr,
+                ],
+                terminate: false,
+            );
+        });
+    }
 
-            if (! $status['running']) {
-                break;
-            }
+    protected function doExecute(string $toolCallId, array $params, ?CancellationToken $signal = null, ?callable $onUpdate = null): AgentToolResult
+    {
+        throw new \LogicException('BashTool::doExecute() should never be called; execute() is overridden');
+    }
 
-            if ($signal?->isCancelled()) {
-                proc_terminate($process);
-                throw new \RuntimeException('Tool execution aborted');
-            }
-
-            if ((microtime(true) - $startedAt) >= $timeoutSeconds) {
-                proc_terminate($process);
-                throw new \RuntimeException(sprintf('Command timed out after %d seconds', $timeoutSeconds));
-            }
-
-            usleep(50_000);
-        }
-
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        $exitCode = proc_close($process);
-
-        $outputParts = [];
+    private function formatOutput(string $stdout, string $stderr, ?int $exitCode): string
+    {
+        $parts = [];
         if ($stdout !== '') {
-            $outputParts[] = "STDOUT:\n".$stdout;
+            $parts[] = "STDOUT:\n".$stdout;
         }
         if ($stderr !== '') {
-            $outputParts[] = "STDERR:\n".$stderr;
+            $parts[] = "STDERR:\n".$stderr;
         }
-        if ($outputParts === []) {
-            $outputParts[] = '(no output)';
+        if ($parts === []) {
+            $parts[] = '(no output)';
+        }
+        $text = implode("\n\n", $parts);
+        if ($exitCode !== null && $exitCode !== 0) {
+            $text .= "\n\nCommand exited with code ".$exitCode;
         }
 
-        return new AgentToolResult(
-            content: [new TextContent(implode("\n\n", $outputParts))],
-            details: ['command' => $command, 'exitCode' => $exitCode, 'stdout' => $stdout, 'stderr' => $stderr],
-            terminate: false,
-        );
+        return $text;
     }
 }
