@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Resource;
 
+use Pi\CodingAgent\Diagnostics\Diagnostic;
+
 interface ResourceLoaderInterface
 {
     /**
@@ -29,7 +31,7 @@ interface ResourceLoaderInterface
     public function getAppendSystemPrompt(): array;
 
     /**
-     * @return list<array{scope:string,error:string}>
+     * @return list<Diagnostic>
      */
     public function getDiagnostics(): array;
 

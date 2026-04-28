@@ -6,6 +6,7 @@ namespace Pi\CodingAgent\Model;
 
 use Pi\AI\Model;
 use Pi\CodingAgent\Auth\AuthStorage;
+use Pi\CodingAgent\Diagnostics\Diagnostic;
 use Pi\CodingAgent\Settings\SettingsManager;
 
 use function Pi\AI\getModel;
@@ -14,6 +15,9 @@ use function Pi\AI\getProviders;
 
 final class ModelRegistry
 {
+    /** @var list<Diagnostic> */
+    private array $diagnostics = [];
+
     public function __construct(
         private readonly ?AuthStorage $authStorage = null,
         private readonly ?SettingsManager $settingsManager = null,
@@ -77,6 +81,19 @@ final class ModelRegistry
     }
 
     /**
+     * @return list<Diagnostic>
+     */
+    public function getDiagnostics(): array
+    {
+        $diagnostics = $this->diagnostics;
+        if ($this->authStorage?->getLoadError() !== null) {
+            $diagnostics[] = new Diagnostic('models', $this->authStorage->getLoadError()->getMessage(), 'error', 'auth');
+        }
+
+        return $diagnostics;
+    }
+
+    /**
      * @return array<Model>
      */
     public function getUsableModels(): array
@@ -120,8 +137,18 @@ final class ModelRegistry
         $requestedModelId = $modelId;
 
         if ($requestedProvider !== null && $requestedModelId !== null) {
+            $model = $this->findModel($requestedProvider, $requestedModelId);
+            if (! $model instanceof Model) {
+                $this->diagnostics[] = new Diagnostic(
+                    'models',
+                    sprintf('Model not found: %s/%s', $requestedProvider, $requestedModelId),
+                    'error',
+                    'resolution',
+                );
+            }
+
             return new ResolvedModelSelection(
-                model: $this->findModel($requestedProvider, $requestedModelId),
+                model: $model,
                 provider: $requestedProvider,
                 modelId: $requestedModelId,
                 source: 'explicit-cli',
@@ -132,8 +159,18 @@ final class ModelRegistry
         $settingsModelId = $requestedModelId ?? $this->settingsManager?->getDefaultModel();
 
         if ($settingsProvider !== null && $settingsModelId !== null) {
+            $model = $this->findModel($settingsProvider, $settingsModelId);
+            if (! $model instanceof Model) {
+                $this->diagnostics[] = new Diagnostic(
+                    'models',
+                    sprintf('Model not found in settings defaults: %s/%s', $settingsProvider, $settingsModelId),
+                    'warning',
+                    'resolution',
+                );
+            }
+
             return new ResolvedModelSelection(
-                model: $this->findModel($settingsProvider, $settingsModelId),
+                model: $model,
                 provider: $settingsProvider,
                 modelId: $settingsModelId,
                 source: 'settings-defaults',
@@ -143,6 +180,14 @@ final class ModelRegistry
         if ($settingsProvider !== null) {
             $models = $this->getProviderModels($settingsProvider);
             $model = $models[0] ?? null;
+            if (! $model instanceof Model) {
+                $this->diagnostics[] = new Diagnostic(
+                    'models',
+                    sprintf('No models available for provider: %s', $settingsProvider),
+                    'warning',
+                    'resolution',
+                );
+            }
 
             return new ResolvedModelSelection(
                 model: $model,
@@ -158,6 +203,14 @@ final class ModelRegistry
                 static fn (Model $model): bool => $model->id === $settingsModelId,
             ));
             $model = count($matches) === 1 ? $matches[0] : null;
+            if (! $model instanceof Model) {
+                $this->diagnostics[] = new Diagnostic(
+                    'models',
+                    sprintf('Model not found: %s', $settingsModelId),
+                    'warning',
+                    'resolution',
+                );
+            }
 
             return new ResolvedModelSelection(
                 model: $model,

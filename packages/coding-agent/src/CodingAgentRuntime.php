@@ -8,6 +8,7 @@ use Pi\Agent\AgentMessage;
 use Pi\Agent\ThinkingLevel;
 use Pi\AI\Model;
 use Pi\CodingAgent\Auth\AuthStorage;
+use Pi\CodingAgent\Diagnostics\Diagnostic;
 use Pi\CodingAgent\Event\CodingAgentEvent;
 use Pi\CodingAgent\Extension\ExtensionRunner;
 use Pi\CodingAgent\Extension\ExtensionUI;
@@ -188,6 +189,45 @@ final class CodingAgentRuntime
     public function getModelRegistry(): ?ModelRegistry
     {
         return $this->modelRegistry;
+    }
+
+    /**
+     * @return list<Diagnostic>
+     */
+    public function getDiagnostics(): array
+    {
+        $diagnostics = [];
+
+        if ($this->authStorage !== null) {
+            $diagnostics = [...$diagnostics, ...$this->authStorage->getDiagnostics()];
+        }
+
+        if ($this->settingsManager !== null) {
+            $diagnostics = [...$diagnostics, ...$this->settingsManager->getDiagnostics()];
+        }
+
+        if ($this->modelRegistry !== null) {
+            $diagnostics = [...$diagnostics, ...$this->modelRegistry->getDiagnostics()];
+        }
+
+        if ($this->extensionRunner !== null) {
+            $diagnostics = [...$diagnostics, ...$this->extensionRunner->getDiagnostics()];
+        }
+
+        $state = $this->session->getState();
+        if ($state->errorMessage !== null && $state->errorMessage !== '') {
+            $diagnostics[] = new Diagnostic('session', $state->errorMessage, 'warning', 'state', $state->sessionPath);
+        }
+
+        if ($state->isCompacting) {
+            $diagnostics[] = new Diagnostic('session', 'Session is compacting.', 'info', 'state', $state->sessionPath);
+        }
+
+        if ($state->isStreaming) {
+            $diagnostics[] = new Diagnostic('session', 'Session is streaming.', 'info', 'state', $state->sessionPath);
+        }
+
+        return $diagnostics;
     }
 
     private function replaceSession(SessionManager $manager, string $reason, ?string $previousSessionFile): void

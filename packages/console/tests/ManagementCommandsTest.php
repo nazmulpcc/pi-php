@@ -13,6 +13,7 @@ use Pi\CodingAgent\CodingAgentRuntime;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
 use Pi\CodingAgent\Session\FilesystemSessionStore;
 use Pi\Console\AuthCommand;
+use Pi\Console\DiagnosticsCommand;
 use Pi\Console\LoginCommand;
 use Pi\Console\LogoutCommand;
 use Pi\Console\ModelsCommand;
@@ -201,6 +202,35 @@ describe('Console management commands', function () {
         expect($models->getDisplay())->toContain('stored');
 
         codingAgentDeleteDir($dir);
+    });
+
+    it('surfaces diagnostics from auth, settings, resources, and models', function () {
+        $dir = codingAgentTempDir('console-diagnostics');
+        putenv('PI_CODING_AGENT_DIR='.$dir.'/.agent');
+        mkdir($dir.'/.agent', 0777, true);
+        file_put_contents($dir.'/.agent/auth.json', '{not valid json');
+        file_put_contents($dir.'/.agent/settings.json', '{not valid json');
+        mkdir($dir.'/.pi', 0777, true);
+        file_put_contents($dir.'/.pi/settings.json', json_encode([
+            'defaultProvider' => 'missing-provider',
+            'defaultModel' => 'missing-model',
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        file_put_contents($dir.'/AGENTS.md', "Unreadable context\n");
+        chmod($dir.'/AGENTS.md', 0000);
+
+        $diagnostics = new CommandTester(new DiagnosticsCommand);
+        $diagnostics->execute([
+            '--cwd' => $dir,
+        ]);
+        $display = $diagnostics->getDisplay();
+
+        chmod($dir.'/AGENTS.md', 0644);
+        codingAgentDeleteDir($dir);
+
+        expect($display)->toContain('Diagnostics');
+        expect($display)->toContain('auth');
+        expect($display)->toContain('settings');
+        expect($display)->toContain('models');
     });
 
     it('handles repl slash commands against the runtime surface', function () {

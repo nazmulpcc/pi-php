@@ -35,6 +35,7 @@ final class SettingsCommand extends Command
                 'project' => $context->settingsManager->getProjectSettings(),
                 'resolved' => $context->settingsManager->getSettings(),
                 'errors' => $context->settingsManager->getErrors(),
+                'diagnostics' => $context->settingsManager->getDiagnostics(),
             ];
             $output->writeln(json_encode($payload, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
 

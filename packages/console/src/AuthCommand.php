@@ -50,6 +50,7 @@ final class AuthCommand extends Command
         }
 
         $table->render();
+        (new DiagnosticsRenderer)->render($output, $context->authStorage->getDiagnostics(), 'Auth diagnostics');
 
         return 0;
     }

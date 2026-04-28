@@ -10,6 +10,7 @@ use Pi\AI\OAuth\OAuthLoginCallbacks;
 use Pi\AI\OAuth\OAuthProviderInterface;
 use Pi\AI\Support\PromiseHelper;
 use Pi\CodingAgent\Config;
+use Pi\CodingAgent\Diagnostics\Diagnostic;
 use React\Promise\PromiseInterface;
 
 use function Pi\AI\getEnvApiKey;
@@ -29,6 +30,9 @@ final class AuthStorage
     private mixed $fallbackResolver = null;
 
     private ?\Throwable $loadError = null;
+
+    /** @var list<Diagnostic> */
+    private array $diagnostics = [];
 
     private function __construct(
         private readonly AuthStorageBackend $storage,
@@ -60,6 +64,7 @@ final class AuthStorage
     public function reload(): void
     {
         $this->loadError = null;
+        $this->diagnostics = [];
 
         try {
             $decoded = $this->storage->withLock(function (?string $current): array {
@@ -75,6 +80,7 @@ final class AuthStorage
         } catch (\Throwable $error) {
             $this->data = [];
             $this->loadError = $error;
+            $this->diagnostics[] = new Diagnostic('auth', $error->getMessage(), 'error', 'load');
         }
     }
 
@@ -107,23 +113,37 @@ final class AuthStorage
     }
 
     /**
+     * @return list<Diagnostic>
+     */
+    public function getDiagnostics(): array
+    {
+        return $this->diagnostics;
+    }
+
+    /**
      * @param  array<string, mixed>|null  $credential
      */
     public function set(string $provider, ?array $credential): void
     {
-        $this->storage->withLock(function (?string $current) use ($provider, $credential): array {
-            $data = $this->decode($current);
-            if ($credential === null) {
-                unset($data[$provider]);
-            } else {
-                $data[$provider] = $credential;
-            }
+        try {
+            $this->storage->withLock(function (?string $current) use ($provider, $credential): array {
+                $data = $this->decode($current);
+                if ($credential === null) {
+                    unset($data[$provider]);
+                } else {
+                    $data[$provider] = $credential;
+                }
 
-            return [
-                'result' => null,
-                'next' => json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
-            ];
-        });
+                return [
+                    'result' => null,
+                    'next' => json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
+                ];
+            });
+        } catch (\Throwable $error) {
+            $this->diagnostics[] = new Diagnostic('auth', sprintf('Failed to update auth for %s: %s', $provider, $error->getMessage()), 'error', $provider);
+
+            throw $error;
+        }
 
         $this->reload();
     }
@@ -235,6 +255,11 @@ final class AuthStorage
                     'type' => 'oauth',
                     ...$credentials->toArray(),
                 ]);
+            }, function (mixed $error) use ($providerId): PromiseInterface {
+                $error = PromiseHelper::normalizeThrowable($error);
+                $this->diagnostics[] = new Diagnostic('auth', sprintf('OAuth login failed for %s: %s', $providerId, $error->getMessage()), 'error', $providerId);
+
+                return PromiseHelper::reject($error);
             });
     }
 
@@ -311,6 +336,9 @@ final class AuthStorage
             if (is_array($updatedCredential) && ($updatedCredential['type'] ?? null) === 'oauth' && (int) ($updatedCredential['expires'] ?? 0) > (time() * 1000)) {
                 return resolve(is_string($updatedCredential['access'] ?? null) ? $updatedCredential['access'] : null);
             }
+
+            $error = PromiseHelper::normalizeThrowable($error);
+            $this->diagnostics[] = new Diagnostic('auth', sprintf('OAuth refresh failed for %s: %s', $provider, $error->getMessage()), 'error', $provider);
 
             return PromiseHelper::reject(PromiseHelper::normalizeThrowable($error));
         });

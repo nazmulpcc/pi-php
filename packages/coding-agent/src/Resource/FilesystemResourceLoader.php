@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Resource;
 
+use Pi\CodingAgent\Diagnostics\Diagnostic;
 use Pi\CodingAgent\Settings\SettingsManager;
 
 final class FilesystemResourceLoader implements ResourceLoaderInterface
 {
-    /** @var list<array{scope:string,error:string}> */
+    /** @var list<Diagnostic> */
     private array $diagnostics = [];
 
     /** @var list<string> */
@@ -52,11 +53,17 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
                 $seen[$path] = true;
 
                 if (is_file($path)) {
-                    $content = @file_get_contents($path);
+                    if (! is_readable($path)) {
+                        $this->diagnostics[] = new Diagnostic('resources', sprintf('Unable to read %s', $path), 'error', 'context', $path);
+
+                        continue;
+                    }
+
+                    $content = file_get_contents($path);
                     if (is_string($content)) {
                         $results[] = new ContextFile($path, $content);
                     } else {
-                        $this->diagnostics[] = ['scope' => 'context', 'error' => sprintf('Unable to read %s', $path)];
+                        $this->diagnostics[] = new Diagnostic('resources', sprintf('Unable to read %s', $path), 'error', 'context', $path);
                     }
                 }
             }
@@ -157,9 +164,15 @@ final class FilesystemResourceLoader implements ResourceLoaderInterface
                 }
                 $seen[$path] = true;
 
-                $content = @file_get_contents($path);
+                if (! is_readable($path)) {
+                    $this->diagnostics[] = new Diagnostic('resources', sprintf('Unable to read %s', $path), 'error', 'resource', $path);
+
+                    continue;
+                }
+
+                $content = file_get_contents($path);
                 if (! is_string($content)) {
-                    $this->diagnostics[] = ['scope' => 'resource', 'error' => sprintf('Unable to read %s', $path)];
+                    $this->diagnostics[] = new Diagnostic('resources', sprintf('Unable to read %s', $path), 'error', 'resource', $path);
 
                     continue;
                 }

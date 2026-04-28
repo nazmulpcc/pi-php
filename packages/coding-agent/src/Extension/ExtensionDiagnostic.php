@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Extension;
 
-final readonly class ExtensionDiagnostic
+use Pi\CodingAgent\Diagnostics\Diagnostic;
+
+final readonly class ExtensionDiagnostic extends Diagnostic
 {
     public function __construct(
-        public string $path,
-        public string $message,
-        public string $severity = 'error',
-    ) {}
+        string $path,
+        string $message,
+        string $severity = 'error',
+    ) {
+        parent::__construct('extension', $message, $severity, 'extension', $path);
+    }
 }

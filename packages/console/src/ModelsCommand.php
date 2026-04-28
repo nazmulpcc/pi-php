@@ -37,6 +37,7 @@ final class ModelsCommand extends Command
         foreach ($registry->getProviderAvailability() as $availability) {
             $availabilityByProvider[$availability->provider] = $availability;
         }
+        (new DiagnosticsRenderer)->render($output, $registry->getDiagnostics(), 'Model diagnostics');
         $search = mb_strtolower((string) $input->getArgument('search'));
         $models = $input->getOption('usable') ? $registry->getUsableModels() : $registry->getAvailableModels();
 

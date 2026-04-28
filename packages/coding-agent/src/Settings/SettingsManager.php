@@ -6,6 +6,7 @@ namespace Pi\CodingAgent\Settings;
 
 use Pi\Agent\ThinkingLevel;
 use Pi\CodingAgent\Config;
+use Pi\CodingAgent\Diagnostics\Diagnostic;
 
 final class SettingsManager
 {
@@ -15,8 +16,8 @@ final class SettingsManager
     /** @var array<string, mixed> */
     private array $projectSettings = [];
 
-    /** @var list<array{scope:string,error:string}> */
-    private array $errors = [];
+    /** @var list<Diagnostic> */
+    private array $diagnostics = [];
 
     private function __construct(
         private readonly SettingsStorage $storage,
@@ -44,9 +45,17 @@ final class SettingsManager
 
     public function reload(): void
     {
-        $this->errors = [];
+        $this->diagnostics = [];
         $this->globalSettings = $this->loadScope('global');
         $this->projectSettings = $this->loadScope('project');
+    }
+
+    /**
+     * @return list<Diagnostic>
+     */
+    public function getDiagnostics(): array
+    {
+        return $this->diagnostics;
     }
 
     /**
@@ -54,7 +63,13 @@ final class SettingsManager
      */
     public function getErrors(): array
     {
-        return $this->errors;
+        return array_map(
+            static fn (Diagnostic $diagnostic): array => [
+                'scope' => $diagnostic->scope ?? $diagnostic->source,
+                'error' => $diagnostic->message,
+            ],
+            $this->diagnostics,
+        );
     }
 
     /**
@@ -195,7 +210,13 @@ final class SettingsManager
     public function setGlobalSettings(array $settings): void
     {
         $this->globalSettings = $settings;
-        $this->storage->write('global', json_encode($settings, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        try {
+            $this->storage->write('global', json_encode($settings, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        } catch (\Throwable $error) {
+            $this->diagnostics[] = new Diagnostic('settings', $error->getMessage(), 'error', 'global');
+
+            throw $error;
+        }
     }
 
     /**
@@ -204,7 +225,13 @@ final class SettingsManager
     public function setProjectSettings(array $settings): void
     {
         $this->projectSettings = $settings;
-        $this->storage->write('project', json_encode($settings, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        try {
+            $this->storage->write('project', json_encode($settings, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        } catch (\Throwable $error) {
+            $this->diagnostics[] = new Diagnostic('settings', $error->getMessage(), 'error', 'project');
+
+            throw $error;
+        }
     }
 
     public function setValue(string $scope, string $key, mixed $value): void
@@ -245,17 +272,17 @@ final class SettingsManager
      */
     private function loadScope(string $scope): array
     {
-        $content = $this->storage->read($scope);
-        if ($content === null || trim($content) === '') {
-            return [];
-        }
-
         try {
+            $content = $this->storage->read($scope);
+            if ($content === null || trim($content) === '') {
+                return [];
+            }
+
             $decoded = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
 
             return is_array($decoded) ? $decoded : [];
         } catch (\Throwable $error) {
-            $this->errors[] = ['scope' => $scope, 'error' => $error->getMessage()];
+            $this->diagnostics[] = new Diagnostic('settings', $error->getMessage(), 'error', $scope);
 
             return [];
         }

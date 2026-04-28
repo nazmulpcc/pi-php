@@ -92,4 +92,22 @@ describe('Console cli', function () {
         expect(implode("\n", $output))->toContain('github-copilot');
         expect(implode("\n", $output))->not->toContain('openai/');
     });
+
+    it('shows the application command list and help pages', function () {
+        $listOutput = [];
+        $listExit = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' list', $listOutput, $listExit);
+
+        expect($listExit)->toBe(0);
+        expect(implode("\n", $listOutput))->toContain('login');
+        expect(implode("\n", $listOutput))->toContain('models');
+
+        $helpOutput = [];
+        $helpExit = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' help models', $helpOutput, $helpExit);
+
+        expect($helpExit)->toBe(0);
+        expect(implode("\n", $helpOutput))->toContain('Usage:');
+        expect(implode("\n", $helpOutput))->toContain('models [options]');
+    });
 });
