@@ -149,7 +149,7 @@ final class CallbackServer
                 return null;
             }
 
-            if ($this->expectedState !== null && $state !== null && $state !== $this->expectedState) {
+            if ($this->expectedState !== null && $state !== $this->expectedState) {
                 $this->writeResponse($client, 400, OAuthPage::error('State mismatch.'));
 
                 return null;

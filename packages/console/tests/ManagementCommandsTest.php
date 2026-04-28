@@ -223,6 +223,7 @@ describe('Console management commands', function () {
             '--cwd' => $dir,
         ]);
         $display = $diagnostics->getDisplay();
+        $sessionFiles = glob($dir.'/.pi/sessions/*.jsonl') ?: [];
 
         chmod($dir.'/AGENTS.md', 0644);
         codingAgentDeleteDir($dir);
@@ -231,6 +232,7 @@ describe('Console management commands', function () {
         expect($display)->toContain('auth');
         expect($display)->toContain('settings');
         expect($display)->toContain('models');
+        expect($sessionFiles)->toBe([]);
     });
 
     it('handles repl slash commands against the runtime surface', function () {

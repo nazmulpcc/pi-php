@@ -27,7 +27,7 @@ final class Application
         $application->add(new SettingsCommand);
         $application->add(new ResourcesCommand);
         $application->add(new ModelsCommand);
-        $application->add(new DiagnosticsCommand($extensions));
+        $application->add(new DiagnosticsCommand);
         $knownCommands = ['_default', 'help', 'list', 'login', 'logout', 'auth', 'sessions', 'settings', 'resources', 'models', 'diagnostics'];
         foreach ($mainCommand->getExtensionCommands() as $command) {
             $application->add($command);
@@ -35,11 +35,7 @@ final class Application
         }
         $application->setDefaultCommand('_default');
 
-        $normalizedArgv = ['bin/pi'];
-        if (! $this->startsWithKnownCommand($argv, $knownCommands)) {
-            $normalizedArgv[] = '_default';
-        }
-        $normalizedArgv = [...$normalizedArgv, ...$argv];
+        $normalizedArgv = ['bin/pi', ...$this->normalizeArgv($argv, $knownCommands)];
 
         return $application->run(
             new ArgvInput($normalizedArgv),
@@ -73,10 +69,89 @@ final class Application
      * @param  list<string>  $argv
      * @param  list<string>  $knownCommands
      */
-    private function startsWithKnownCommand(array $argv, array $knownCommands): bool
+    private function normalizeArgv(array $argv, array $knownCommands): array
     {
-        $first = $argv[0] ?? null;
+        $commandInfo = $this->findCommandToken($argv);
+        $first = $commandInfo['token'];
 
-        return is_string($first) && $first !== '' && ! str_starts_with($first, '-') && in_array($first, $knownCommands, true);
+        if (is_string($first) && $first !== '' && in_array($first, $knownCommands, true)) {
+            $index = $commandInfo['index'];
+            if ($index === 0) {
+                return in_array($first, ['help', 'list'], true)
+                    ? $this->stripCwdOptions($argv)
+                    : $argv;
+            }
+
+            if (is_int($index) && $index > 0) {
+                $normalized = [
+                    $first,
+                    ...array_slice($argv, 0, $index),
+                    ...array_slice($argv, $index + 1),
+                ];
+
+                return in_array($first, ['help', 'list'], true)
+                    ? $this->stripCwdOptions($normalized)
+                    : $normalized;
+            }
+        }
+
+        return ['_default', ...$argv];
+    }
+
+    /**
+     * @param  list<string>  $argv
+     */
+    private function findCommandToken(array $argv): array
+    {
+        for ($index = 0, $count = count($argv); $index < $count; $index++) {
+            $argument = $argv[$index];
+            if (! is_string($argument) || $argument === '') {
+                continue;
+            }
+
+            if ($argument === '--cwd') {
+                $index++;
+
+                continue;
+            }
+
+            if (str_starts_with($argument, '--cwd=')) {
+                continue;
+            }
+
+            if (str_starts_with($argument, '-')) {
+                continue;
+            }
+
+            return ['token' => $argument, 'index' => $index];
+        }
+
+        return ['token' => null, 'index' => null];
+    }
+
+    /**
+     * @param  list<string>  $argv
+     * @return list<string>
+     */
+    private function stripCwdOptions(array $argv): array
+    {
+        $result = [];
+
+        for ($index = 0, $count = count($argv); $index < $count; $index++) {
+            $argument = $argv[$index];
+            if ($argument === '--cwd') {
+                $index++;
+
+                continue;
+            }
+
+            if (is_string($argument) && str_starts_with($argument, '--cwd=')) {
+                continue;
+            }
+
+            $result[] = $argument;
+        }
+
+        return $result;
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pi\Console;
 
-use Pi\CodingAgent\Extension\Extension;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,15 +11,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class DiagnosticsCommand extends Command
 {
-    /**
-     * @param  array<Extension>  $extensions
-     */
-    public function __construct(
-        private readonly array $extensions = [],
-    ) {
-        parent::__construct('diagnostics');
-    }
-
     protected function configure(): void
     {
         $this
@@ -34,8 +24,8 @@ final class DiagnosticsCommand extends Command
         $cwdOption = $input->getOption('cwd');
         $cwd = is_string($cwdOption) && $cwdOption !== '' ? $cwdOption : null;
 
-        $runtime = (new MainCommand($this->extensions))->createRuntimeFromCwd($cwd ?? (getcwd() ?: '.'));
-        $diagnostics = $runtime->getDiagnostics();
+        $context = (new ConsoleContextFactory)->create($cwd);
+        $diagnostics = (new DiagnosticsCollector)->collect($context);
         if ($diagnostics === []) {
             $output->writeln('No diagnostics.');
 

@@ -170,4 +170,26 @@ PHP,
         expect(implode("\n", $helpOutput))->toContain('Usage:');
         expect(implode("\n", $helpOutput))->toContain('models [options]');
     });
+
+    it('recognizes management commands when --cwd appears before the command name', function () {
+        $dir = codingAgentTempDir('console-command-routing');
+
+        $listOutput = [];
+        $listExit = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' --cwd '.escapeshellarg($dir).' list', $listOutput, $listExit);
+
+        expect($listExit)->toBe(0);
+        expect(implode("\n", $listOutput))->toContain('login');
+        expect(implode("\n", $listOutput))->toContain('models');
+
+        $modelsOutput = [];
+        $modelsExit = 0;
+        exec('php '.escapeshellarg(getcwd().'/bin/pi').' --cwd '.escapeshellarg($dir).' models list', $modelsOutput, $modelsExit);
+
+        codingAgentDeleteDir($dir);
+
+        expect($modelsExit)->toBe(0);
+        expect(implode("\n", $modelsOutput))->toContain('Provider');
+        expect(implode("\n", $modelsOutput))->toContain('Model');
+    });
 });

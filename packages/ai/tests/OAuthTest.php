@@ -5,10 +5,12 @@ declare(strict_types=1);
 require_once __DIR__.'/TestHelper.php';
 
 use Pi\AI\Model;
+use Pi\AI\OAuth\CallbackServer;
 use Pi\AI\OAuth\OAuthCredentials;
 use Pi\AI\OAuth\OAuthHttp;
 use Pi\AI\OAuth\OAuthLoginCallbacks;
 use Pi\AI\OAuth\OAuthProviderInterface;
+use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 
 use function Pi\AI\getModel;
@@ -234,6 +236,26 @@ describe('OAuth runtime helpers', function () {
 
         expect($credentials->refresh)->toBe('antigravity-refresh');
         expect($credentials->get('projectId'))->toBe('rising-fact-p41fc');
+    });
+
+    it('rejects callback requests when state is missing', function () {
+        $port = random_int(41000, 49000);
+        $server = CallbackServer::start('127.0.0.1', $port, '/callback', 'expected-state', 'ok');
+
+        Loop::futureTick(static function () use ($port): void {
+            $client = stream_socket_client(sprintf('tcp://127.0.0.1:%d', $port), $errno, $errstr, 1.0);
+            expect(is_resource($client))->toBeTrue($errstr !== '' ? $errstr : (string) $errno);
+
+            fwrite($client, "GET /callback?code=test-code HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
+            fclose($client);
+        });
+
+        Loop::addTimer(0.1, static function () use ($server): void {
+            $server->cancelWait();
+            $server->close();
+        });
+
+        expect(block($server->waitForCode()))->toBeNull();
     });
 });
 
