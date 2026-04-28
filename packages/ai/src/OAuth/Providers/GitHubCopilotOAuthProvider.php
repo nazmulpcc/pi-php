@@ -79,7 +79,7 @@ final class GitHubCopilotOAuthProvider extends AbstractOAuthProvider
         return OAuthHttp::request('GET', $url, [
             ...self::HEADERS,
             'Authorization' => 'Bearer '.$credentials->refresh,
-        ])->then(function (array $response) use ($enterpriseUrl): OAuthCredentials {
+        ])->then(function (array $response) use ($credentials, $enterpriseUrl): OAuthCredentials {
             if ($response['status'] < 200 || $response['status'] >= 300) {
                 throw new \RuntimeException(sprintf('GitHub Copilot token refresh failed: %s', $response['body']));
             }

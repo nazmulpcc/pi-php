@@ -171,6 +171,32 @@ final class CodingAgentEventSerializer
         }
 
         if (is_object($value)) {
+            if (method_exists($value, 'getType')) {
+                $normalized = [];
+                $type = $value->getType();
+                if ($type instanceof \UnitEnum) {
+                    $normalized['type'] = $type->value ?? $type->name;
+                } else {
+                    $normalized['type'] = self::normalizeValue($type);
+                }
+
+                foreach (get_object_vars($value) as $key => $item) {
+                    $normalized[$key] = self::normalizeValue($item);
+                }
+
+                return $normalized;
+            }
+
+            $properties = get_object_vars($value);
+            if ($properties !== []) {
+                $normalized = [];
+                foreach ($properties as $key => $item) {
+                    $normalized[$key] = self::normalizeValue($item);
+                }
+
+                return $normalized;
+            }
+
             if (method_exists($value, '__toString')) {
                 return (string) $value;
             }

@@ -202,6 +202,27 @@ describe('OAuth runtime helpers', function () {
         expect($credentials->access)->toContain('proxy-ep=proxy.individual.githubcopilot.com');
     });
 
+    it('refreshes github copilot oauth credentials', function () {
+        OAuthHttp::setClientForTesting(static fn (): array => [
+            'status' => 200,
+            'body' => json_encode([
+                'token' => 'tid=1;proxy-ep=proxy.enterprise.githubcopilot.com;exp=999',
+                'expires_at' => time() + 3600,
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $provider = getOAuthProvider('github-copilot');
+        $credentials = block($provider->refreshToken(new OAuthCredentials(
+            refresh: 'github-refresh',
+            access: 'stale-token',
+            expires: 0,
+            extra: ['enterpriseUrl' => 'github.com'],
+        )));
+
+        expect($credentials->refresh)->toBe('github-refresh');
+        expect($credentials->access)->toContain('proxy-ep=proxy.enterprise.githubcopilot.com');
+    });
+
     it('logs in with google gemini cli oauth', function () {
         putenv('GOOGLE_CLOUD_PROJECT=test-project');
         OAuthHttp::setClientForTesting(static fn (): array => [

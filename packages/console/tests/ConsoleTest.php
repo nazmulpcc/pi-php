@@ -13,6 +13,34 @@ describe('Console cli', function () {
 
         expect($exitCode)->toBe(0);
         expect(implode("\n", $output))->toContain('console text');
+        expect(substr_count(implode("\n", $output), 'console text'))->toBe(1);
+    });
+
+    it('prints assistant error messages in text mode', function () {
+        $descriptorSpec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $code = <<<'PHP'
+require __DIR__.'/vendor/autoload.php';
+(new \Pi\Console\ConsoleOutputGuard())->writeError('provider exploded');
+PHP;
+
+        $process = proc_open('php -r '.escapeshellarg($code), $descriptorSpec, $pipes, getcwd());
+        expect(is_resource($process))->toBeTrue();
+
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+
+        expect($stdout)->toBe('');
+        expect($stderr)->toContain('provider exploded');
+        expect($exitCode)->toBe(0);
     });
 
     it('streams json mode events through bin/pi', function () {

@@ -42,9 +42,7 @@
   },
   "extra": {
     "pi": {
-      "extensions": [
-        "packages/extension-plan"
-      ]
+      "extensions": []
     }
   },
   "scripts": {

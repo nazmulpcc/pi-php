@@ -16,7 +16,7 @@ final class ReplInputReader
 
     public function readLine(string $prompt): ?string
     {
-        if ($this->canUseReadline()) {
+        if ($this->supportsReadline()) {
             $this->registerCompletion();
             $line = readline($prompt);
             if ($line === false) {
@@ -40,7 +40,24 @@ final class ReplInputReader
         return trim($line);
     }
 
-    private function canUseReadline(): bool
+    /**
+     * @param  list<string>  $history
+     */
+    public function seedHistory(array $history): void
+    {
+        if (! $this->supportsReadline() || ! function_exists('readline_add_history')) {
+            return;
+        }
+
+        foreach ($history as $line) {
+            $line = trim($line);
+            if ($line !== '') {
+                readline_add_history($line);
+            }
+        }
+    }
+
+    public function supportsReadline(): bool
     {
         return function_exists('readline')
             && function_exists('readline_completion_function')

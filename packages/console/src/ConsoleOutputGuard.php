@@ -18,6 +18,7 @@ final class ConsoleOutputGuard
     public function writeProtocolLine(string $line): void
     {
         fwrite(STDOUT, $line);
+        fflush(STDOUT);
     }
 
     /**
@@ -26,20 +27,25 @@ final class ConsoleOutputGuard
     public function writeProtocolJson(mixed $payload): void
     {
         fwrite(STDOUT, json_encode($payload, JSON_THROW_ON_ERROR)."\n");
+        fflush(STDOUT);
     }
 
     public function writeStdoutLine(string $line): void
     {
-        fwrite($this->protocolMode ? STDERR : STDOUT, rtrim($line)."\n");
+        $stream = $this->protocolMode ? STDERR : STDOUT;
+        fwrite($stream, rtrim($line)."\n");
+        fflush($stream);
     }
 
     public function writeNotice(string $message, string $type = 'info'): void
     {
         fwrite(STDERR, sprintf("[%s] %s\n", $type, $message));
+        fflush(STDERR);
     }
 
     public function writeError(string $message): void
     {
         fwrite(STDERR, $message."\n");
+        fflush(STDERR);
     }
 }

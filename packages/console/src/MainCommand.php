@@ -22,6 +22,7 @@ use Pi\CodingAgent\Session\InMemorySessionStore;
 use Pi\CodingAgent\Settings\SettingsManager;
 use Pi\CodingAgent\Support\PromiseBlocker;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -140,7 +141,13 @@ final class MainCommand extends Command
             $thinkingLevel = ThinkingLevel::from($thinking);
         }
 
-        $resume = $input->getOption('resume');
+        $resumeOption = $input->getOption('resume');
+        $resumeProvided = $input instanceof Input
+            ? $input->hasParameterOption('--resume', true)
+            : false;
+        $resume = $resumeProvided
+            ? (is_string($resumeOption) && $resumeOption !== '' ? $resumeOption : true)
+            : false;
         $sessionTarget = $input->getOption('session');
         if ($resume !== false && is_string($sessionTarget) && $sessionTarget !== '' && $resume !== null && $resume !== $sessionTarget) {
             throw new \RuntimeException('Use either --resume or --session, not both.');
@@ -307,13 +314,44 @@ final class MainCommand extends Command
             throw new \RuntimeException('No prompt provided');
         }
 
-        if ($message !== null) {
-            PromiseBlocker::block($runtime->prompt($message, new PromptOptions($parsed->fileImages)));
-        } else {
-            PromiseBlocker::block($runtime->continue());
+        $renderState = (object) ['printedText' => false, 'printedError' => false];
+        $unsubscribe = $runtime->subscribe(function (CodingAgentEvent $event) use ($renderState): void {
+            if ($event->type === 'message_update') {
+                $raw = $event->payload['assistantMessageEvent'] ?? null;
+                if (is_array($raw) && ($raw['type'] ?? null) === 'text_delta') {
+                    $this->consoleOutputGuard()->writeProtocolLine((string) ($raw['delta'] ?? ''));
+                    $renderState->printedText = true;
+                }
+            }
+
+            if ($event->type === 'message_end') {
+                $message = $event->payload['message'] ?? null;
+                if (
+                    is_array($message)
+                    && ($message['role'] ?? null) === 'assistant'
+                    && in_array((string) ($message['stopReason'] ?? ''), ['error', 'aborted'], true)
+                ) {
+                    $this->consoleOutputGuard()->writeError((string) ($message['errorMessage'] ?? ('Request '.($message['stopReason'] ?? 'error'))));
+                    $renderState->printedError = true;
+                }
+            }
+
+            if ($event->type === 'tool_execution_start') {
+                $this->consoleOutputGuard()->writeNotice((string) ($event->payload['toolName'] ?? 'tool'), 'tool');
+            }
+        });
+
+        try {
+            if ($message !== null) {
+                PromiseBlocker::block($runtime->prompt($message, new PromptOptions($parsed->fileImages)));
+            } else {
+                PromiseBlocker::block($runtime->continue());
+            }
+        } finally {
+            $unsubscribe();
         }
 
-        return $this->renderFinalAssistantMessage($runtime);
+        return $this->renderFinalAssistantMessage($runtime, $renderState->printedText, $renderState->printedError);
     }
 
     private function runJsonMode(CodingAgentRuntime $runtime, ParsedInput $parsed, ?string $stdin): int
@@ -404,13 +442,18 @@ final class MainCommand extends Command
 
     private function runRepl(CodingAgentRuntime $runtime, SymfonyStyle $io): int
     {
-        $renderState = (object) ['printedText' => false];
+        $renderState = (object) ['printedText' => false, 'printedError' => false];
         $slashCommands = new ReplSlashCommandHandler;
         $slashCompleter = new ReplSlashCommandCompleter;
+        $promptRenderer = new ReplPromptRenderer;
+        $startupSummary = new ReplStartupSummary;
         $inputReader = new ReplInputReader(
             $this->consoleOutputGuard(),
             fn (string $input): array => $slashCompleter->complete($input, $this->getReplSlashCommandNames($runtime, $slashCommands)),
         );
+        $inputReader->seedHistory((new ReplHistoryExtractor)->userMessages($runtime->getState()->messages));
+        $interrupts = new ReplInterruptHandler($runtime, $this->consoleOutputGuard());
+        $interrupts->install();
         $unsubscribe = $runtime->subscribe(function (CodingAgentEvent $event) use ($renderState): void {
             if ($event->type === 'message_update') {
                 $raw = $event->payload['assistantMessageEvent'] ?? null;
@@ -420,14 +463,31 @@ final class MainCommand extends Command
                 }
             }
 
+            if ($event->type === 'message_end') {
+                $message = $event->payload['message'] ?? null;
+                if (
+                    is_array($message)
+                    && ($message['role'] ?? null) === 'assistant'
+                    && in_array((string) ($message['stopReason'] ?? ''), ['error', 'aborted'], true)
+                ) {
+                    $this->consoleOutputGuard()->writeError((string) ($message['errorMessage'] ?? ('Request '.($message['stopReason'] ?? 'error'))));
+                    $renderState->printedError = true;
+                }
+            }
+
             if ($event->type === 'tool_execution_start') {
                 $this->consoleOutputGuard()->writeNotice((string) ($event->payload['toolName'] ?? 'tool'), 'tool');
             }
         });
 
         try {
+            foreach ($startupSummary->lines($runtime) as $line) {
+                $this->consoleOutputGuard()->writeStdoutLine($line);
+            }
+            $this->consoleOutputGuard()->writeStdoutLine('');
+
             while (true) {
-                $line = $inputReader->readLine('> ');
+                $line = $inputReader->readLine($promptRenderer->render($runtime->getState()));
                 if ($line === null) {
                     $this->consoleOutputGuard()->writeProtocolLine("\n");
 
@@ -440,8 +500,9 @@ final class MainCommand extends Command
                 if (str_starts_with($line, '/')) {
                     if ($line === '/continue') {
                         $renderState->printedText = false;
-                        PromiseBlocker::block($runtime->continue());
-                        $this->finishReplTurn($runtime, $renderState->printedText);
+                        $renderState->printedError = false;
+                        $this->blockReplTurn($runtime, $interrupts, fn () => $runtime->continue());
+                        $this->finishReplTurn($runtime, $renderState->printedText, $renderState->printedError);
 
                         continue;
                     }
@@ -478,18 +539,34 @@ final class MainCommand extends Command
 
                 if ($line === '/continue') {
                     $renderState->printedText = false;
-                    PromiseBlocker::block($runtime->continue());
-                    $this->finishReplTurn($runtime, $renderState->printedText);
+                    $renderState->printedError = false;
+                    $this->blockReplTurn($runtime, $interrupts, fn () => $runtime->continue());
+                    $this->finishReplTurn($runtime, $renderState->printedText, $renderState->printedError);
 
                     continue;
                 }
 
                 $renderState->printedText = false;
-                PromiseBlocker::block($runtime->prompt($line));
-                $this->finishReplTurn($runtime, $renderState->printedText);
+                $renderState->printedError = false;
+                $this->blockReplTurn($runtime, $interrupts, fn () => $runtime->prompt($line));
+                $this->finishReplTurn($runtime, $renderState->printedText, $renderState->printedError);
             }
         } finally {
+            $interrupts->restore();
             $unsubscribe();
+        }
+    }
+
+    private function blockReplTurn(CodingAgentRuntime $runtime, ReplInterruptHandler $interrupts, callable $start): void
+    {
+        $interrupts->beginTurn();
+        try {
+            PromiseBlocker::block($start());
+        } finally {
+            if ($runtime->getState()->isStreaming) {
+                PromiseBlocker::block($runtime->waitForIdle());
+            }
+            $interrupts->endTurn();
         }
     }
 
@@ -512,7 +589,7 @@ final class MainCommand extends Command
         return $commands;
     }
 
-    private function finishReplTurn(CodingAgentRuntime $runtime, bool $printedStreamingText): void
+    private function finishReplTurn(CodingAgentRuntime $runtime, bool $printedStreamingText, bool $printedError): void
     {
         if (! $printedStreamingText) {
             $assistant = $this->getLastAssistantMessage($runtime);
@@ -527,26 +604,27 @@ final class MainCommand extends Command
 
         $this->consoleOutputGuard()->writeProtocolLine("\n");
 
-        $assistant = $this->getLastAssistantMessage($runtime);
-        if ($assistant !== null && in_array($assistant->stopReason->value, ['error', 'aborted'], true)) {
-            $this->consoleOutputGuard()->writeError($assistant->errorMessage ?? ('Request '.$assistant->stopReason->value));
-        }
+        $this->renderFinalAssistantMessage($runtime, true, $printedError);
     }
 
-    private function renderFinalAssistantMessage(CodingAgentRuntime $runtime): int
+    private function renderFinalAssistantMessage(CodingAgentRuntime $runtime, bool $printedStreamingText = false, bool $printedError = false): int
     {
         $lastMessage = $this->getLastAssistantMessage($runtime);
 
         if ($lastMessage instanceof AssistantMessage) {
             if (in_array($lastMessage->stopReason->value, ['error', 'aborted'], true)) {
-                $this->consoleOutputGuard()->writeError($lastMessage->errorMessage ?? ('Request '.$lastMessage->stopReason->value));
+                if (! $printedError) {
+                    $this->consoleOutputGuard()->writeError($lastMessage->errorMessage ?? ('Request '.$lastMessage->stopReason->value));
+                }
 
                 return 1;
             }
 
-            foreach ($lastMessage->content as $content) {
-                if ($content instanceof TextContent) {
-                    $this->consoleOutputGuard()->writeStdoutLine($content->text);
+            if (! $printedStreamingText) {
+                foreach ($lastMessage->content as $content) {
+                    if ($content instanceof TextContent) {
+                        $this->consoleOutputGuard()->writeStdoutLine($content->text);
+                    }
                 }
             }
         }
