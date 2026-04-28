@@ -6,6 +6,7 @@ require_once __DIR__.'/TestHelper.php';
 
 use Pi\Agent\ThinkingLevel;
 use Pi\AI\OAuth\OAuthHttp;
+use Pi\AI\OAuth\OAuthLoginCallbacks;
 use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\Settings\SettingsManager;
 
@@ -86,6 +87,31 @@ describe('Coding agent auth storage and settings manager', function () {
         expect($reloaded->get('anthropic')['access'] ?? null)->toBe('access-new');
 
         OAuthHttp::setClientForTesting(null);
+        codingAgentDeleteDir($dir);
+    });
+
+    it('does not overwrite stored credentials when oauth login fails', function () {
+        $dir = codingAgentTempDir();
+        $auth = AuthStorage::create($dir.'/auth.json');
+        $auth->set('openai-codex', [
+            'type' => 'oauth',
+            'access' => 'access-old',
+            'refresh' => 'refresh-old',
+            'expires' => 123,
+            'accountId' => 'acct_old',
+        ]);
+
+        expect(fn () => codingAgentBlock($auth->login('openai-codex', new OAuthLoginCallbacks(
+            onAuth: static fn () => null,
+            onPrompt: static fn () => '',
+            onProgress: static fn () => null,
+            onManualCodeInput: static fn () => '',
+        ))))->toThrow(RuntimeException::class);
+
+        $reloaded = AuthStorage::create($dir.'/auth.json');
+        expect($reloaded->get('openai-codex')['refresh'] ?? null)->toBe('refresh-old');
+        expect($reloaded->get('openai-codex')['access'] ?? null)->toBe('access-old');
+
         codingAgentDeleteDir($dir);
     });
 

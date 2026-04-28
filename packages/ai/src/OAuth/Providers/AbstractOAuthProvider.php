@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Pi\AI\OAuth\Providers;
 
 use Pi\AI\Model;
+use Pi\AI\OAuth\OAuthAuthInfo;
 use Pi\AI\OAuth\OAuthCredentials;
 use Pi\AI\OAuth\OAuthLoginCallbacks;
+use Pi\AI\OAuth\OAuthPrompt;
 use Pi\AI\OAuth\OAuthProviderInterface;
 use Pi\AI\Support\PromiseHelper;
 use React\Promise\PromiseInterface;
@@ -33,5 +35,39 @@ abstract class AbstractOAuthProvider implements OAuthProviderInterface
     public function modifyModels(array $models, OAuthCredentials $credentials): array
     {
         return $models;
+    }
+
+    protected function onAuth(OAuthLoginCallbacks $callbacks, string $url, ?string $instructions = null): void
+    {
+        ($callbacks->onAuth)(new OAuthAuthInfo($url, $instructions));
+    }
+
+    /**
+     * @return PromiseInterface<string>
+     */
+    protected function prompt(OAuthLoginCallbacks $callbacks, string $message, ?string $placeholder = null, bool $allowEmpty = false): PromiseInterface
+    {
+        return PromiseHelper::resolve(($callbacks->onPrompt)(new OAuthPrompt($message, $placeholder, $allowEmpty)))
+            ->then(static fn (mixed $value): string => is_string($value) ? $value : '');
+    }
+
+    protected function progress(OAuthLoginCallbacks $callbacks, string $message): void
+    {
+        if ($callbacks->onProgress !== null) {
+            ($callbacks->onProgress)($message);
+        }
+    }
+
+    /**
+     * @return PromiseInterface<string>
+     */
+    protected function manualCodeInput(OAuthLoginCallbacks $callbacks): PromiseInterface
+    {
+        if ($callbacks->onManualCodeInput === null) {
+            return PromiseHelper::resolve('');
+        }
+
+        return PromiseHelper::resolve(($callbacks->onManualCodeInput)())
+            ->then(static fn (mixed $value): string => is_string($value) ? $value : '');
     }
 }

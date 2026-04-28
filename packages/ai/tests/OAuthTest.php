@@ -125,6 +125,116 @@ describe('OAuth runtime helpers', function () {
         expect($modified[0]->baseUrl)->toBe('https://api.enterprise.githubcopilot.com');
         expect($modified[1]->baseUrl)->toBe($models[1]->baseUrl);
     });
+
+    it('logs in with openai codex oauth', function () {
+        OAuthHttp::setClientForTesting(static fn (string $method, string $url, array $headers, ?string $body): array => [
+            'status' => 200,
+            'body' => json_encode([
+                'access_token' => createTestJwt(['https://api.openai.com/auth' => ['chatgpt_account_id' => 'acct_login']]),
+                'refresh_token' => 'refresh-login',
+                'expires_in' => 3600,
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $provider = getOAuthProvider('openai-codex');
+        $credentials = block($provider->login(loginCallbacks('code123')));
+
+        expect($credentials->refresh)->toBe('refresh-login');
+        expect($credentials->get('accountId'))->toBe('acct_login');
+    });
+
+    it('logs in with anthropic oauth', function () {
+        OAuthHttp::setClientForTesting(static fn (): array => [
+            'status' => 200,
+            'body' => json_encode([
+                'access_token' => 'anth-access',
+                'refresh_token' => 'anth-refresh',
+                'expires_in' => 3600,
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $provider = getOAuthProvider('anthropic');
+        $credentials = block($provider->login(loginCallbacks('anth-code')));
+
+        expect($credentials->access)->toBe('anth-access');
+        expect($credentials->refresh)->toBe('anth-refresh');
+    });
+
+    it('logs in with github copilot oauth', function () {
+        OAuthHttp::setClientForTesting(static function (string $method, string $url): array {
+            if (str_contains($url, '/login/device/code')) {
+                return [
+                    'status' => 200,
+                    'body' => json_encode([
+                        'device_code' => 'device-123',
+                        'user_code' => 'USER-CODE',
+                        'verification_uri' => 'https://github.com/login/device',
+                        'interval' => 0,
+                        'expires_in' => 300,
+                    ], JSON_THROW_ON_ERROR),
+                ];
+            }
+
+            if (str_contains($url, '/login/oauth/access_token')) {
+                return [
+                    'status' => 200,
+                    'body' => json_encode([
+                        'access_token' => 'github-access',
+                    ], JSON_THROW_ON_ERROR),
+                ];
+            }
+
+            return [
+                'status' => 200,
+                'body' => json_encode([
+                    'token' => 'tid=1;proxy-ep=proxy.individual.githubcopilot.com;exp=999',
+                    'expires_at' => time() + 3600,
+                ], JSON_THROW_ON_ERROR),
+            ];
+        });
+
+        $provider = getOAuthProvider('github-copilot');
+        $credentials = block($provider->login(loginCallbacks('', '')));
+
+        expect($credentials->refresh)->toBe('github-access');
+        expect($credentials->access)->toContain('proxy-ep=proxy.individual.githubcopilot.com');
+    });
+
+    it('logs in with google gemini cli oauth', function () {
+        putenv('GOOGLE_CLOUD_PROJECT=test-project');
+        OAuthHttp::setClientForTesting(static fn (): array => [
+            'status' => 200,
+            'body' => json_encode([
+                'access_token' => 'google-access',
+                'refresh_token' => 'google-refresh',
+                'expires_in' => 3600,
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $provider = getOAuthProvider('google-gemini-cli');
+        $credentials = block($provider->login(loginCallbacks('gcode')));
+
+        expect($credentials->refresh)->toBe('google-refresh');
+        expect($credentials->get('projectId'))->toBe('test-project');
+        putenv('GOOGLE_CLOUD_PROJECT');
+    });
+
+    it('logs in with google antigravity oauth', function () {
+        OAuthHttp::setClientForTesting(static fn (): array => [
+            'status' => 200,
+            'body' => json_encode([
+                'access_token' => 'antigravity-access',
+                'refresh_token' => 'antigravity-refresh',
+                'expires_in' => 3600,
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $provider = getOAuthProvider('google-antigravity');
+        $credentials = block($provider->login(loginCallbacks('acode')));
+
+        expect($credentials->refresh)->toBe('antigravity-refresh');
+        expect($credentials->get('projectId'))->toBe('rising-fact-p41fc');
+    });
 });
 
 function createTestJwt(array $payload): string
@@ -135,4 +245,14 @@ function createTestJwt(array $payload): string
     };
 
     return $encode($header).'.'.$encode($payload).'.signature';
+}
+
+function loginCallbacks(string $manualInput, string $promptInput = 'github.com'): OAuthLoginCallbacks
+{
+    return new OAuthLoginCallbacks(
+        onAuth: static fn () => null,
+        onPrompt: static fn () => $promptInput,
+        onProgress: static fn () => null,
+        onManualCodeInput: static fn () => $manualInput,
+    );
 }
