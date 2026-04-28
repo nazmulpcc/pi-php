@@ -9,9 +9,9 @@ final class InMemorySessionStore implements SessionStore
     /** @var array<string, SessionManager> */
     private array $sessions = [];
 
-    public function createManager(string $cwd, ?string $sessionId = null): SessionManager
+    public function createManager(string $cwd, ?string $sessionId = null, ?string $parentSession = null): SessionManager
     {
-        $manager = SessionManager::create($cwd, null, false, $sessionId);
+        $manager = SessionManager::create($cwd, null, false, $sessionId, $parentSession);
         $this->sessions[$manager->getSessionId()] = $manager;
 
         return $manager;

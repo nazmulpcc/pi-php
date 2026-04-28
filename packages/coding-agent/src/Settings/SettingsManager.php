@@ -65,6 +65,22 @@ final class SettingsManager
         return self::deepMerge($this->globalSettings, $this->projectSettings);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function getGlobalSettings(): array
+    {
+        return $this->globalSettings;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getProjectSettings(): array
+    {
+        return $this->projectSettings;
+    }
+
     public function getDefaultProvider(): ?string
     {
         $value = $this->getSettings()['defaultProvider'] ?? null;
@@ -179,6 +195,39 @@ final class SettingsManager
     {
         $this->projectSettings = $settings;
         $this->storage->write('project', json_encode($settings, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+    }
+
+    public function setValue(string $scope, string $key, mixed $value): void
+    {
+        $segments = array_values(array_filter(explode('.', $key), static fn (string $segment): bool => $segment !== ''));
+        if ($segments === []) {
+            throw new \RuntimeException('Setting key must not be empty.');
+        }
+
+        $settings = $scope === 'global' ? $this->globalSettings : $this->projectSettings;
+        $cursor = &$settings;
+
+        foreach ($segments as $index => $segment) {
+            $last = $index === count($segments) - 1;
+            if ($last) {
+                $cursor[$segment] = $value;
+                break;
+            }
+
+            if (! isset($cursor[$segment]) || ! is_array($cursor[$segment])) {
+                $cursor[$segment] = [];
+            }
+
+            $cursor = &$cursor[$segment];
+        }
+
+        if ($scope === 'global') {
+            $this->setGlobalSettings($settings);
+
+            return;
+        }
+
+        $this->setProjectSettings($settings);
     }
 
     /**

@@ -33,6 +33,7 @@ final class SessionManager
         private bool $persist,
         ?string $sessionFile = null,
         ?string $sessionId = null,
+        ?string $parentSession = null,
     ) {
         $this->sessionId = $sessionId ?? self::createSessionId();
 
@@ -43,13 +44,13 @@ final class SessionManager
         if ($sessionFile !== null) {
             $this->setSessionFile($sessionFile);
         } else {
-            $this->newSession($sessionId);
+            $this->newSession($sessionId, $parentSession);
         }
     }
 
-    public static function create(string $cwd, ?string $sessionDir = null, bool $persist = true, ?string $sessionId = null): self
+    public static function create(string $cwd, ?string $sessionDir = null, bool $persist = true, ?string $sessionId = null, ?string $parentSession = null): self
     {
-        return new self($cwd, $sessionDir, $persist, null, $sessionId);
+        return new self($cwd, $sessionDir, $persist, null, $sessionId, $parentSession);
     }
 
     public static function open(string $sessionFile, ?string $sessionDir = null, ?string $cwdOverride = null): self
@@ -279,6 +280,16 @@ final class SessionManager
             $this->cwd = (string) $header['cwd'];
         }
         $this->rebuildLeaf();
+        $this->flushed = true;
+    }
+
+    public function save(): void
+    {
+        if (! $this->persist || $this->sessionFile === null) {
+            return;
+        }
+
+        $this->rewriteFile();
         $this->flushed = true;
     }
 

@@ -325,6 +325,7 @@ final class MainCommand extends Command
     private function runRepl(CodingAgentRuntime $runtime, SymfonyStyle $io): int
     {
         $renderState = (object) ['printedText' => false];
+        $slashCommands = new ReplSlashCommandHandler;
         $unsubscribe = $runtime->subscribe(function (CodingAgentEvent $event) use ($renderState): void {
             if ($event->type === 'message_update') {
                 $raw = $event->payload['assistantMessageEvent'] ?? null;
@@ -353,9 +354,28 @@ final class MainCommand extends Command
                 if ($line === '') {
                     continue;
                 }
-                if (in_array($line, ['/exit', '/quit'], true)) {
-                    return 0;
+                if (str_starts_with($line, '/')) {
+                    if ($line === '/continue') {
+                        $renderState->printedText = false;
+                        PromiseBlocker::block($runtime->continue());
+                        $this->finishReplTurn($runtime, $renderState->printedText);
+
+                        continue;
+                    }
+
+                    $result = $slashCommands->handle($line, $runtime);
+                    if ($result['handled'] ?? false) {
+                        if (($result['output'] ?? null) !== null) {
+                            fwrite(STDOUT, rtrim((string) $result['output'])."\n");
+                        }
+                        if (($result['exit'] ?? false) === true) {
+                            return 0;
+                        }
+
+                        continue;
+                    }
                 }
+
                 if ($line === '/continue') {
                     $renderState->printedText = false;
                     PromiseBlocker::block($runtime->continue());

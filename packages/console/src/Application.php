@@ -17,6 +17,13 @@ final class Application
         $this->application = new SymfonyApplication('pi-console');
         $this->application->setAutoExit(false);
         $this->application->add(new MainCommand);
+        $this->application->add(new LoginCommand);
+        $this->application->add(new LogoutCommand);
+        $this->application->add(new AuthCommand);
+        $this->application->add(new SessionsCommand);
+        $this->application->add(new SettingsCommand);
+        $this->application->add(new ResourcesCommand);
+        $this->application->add(new ModelsCommand);
         $this->application->setDefaultCommand('_default', true);
     }
 

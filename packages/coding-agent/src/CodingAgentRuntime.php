@@ -117,7 +117,7 @@ final class CodingAgentRuntime
         }
 
         $previous = $this->session->getState()->sessionPath;
-        $manager = $this->sessionStore->createManager($this->session->getState()->cwd);
+        $manager = $this->sessionStore->createManager($this->session->getState()->cwd, null, $parentSession);
         $this->replaceSession($manager, 'new', $previous);
 
         return ['cancelled' => false];

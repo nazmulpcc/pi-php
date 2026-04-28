@@ -10,9 +10,9 @@ final readonly class FilesystemSessionStore implements SessionStore
         public string $directory,
     ) {}
 
-    public function createManager(string $cwd, ?string $sessionId = null): SessionManager
+    public function createManager(string $cwd, ?string $sessionId = null, ?string $parentSession = null): SessionManager
     {
-        return SessionManager::create($cwd, $this->directory, true, $sessionId);
+        return SessionManager::create($cwd, $this->directory, true, $sessionId, $parentSession);
     }
 
     public function openManager(string $sessionIdOrPath, ?string $cwd = null): ?SessionManager
@@ -31,6 +31,31 @@ final readonly class FilesystemSessionStore implements SessionStore
     public function continueLatest(string $cwd): ?SessionManager
     {
         return SessionManager::continueRecent($cwd, $this->directory);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function listSessionFiles(): array
+    {
+        $pattern = rtrim($this->directory, '/').'/*.jsonl';
+        $matches = glob($pattern);
+        if ($matches === false || $matches === []) {
+            return [];
+        }
+
+        usort($matches, static fn (string $a, string $b): int => strcmp($b, $a));
+
+        return array_values($matches);
+    }
+
+    public function resolveSessionPath(string $sessionIdOrPath): ?string
+    {
+        if (str_contains($sessionIdOrPath, DIRECTORY_SEPARATOR) || str_ends_with($sessionIdOrPath, '.jsonl')) {
+            return is_file($sessionIdOrPath) ? $sessionIdOrPath : null;
+        }
+
+        return $this->resolveIdPath($sessionIdOrPath);
     }
 
     private function resolveIdPath(string $sessionIdOrPrefix): ?string
