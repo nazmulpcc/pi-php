@@ -511,7 +511,7 @@ class AgentLoop
                 });
         }
 
-        return $promise->then(function () use ($messages, $finalizedCalls) {
+        return $promise->then(function () use (&$messages, &$finalizedCalls) {
             return [
                 'messages' => $messages,
                 'terminate' => $this->shouldTerminateToolBatch($finalizedCalls),
