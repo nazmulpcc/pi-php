@@ -26,6 +26,66 @@ describe('Console cli', function () {
         expect(implode("\n", $output))->toContain('"type":"agent_end"');
     });
 
+    it('routes extension notifications to stderr through the runtime surface', function () {
+        $dir = codingAgentTempDir('console-output-guard');
+        file_put_contents($dir.'/composer.json', json_encode([
+            'name' => 'test/output-guard',
+            'extra' => [
+                'pi' => [
+                    'extensions' => ['ext.php'],
+                ],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        file_put_contents($dir.'/ext.php', <<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+use Pi\CodingAgent\Extension\ExtensionAPI;
+use Pi\CodingAgent\Extension\ExtensionContext;
+
+return static function (ExtensionAPI $api): void {
+    $api->on('input', static function (array $_event, ExtensionContext $context): void {
+        $context->ui->notify('guard notice', 'info');
+    });
+};
+PHP);
+
+        $descriptorSpec = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $code = sprintf(
+            <<<'PHP'
+require %s;
+
+$command = new \Pi\Console\MainCommand;
+$runtime = $command->createRuntimeFromCwd(%s);
+$runtime->getExtensionRunner()?->emit('input', ['type' => 'input', 'input' => 'hello']);
+PHP,
+            var_export(getcwd().'/vendor/autoload.php', true),
+            var_export($dir, true),
+        );
+
+        $process = proc_open('php -r '.escapeshellarg($code), $descriptorSpec, $pipes, getcwd());
+        expect(is_resource($process))->toBeTrue();
+
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+
+        codingAgentDeleteDir($dir);
+
+        expect($exitCode)->toBe(0);
+        expect($stdout)->toBe('');
+        expect($stderr)->toContain('[info] guard notice');
+    });
+
     it('handles rpc mode over stdin and stdout', function () {
         $descriptorSpec = [
             0 => ['pipe', 'r'],

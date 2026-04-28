@@ -33,6 +33,8 @@ use function Pi\AI\registerFauxProvider;
 
 final class MainCommand extends Command
 {
+    private ?ConsoleOutputGuard $outputGuard = null;
+
     /**
      * @param  array<Extension>  $extensions
      */
@@ -75,6 +77,7 @@ final class MainCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $parsed = $this->parseInput($input);
+        $this->outputGuard = new ConsoleOutputGuard($parsed->mode === 'json' || $parsed->mode === 'rpc');
 
         $runtime = $this->createRuntime($parsed);
         $recentEvents = [];
@@ -105,8 +108,8 @@ final class MainCommand extends Command
             return $this->runTextMode($runtime, $parsed, $this->readPipedStdin());
         } catch (\Throwable $error) {
             $logPath = (new RuntimeFailureLogger)->log($runtime, $error, $recentEvents);
-            fwrite(STDERR, $error->getMessage()."\n");
-            fwrite(STDERR, sprintf("Failure details logged to %s\n", $logPath));
+            $this->consoleOutputGuard()->writeError($error->getMessage());
+            $this->consoleOutputGuard()->writeError(sprintf('Failure details logged to %s', $logPath));
 
             return 1;
         }
@@ -203,6 +206,7 @@ final class MainCommand extends Command
 
     public function createRuntimeFromCwd(string $cwd, ?ParsedInput $parsed = null): CodingAgentRuntime
     {
+        $this->outputGuard ??= new ConsoleOutputGuard;
         $parsed ??= new ParsedInput(
             mode: null,
             provider: null,
@@ -248,8 +252,8 @@ final class MainCommand extends Command
             extensions: $this->extensions,
             extensionFlagValues: $parsed->extensionFlagValues,
             extensionUi: new HeadlessExtensionUI(
-                onNotify: static function (string $message, string $type): void {
-                    fwrite(STDERR, sprintf("[%s] %s\n", $type, $message));
+                onNotify: function (string $message, string $type): void {
+                    $this->consoleOutputGuard()->writeNotice($message, $type);
                 },
             ),
         );
@@ -316,11 +320,11 @@ final class MainCommand extends Command
     {
         $header = $runtime->session->sessionManager->getHeader();
         if ($header !== null) {
-            fwrite(STDOUT, json_encode($header, JSON_THROW_ON_ERROR)."\n");
+            $this->consoleOutputGuard()->writeProtocolJson($header);
         }
 
         $runtime->subscribe(function (CodingAgentEvent $event): void {
-            fwrite(STDOUT, json_encode($event, JSON_THROW_ON_ERROR)."\n");
+            $this->consoleOutputGuard()->writeProtocolJson($event);
         });
 
         $message = $this->buildInitialMessage($parsed, $stdin);
@@ -336,7 +340,7 @@ final class MainCommand extends Command
     private function runRpcMode(CodingAgentRuntime $runtime): int
     {
         $runtime->subscribe(function (CodingAgentEvent $event): void {
-            fwrite(STDOUT, json_encode($event, JSON_THROW_ON_ERROR)."\n");
+            $this->consoleOutputGuard()->writeProtocolJson($event);
         });
 
         while (($line = fgets(STDIN)) !== false) {
@@ -373,25 +377,25 @@ final class MainCommand extends Command
                     default => throw new \RuntimeException('Unknown RPC command'),
                 };
 
-                fwrite(STDOUT, json_encode([
+                $this->consoleOutputGuard()->writeProtocolJson([
                     'id' => $id,
                     'type' => 'response',
                     'command' => $commandType,
                     'success' => true,
                     'data' => $result,
-                ], JSON_THROW_ON_ERROR)."\n");
+                ]);
 
                 if ($commandType === 'shutdown') {
                     return 0;
                 }
             } catch (\Throwable $error) {
-                fwrite(STDOUT, json_encode([
+                $this->consoleOutputGuard()->writeProtocolJson([
                     'id' => $id,
                     'type' => 'response',
                     'command' => $commandType,
                     'success' => false,
                     'error' => $error->getMessage(),
-                ], JSON_THROW_ON_ERROR)."\n");
+                ]);
             }
         }
 
@@ -406,22 +410,22 @@ final class MainCommand extends Command
             if ($event->type === 'message_update') {
                 $raw = $event->payload['assistantMessageEvent'] ?? null;
                 if (is_array($raw) && ($raw['type'] ?? null) === 'text_delta') {
-                    fwrite(STDOUT, (string) ($raw['delta'] ?? ''));
+                    $this->consoleOutputGuard()->writeProtocolLine((string) ($raw['delta'] ?? ''));
                     $renderState->printedText = true;
                 }
             }
 
             if ($event->type === 'tool_execution_start') {
-                fwrite(STDERR, sprintf("[tool] %s\n", (string) ($event->payload['toolName'] ?? 'tool')));
+                $this->consoleOutputGuard()->writeNotice((string) ($event->payload['toolName'] ?? 'tool'), 'tool');
             }
         });
 
         try {
             while (true) {
-                fwrite(STDOUT, '> ');
+                $this->consoleOutputGuard()->writeProtocolLine('> ');
                 $line = fgets(STDIN);
                 if ($line === false) {
-                    fwrite(STDOUT, "\n");
+                    $this->consoleOutputGuard()->writeProtocolLine("\n");
 
                     return 0;
                 }
@@ -442,7 +446,7 @@ final class MainCommand extends Command
                     $result = $slashCommands->handle($line, $runtime);
                     if ($result['handled'] ?? false) {
                         if (($result['output'] ?? null) !== null) {
-                            fwrite(STDOUT, rtrim((string) $result['output'])."\n");
+                            $this->consoleOutputGuard()->writeStdoutLine((string) $result['output']);
                         }
                         if (($result['exit'] ?? false) === true) {
                             return 0;
@@ -457,12 +461,12 @@ final class MainCommand extends Command
                         try {
                             $result = $runner->executeCommand($commandName, $arguments, true);
                             if ($result !== null) {
-                                fwrite(STDOUT, rtrim((string) $result)."\n");
+                                $this->consoleOutputGuard()->writeStdoutLine((string) $result);
                             }
 
                             continue;
                         } catch (\Throwable) {
-                            fwrite(STDOUT, sprintf("Unknown slash command: /%s\n", $commandName));
+                            $this->consoleOutputGuard()->writeStdoutLine(sprintf('Unknown slash command: /%s', $commandName));
 
                             continue;
                         }
@@ -493,17 +497,17 @@ final class MainCommand extends Command
             if ($assistant !== null) {
                 foreach ($assistant->content as $content) {
                     if ($content instanceof TextContent) {
-                        fwrite(STDOUT, $content->text);
+                        $this->consoleOutputGuard()->writeProtocolLine($content->text);
                     }
                 }
             }
         }
 
-        fwrite(STDOUT, "\n");
+        $this->consoleOutputGuard()->writeProtocolLine("\n");
 
         $assistant = $this->getLastAssistantMessage($runtime);
         if ($assistant !== null && in_array($assistant->stopReason->value, ['error', 'aborted'], true)) {
-            fwrite(STDERR, ($assistant->errorMessage ?? ('Request '.$assistant->stopReason->value))."\n");
+            $this->consoleOutputGuard()->writeError($assistant->errorMessage ?? ('Request '.$assistant->stopReason->value));
         }
     }
 
@@ -513,14 +517,14 @@ final class MainCommand extends Command
 
         if ($lastMessage instanceof AssistantMessage) {
             if (in_array($lastMessage->stopReason->value, ['error', 'aborted'], true)) {
-                fwrite(STDERR, ($lastMessage->errorMessage ?? ('Request '.$lastMessage->stopReason->value))."\n");
+                $this->consoleOutputGuard()->writeError($lastMessage->errorMessage ?? ('Request '.$lastMessage->stopReason->value));
 
                 return 1;
             }
 
             foreach ($lastMessage->content as $content) {
                 if ($content instanceof TextContent) {
-                    fwrite(STDOUT, $content->text."\n");
+                    $this->consoleOutputGuard()->writeStdoutLine($content->text);
                 }
             }
         }
@@ -560,6 +564,11 @@ final class MainCommand extends Command
     private function stdinIsInteractive(): bool
     {
         return function_exists('stream_isatty') ? stream_isatty(STDIN) : false;
+    }
+
+    private function consoleOutputGuard(): ConsoleOutputGuard
+    {
+        return $this->outputGuard ??= new ConsoleOutputGuard;
     }
 
     private function shouldStartRepl(ParsedInput $parsed): bool
