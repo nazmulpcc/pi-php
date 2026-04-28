@@ -43,6 +43,7 @@ final class CodingAgentRuntime
         private readonly ?AuthStorage $authStorage = null,
         private readonly ?SettingsManager $settingsManager = null,
         private readonly ?ModelRegistry $modelRegistry = null,
+        private readonly array $packageDiagnostics = [],
         private readonly ?string $explicitApiKey = null,
         private readonly mixed $customStreamFn = null,
         private readonly mixed $getApiKey = null,
@@ -209,6 +210,8 @@ final class CodingAgentRuntime
         if ($this->modelRegistry !== null) {
             $diagnostics = [...$diagnostics, ...$this->modelRegistry->getDiagnostics()];
         }
+
+        $diagnostics = [...$diagnostics, ...$this->packageDiagnostics];
 
         if ($this->extensionRunner !== null) {
             $diagnostics = [...$diagnostics, ...$this->extensionRunner->getDiagnostics()];

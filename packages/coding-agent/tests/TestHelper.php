@@ -88,3 +88,69 @@ if (! function_exists('codingAgentDeleteDir')) {
         rmdir($path);
     }
 }
+
+if (! function_exists('createExtensionPackageFixture')) {
+    /**
+     * @param  list<string>  $extensions
+     * @param  list<string>  $skills
+     * @param  list<string>  $prompts
+     * @param  list<string>  $themes
+     */
+    function createExtensionPackageFixture(
+        string $directory,
+        string $name,
+        array $extensions,
+        array $skills = [],
+        array $prompts = [],
+        array $themes = [],
+    ): string {
+        mkdir($directory, 0777, true);
+
+        foreach ($extensions as $entry) {
+            $path = $directory.'/'.ltrim($entry, '/');
+            $parent = dirname($path);
+            if (! is_dir($parent)) {
+                mkdir($parent, 0777, true);
+            }
+            file_put_contents($path, <<<'PHP'
+<?php
+
+return function ($api): void {
+    $api->registerCommand('managed-ext', 'Managed', fn (string $args): string => 'managed '.$args);
+};
+PHP);
+        }
+
+        foreach ($skills as $skillDir) {
+            $path = $directory.'/'.trim($skillDir, '/');
+            mkdir($path, 0777, true);
+            file_put_contents($path.'/debug.md', "# Debug\n");
+        }
+
+        foreach ($prompts as $promptDir) {
+            $path = $directory.'/'.trim($promptDir, '/');
+            mkdir($path, 0777, true);
+            file_put_contents($path.'/review.md', "# Review\n");
+        }
+
+        foreach ($themes as $themeDir) {
+            $path = $directory.'/'.trim($themeDir, '/');
+            mkdir($path, 0777, true);
+            file_put_contents($path.'/theme.txt', "theme\n");
+        }
+
+        file_put_contents($directory.'/composer.json', json_encode([
+            'name' => $name,
+            'extra' => [
+                'pi' => [
+                    'extensions' => $extensions,
+                    'skills' => $skills,
+                    'prompts' => $prompts,
+                    'themes' => $themes,
+                ],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+
+        return $directory;
+    }
+}

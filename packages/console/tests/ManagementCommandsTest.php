@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/TestHelper.php';
+require_once __DIR__.'/../../coding-agent/tests/TestHelper.php';
 
 use Pi\AI\OAuth\OAuthCredentials;
 use Pi\AI\OAuth\OAuthLoginCallbacks;
@@ -11,6 +12,9 @@ use Pi\CodingAgent\Auth\AuthStorage;
 use Pi\CodingAgent\CodingAgentConfig;
 use Pi\CodingAgent\CodingAgentRuntime;
 use Pi\CodingAgent\CodingAgentRuntimeFactory;
+use Pi\CodingAgent\Extension\Package\ExtensionPackageManager;
+use Pi\CodingAgent\Extension\Package\ExtensionPackageScope;
+use Pi\CodingAgent\Extension\Package\ExtensionPackageSourceType;
 use Pi\CodingAgent\Session\FilesystemSessionStore;
 use Pi\Console\AuthCommand;
 use Pi\Console\DiagnosticsCommand;
@@ -165,6 +169,16 @@ describe('Console management commands', function () {
             'refresh' => 'refresh-token',
             'expires' => time() * 1000 + 3600_000,
         ]);
+        $package = createExtensionPackageFixture(
+            $dir.'/fixtures/resource-package',
+            'fixture/resource-package',
+            ['index.php'],
+            ['managed-skills'],
+            ['managed-prompts'],
+            ['managed-themes'],
+        );
+        (new ExtensionPackageManager($dir, $dir.'/.agent'))
+            ->install(ExtensionPackageSourceType::LOCAL, $package, ExtensionPackageScope::PROJECT);
 
         $settings = new CommandTester(new SettingsCommand);
         expect($settings->execute([
@@ -190,6 +204,8 @@ describe('Console management commands', function () {
         expect($resources->getDisplay())->toContain('AGENTS.md');
         expect($resources->getDisplay())->toContain('debug');
         expect($resources->getDisplay())->toContain('review');
+        expect($resources->getDisplay())->toContain('managed-skills');
+        expect($resources->getDisplay())->toContain('managed-prompts');
 
         $models = new CommandTester(new ModelsCommand);
         $models->execute([
@@ -215,6 +231,7 @@ describe('Console management commands', function () {
             'defaultProvider' => 'missing-provider',
             'defaultModel' => 'missing-model',
         ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+        file_put_contents($dir.'/.pi/packages.json', '{not valid json');
         file_put_contents($dir.'/AGENTS.md', "Unreadable context\n");
         chmod($dir.'/AGENTS.md', 0000);
 
@@ -232,6 +249,7 @@ describe('Console management commands', function () {
         expect($display)->toContain('auth');
         expect($display)->toContain('settings');
         expect($display)->toContain('models');
+        expect($display)->toContain('extension-package');
         expect($sessionFiles)->toBe([]);
     });
 

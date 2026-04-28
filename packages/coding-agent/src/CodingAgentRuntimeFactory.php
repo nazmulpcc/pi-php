@@ -13,6 +13,7 @@ use Pi\CodingAgent\Extension\ExtensionAgentTool;
 use Pi\CodingAgent\Extension\ExtensionLoader;
 use Pi\CodingAgent\Extension\ExtensionRunner;
 use Pi\CodingAgent\Extension\InstrumentedAgentTool;
+use Pi\CodingAgent\Extension\Package\ExtensionPackageManager;
 use Pi\CodingAgent\Model\ModelRegistry;
 use Pi\CodingAgent\Resource\FilesystemResourceLoader;
 use Pi\CodingAgent\Resource\ResourceLoaderInterface;
@@ -44,6 +45,14 @@ final class CodingAgentRuntimeFactory
             appendSystemPrompt: $config->appendSystemPrompt,
             enableContextFiles: $config->enableContextFiles,
         );
+        $packageManager = new ExtensionPackageManager($cwd);
+        $managedResources = $packageManager->resolveManagedResources();
+        $packageDiagnostics = $packageManager->getDiagnostics();
+        $resourceLoader->extendResources(
+            $managedResources->skillPaths,
+            $managedResources->promptPaths,
+            $managedResources->themePaths,
+        );
         $extensions = $this->resolveExtensions($config, $cwd, $settingsManager);
         $extensionRunner = new ExtensionRunner($extensions, $cwd);
         $resourceContribution = $extensionRunner->discoverResources();
@@ -69,7 +78,7 @@ final class CodingAgentRuntimeFactory
         }
         $manager->appendThinkingLevelChange($config->thinkingLevel);
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $extensionRunner);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $packageDiagnostics, $extensionRunner);
     }
 
     public function resume(CodingAgentConfig $config, string $sessionIdOrPath): CodingAgentRuntime
@@ -84,6 +93,14 @@ final class CodingAgentRuntimeFactory
             systemPrompt: $config->systemPrompt,
             appendSystemPrompt: $config->appendSystemPrompt,
             enableContextFiles: $config->enableContextFiles,
+        );
+        $packageManager = new ExtensionPackageManager($cwd);
+        $managedResources = $packageManager->resolveManagedResources();
+        $packageDiagnostics = $packageManager->getDiagnostics();
+        $resourceLoader->extendResources(
+            $managedResources->skillPaths,
+            $managedResources->promptPaths,
+            $managedResources->themePaths,
         );
         $extensions = $this->resolveExtensions($config, $cwd, $settingsManager);
         $extensionRunner = new ExtensionRunner($extensions, $cwd);
@@ -136,7 +153,7 @@ final class CodingAgentRuntimeFactory
             extensionUi: $config->extensionUi,
         );
 
-        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $extensionRunner);
+        return $this->createRuntime($sessionStore, $resourceLoader, $tools, $config, $systemPrompt, $model, $manager, $authStorage, $settingsManager, $modelRegistry, $packageDiagnostics, $extensionRunner);
     }
 
     public function continueLatest(CodingAgentConfig $config): CodingAgentRuntime
@@ -201,6 +218,7 @@ final class CodingAgentRuntimeFactory
         ?AuthStorage $authStorage,
         ?SettingsManager $settingsManager,
         ModelRegistry $modelRegistry,
+        array $packageDiagnostics,
         ?ExtensionRunner $extensionRunner,
     ): CodingAgentRuntime {
         return new CodingAgentRuntime(
@@ -211,6 +229,7 @@ final class CodingAgentRuntimeFactory
             authStorage: $authStorage,
             settingsManager: $settingsManager,
             modelRegistry: $modelRegistry,
+            packageDiagnostics: $packageDiagnostics,
             explicitApiKey: $config->apiKey,
             customStreamFn: $config->streamFn,
             getApiKey: $config->getApiKey,

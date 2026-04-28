@@ -33,6 +33,7 @@ final class DiagnosticsCollector
             ...$diagnostics,
             ...$context->authStorage->getDiagnostics(),
             ...$context->settingsManager->getDiagnostics(),
+            ...$context->packageManager->getDiagnostics(),
             ...$context->resourceLoader->getDiagnostics(),
             ...$modelRegistry->getDiagnostics(),
             ...$extensionLoadResult->diagnostics,

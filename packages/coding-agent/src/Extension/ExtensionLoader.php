@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pi\CodingAgent\Extension;
 
 use Pi\CodingAgent\Config;
+use Pi\CodingAgent\Extension\Package\ExtensionPackageManager;
 use Pi\CodingAgent\Settings\SettingsManager;
 
 final class ExtensionLoader
@@ -24,6 +25,11 @@ final class ExtensionLoader
             $paths[] = $path;
         };
 
+        $packageManager = new ExtensionPackageManager($cwd);
+        $managed = $packageManager->resolveManagedResources();
+        foreach ($managed->extensionPaths as $path) {
+            $add($path);
+        }
         foreach ($this->discoverComposerConfiguredPaths($cwd) as $path) {
             $add($path);
         }
@@ -41,7 +47,7 @@ final class ExtensionLoader
 
         $loaded = $this->loadPaths($paths, $cwd);
 
-        return new ExtensionLoadResult($loaded->extensions, [...$diagnostics, ...$loaded->diagnostics]);
+        return new ExtensionLoadResult($loaded->extensions, [...$packageManager->getDiagnostics(), ...$diagnostics, ...$loaded->diagnostics]);
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pi\CodingAgent\Diagnostics;
 
-final readonly class Diagnostic implements \JsonSerializable
+readonly class Diagnostic implements \JsonSerializable
 {
     /**
      * @param  array<string, mixed>  $context
